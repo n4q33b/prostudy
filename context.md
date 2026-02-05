@@ -27,12 +27,12 @@
 |-----------|--------|
 | Project planning | ✅ Complete |
 | Firebase setup | ✅ Apps created |
-| Supabase setup | ⏸️ Project paused |
+| Supabase setup | ✅ Active |
 | Cloudflare R2 | ✅ Bucket created |
 | Flutter app | 🔲 Not started |
 | Content creation | 🔲 Not started |
 
-**Next Action:** Unpause Supabase project
+**Next Action:** Enable Firebase Auth and create Supabase schema
 
 ---
 
@@ -67,18 +67,19 @@ App ID: 1:396820470969:ios:990e91f3f4bd5270604f68
 Bundle ID: com.nstar.prostudy
 ```
 
-### Supabase (ProStudy)
+### Supabase (prostudy)
 
 | Key | Value |
 |-----|-------|
-| Project Ref | `wfeycacgabngpbdsuapj` |
+| Project Ref | `aixjdhdbyvicrwqilsyw` |
 | Region | South Asia (Mumbai) |
-| URL | `https://wfeycacgabngpbdsuapj.supabase.co` |
-| Status | **PAUSED** |
-| Anon Key | *Get after unpausing* |
-| Service Key | *Get after unpausing* |
+| URL | `https://aixjdhdbyvicrwqilsyw.supabase.co` |
+| Status | **ACTIVE** |
+| DB Password | `ProStudy2026Secure!` |
+| Anon Key | `eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6ImFpeGpkaGRieXZpY3J3cWlsc3l3Iiwicm9sZSI6ImFub24iLCJpYXQiOjE3NzAzMDMyNDEsImV4cCI6MjA4NTg3OTI0MX0.XzsECtsTz9KBxexfWQdf31XIIxOHPA41kvB-DDYp3ko` |
+| Service Key | `eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6ImFpeGpkaGRieXZpY3J3cWlsc3l3Iiwicm9sZSI6InNlcnZpY2Vfcm9sZSIsImlhdCI6MTc3MDMwMzI0MSwiZXhwIjoyMDg1ODc5MjQxfQ.UAfLFKek-wcQ_aEZ37ufmxQj_N9P-z3zHoaToPAHOHY` |
 
-**Action Required:** Unpause at https://supabase.com/dashboard/project/wfeycacgabngpbdsuapj
+**Dashboard:** https://supabase.com/dashboard/project/aixjdhdbyvicrwqilsyw
 
 ### Cloudflare R2
 
@@ -121,8 +122,8 @@ prostudy-content/
 | Component | Service | Free Tier | Status |
 |-----------|---------|-----------|--------|
 | Auth | Firebase Auth | Unlimited | ✅ Ready |
-| Database | Supabase PostgreSQL | 500MB | ⏸️ Paused |
-| Vector Search | Supabase pgvector | Built-in | ⏸️ Paused |
+| Database | Supabase PostgreSQL | 500MB | ✅ Ready |
+| Vector Search | Supabase pgvector | Built-in | ✅ Ready |
 | File Storage | Cloudflare R2 | 10GB | ✅ Ready |
 | CDN | Cloudflare | Free | ✅ Ready |
 | LLM | Gemini 2.5 Flash | Pay-per-use | ✅ Key ready |
@@ -221,7 +222,6 @@ embeddings (
 
 ## 7. Active Tasks
 
-- [ ] **Unpause Supabase project** (blocking)
 - [ ] Enable Firebase Auth (Google, Phone)
 - [ ] Create Supabase schema with pgvector
 - [ ] Initialize Flutter project
@@ -251,7 +251,7 @@ embeddings (
 | Resource | URL |
 |----------|-----|
 | Firebase Console | https://console.firebase.google.com/project/prostudy-51534 |
-| Supabase Dashboard | https://supabase.com/dashboard/project/wfeycacgabngpbdsuapj |
+| Supabase Dashboard | https://supabase.com/dashboard/project/aixjdhdbyvicrwqilsyw |
 | Cloudflare Dashboard | https://dash.cloudflare.com |
 | GitHub Repo | https://github.com/n4q33b/prostudy |
 | Live Domain | https://prostudy.app |
