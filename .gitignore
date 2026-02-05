@@ -1,0 +1,48 @@
+# Wrangler local state
+.wrangler/
+
+# Environment
+.env
+.env.local
+.env.*.local
+*.env
+
+# IDE
+.idea/
+.vscode/
+*.swp
+*.swo
+
+# OS
+.DS_Store
+Thumbs.db
+
+# Flutter
+app/.dart_tool/
+app/.packages
+app/build/
+app/.flutter-plugins
+app/.flutter-plugins-dependencies
+app/pubspec.lock
+
+# Node (for scripts)
+node_modules/
+npm-debug.log
+yarn-error.log
+
+# Python (for content scripts)
+__pycache__/
+*.py[cod]
+venv/
+.venv/
+
+# Build outputs
+dist/
+build/
+*.log
+
+# Credentials (NEVER commit)
+**/google-services.json
+**/GoogleService-Info.plist
+**/firebase-adminsdk*.json
+**/service-account*.json
