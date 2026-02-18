@@ -2,11 +2,12 @@ import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:go_router/go_router.dart';
 
-import '../../core/theme/app_colors.dart';
-import '../../core/theme/app_typography.dart';
 import '../../core/constants/app_constants.dart';
+import '../../core/l10n/app_strings.dart';
 import '../../core/models/user_profile.dart';
 import '../../core/providers/user_profile_provider.dart';
+import '../../core/theme/app_colors.dart';
+import '../../core/theme/app_typography.dart';
 
 /// Settings screen for ProStudy
 ///
@@ -118,7 +119,7 @@ class SettingsScreen extends ConsumerWidget {
           child: Column(
             children: [
               // -- AppBar --
-              _buildAppBar(context),
+              _buildAppBar(context, profileAsync.valueOrNull),
 
               // -- Body --
               Expanded(
@@ -128,25 +129,29 @@ class SettingsScreen extends ConsumerWidget {
                       color: AppColors.teal,
                     ),
                   ),
-                  error: (error, _) => Center(
-                    child: Padding(
-                      padding: const EdgeInsets.all(
-                        AppConstants.screenPadding,
-                      ),
-                      child: Text(
-                        'Unable to load profile.\n$error',
-                        style: AppTypography.bodyMedium.copyWith(
-                          color: AppColors.textSecondary,
+                  error: (error, _) {
+                    final s = AppStrings.of(null);
+                    return Center(
+                      child: Padding(
+                        padding: const EdgeInsets.all(
+                          AppConstants.screenPadding,
                         ),
-                        textAlign: TextAlign.center,
+                        child: Text(
+                          '${s.unableToLoadProfile}\n$error',
+                          style: AppTypography.bodyMedium.copyWith(
+                            color: AppColors.textSecondary,
+                          ),
+                          textAlign: TextAlign.center,
+                        ),
                       ),
-                    ),
-                  ),
+                    );
+                  },
                   data: (profile) {
                     if (profile == null) {
+                      final s = AppStrings.of(null);
                       return Center(
                         child: Text(
-                          'No profile found.',
+                          s.noProfileFound,
                           style: AppTypography.bodyMedium.copyWith(
                             color: AppColors.textSecondary,
                           ),
@@ -168,7 +173,8 @@ class SettingsScreen extends ConsumerWidget {
   // AppBar
   // ---------------------------------------------------------------------------
 
-  Widget _buildAppBar(BuildContext context) {
+  Widget _buildAppBar(BuildContext context, UserProfile? profile) {
+    final s = AppStrings.of(profile?.medium);
     return Padding(
       padding: const EdgeInsets.symmetric(
         horizontal: 8,
@@ -177,7 +183,7 @@ class SettingsScreen extends ConsumerWidget {
       child: Row(
         children: [
           IconButton(
-            onPressed: () => context.pop(),
+            onPressed: () => context.go(AppConstants.homeRoute),
             icon: const Icon(
               Icons.arrow_back_ios_new_rounded,
               color: AppColors.white,
@@ -187,7 +193,7 @@ class SettingsScreen extends ConsumerWidget {
           ),
           const SizedBox(width: 4),
           Text(
-            'Settings',
+            s.settings,
             style: AppTypography.headlineMedium,
           ),
           const Spacer(),
@@ -205,6 +211,7 @@ class SettingsScreen extends ConsumerWidget {
     WidgetRef ref,
     UserProfile profile,
   ) {
+    final s = AppStrings.of(profile.medium);
     return SingleChildScrollView(
       padding: const EdgeInsets.symmetric(
         horizontal: AppConstants.screenPadding,
@@ -216,23 +223,23 @@ class SettingsScreen extends ConsumerWidget {
           const SizedBox(height: 8),
 
           // Section 1 -- Profile Info
-          _buildProfileInfoCard(profile),
+          _buildProfileInfoCard(profile, s),
           const SizedBox(height: 24),
 
           // Section 2 -- Change Medium
-          _buildChangeMediumSection(context, ref, profile),
+          _buildChangeMediumSection(context, ref, profile, s),
           const SizedBox(height: 24),
 
           // Section 3 -- Change Class
-          _buildChangeClassSection(context, ref, profile),
+          _buildChangeClassSection(context, ref, profile, s),
           const SizedBox(height: 24),
 
           // Section 4 -- Trial Status
-          _buildTrialStatusCard(context, profile),
+          _buildTrialStatusCard(context, profile, s),
           const SizedBox(height: 24),
 
           // Section 5 -- Account
-          _buildAccountSection(context, ref),
+          _buildAccountSection(context, ref, s),
           const SizedBox(height: 40),
         ],
       ),
@@ -243,7 +250,7 @@ class SettingsScreen extends ConsumerWidget {
   // Section 1 -- Profile Info
   // ---------------------------------------------------------------------------
 
-  Widget _buildProfileInfoCard(UserProfile profile) {
+  Widget _buildProfileInfoCard(UserProfile profile, AppStrings s) {
     return _SectionCard(
       child: Column(
         crossAxisAlignment: CrossAxisAlignment.start,
@@ -265,7 +272,7 @@ class SettingsScreen extends ConsumerWidget {
               ),
               const SizedBox(width: 12),
               Text(
-                'Your Profile',
+                s.yourProfile,
                 style: AppTypography.titleLarge,
               ),
             ],
@@ -274,15 +281,15 @@ class SettingsScreen extends ConsumerWidget {
 
           // Board (read-only)
           _ProfileRow(
-            label: 'Board',
+            label: s.board,
             value: _boardDisplayName(profile.board),
           ),
           const _ThinDivider(),
 
           // Class
           _ProfileRow(
-            label: 'Class',
-            value: 'Class ${profile.classLevel}',
+            label: s.classLabel,
+            value: s.classDisplay(profile.classLevel),
             trailing: const Icon(
               Icons.edit_outlined,
               color: AppColors.tealLight,
@@ -293,7 +300,7 @@ class SettingsScreen extends ConsumerWidget {
 
           // Medium
           _ProfileRow(
-            label: 'Medium',
+            label: s.mediumLabel,
             value: profile.medium,
             trailing: const Icon(
               Icons.edit_outlined,
@@ -314,6 +321,7 @@ class SettingsScreen extends ConsumerWidget {
     BuildContext context,
     WidgetRef ref,
     UserProfile profile,
+    AppStrings s,
   ) {
     final mediums =
         AppConstants.boardMediums[profile.board] ?? const <String>[];
@@ -322,12 +330,12 @@ class SettingsScreen extends ConsumerWidget {
       crossAxisAlignment: CrossAxisAlignment.start,
       children: [
         Text(
-          'Change Medium',
+          s.changeMedium,
           style: AppTypography.headlineSmall,
         ),
         const SizedBox(height: 4),
         Text(
-          'You can change your medium anytime for free',
+          s.changeMediumFreeSubtitle,
           style: AppTypography.bodySmall.copyWith(
             color: AppColors.textMuted,
           ),
@@ -349,7 +357,7 @@ class SettingsScreen extends ConsumerWidget {
                       .updateMedium(medium);
                   _showSuccessSnackBar(
                     context,
-                    'Medium updated to $medium',
+                    s.mediumUpdatedTo(medium),
                   );
                 }
               },
@@ -368,22 +376,23 @@ class SettingsScreen extends ConsumerWidget {
     BuildContext context,
     WidgetRef ref,
     UserProfile profile,
+    AppStrings s,
   ) {
     final isTrialActive = profile.isTrialActive;
     final daysRemaining = profile.trialDaysRemaining;
 
     String subtitle;
     if (isTrialActive) {
-      subtitle = 'Free during trial ($daysRemaining days remaining)';
+      subtitle = s.freeDuringTrial(daysRemaining);
     } else {
-      subtitle = 'Class change pricing applies';
+      subtitle = s.classChangePricingApplies;
     }
 
     return Column(
       crossAxisAlignment: CrossAxisAlignment.start,
       children: [
         Text(
-          'Change Class',
+          s.changeClass,
           style: AppTypography.headlineSmall,
         ),
         const SizedBox(height: 4),
@@ -413,6 +422,7 @@ class SettingsScreen extends ConsumerWidget {
               classLevel: classLevel,
               priceLabel: priceLabel,
               isSelected: isSelected,
+              classLabel: s.classLabel,
               onTap: () {
                 if (isSelected) return;
 
@@ -422,7 +432,7 @@ class SettingsScreen extends ConsumerWidget {
                       .updateClass(classLevel);
                   _showSuccessSnackBar(
                     context,
-                    'Class updated to Class $classLevel',
+                    s.classUpdatedTo(classLevel),
                   );
                 } else {
                   _showClassChangeBottomSheet(
@@ -430,6 +440,7 @@ class SettingsScreen extends ConsumerWidget {
                     ref,
                     classLevel,
                     priceLabel,
+                    s,
                   );
                 }
               },
@@ -445,6 +456,7 @@ class SettingsScreen extends ConsumerWidget {
     WidgetRef ref,
     int classLevel,
     String priceLabel,
+    AppStrings s,
   ) {
     showModalBottomSheet<void>(
       context: context,
@@ -510,14 +522,14 @@ class SettingsScreen extends ConsumerWidget {
 
               // Title
               Text(
-                'Change to Class $classLevel',
+                s.changeToClass(classLevel),
                 style: AppTypography.headlineMedium,
               ),
               const SizedBox(height: 8),
 
               // Price
               Text(
-                'Monthly price: $priceLabel',
+                s.monthlyPrice(priceLabel),
                 style: AppTypography.bodyLarge.copyWith(
                   color: AppColors.textSecondary,
                 ),
@@ -536,7 +548,7 @@ class SettingsScreen extends ConsumerWidget {
                         .updateClass(classLevel);
                     _showSuccessSnackBar(
                       context,
-                      'Class updated to Class $classLevel',
+                      s.classUpdatedTo(classLevel),
                     );
                   },
                   style: ElevatedButton.styleFrom(
@@ -550,7 +562,7 @@ class SettingsScreen extends ConsumerWidget {
                     elevation: 0,
                   ),
                   child: Text(
-                    'Confirm',
+                    s.confirm,
                     style: AppTypography.button.copyWith(
                       color: AppColors.darkNavy,
                     ),
@@ -577,7 +589,7 @@ class SettingsScreen extends ConsumerWidget {
                     ),
                   ),
                   child: Text(
-                    'Cancel',
+                    s.cancel,
                     style: AppTypography.button.copyWith(
                       color: AppColors.textSecondary,
                     ),
@@ -595,7 +607,7 @@ class SettingsScreen extends ConsumerWidget {
   // Section 4 -- Trial Status
   // ---------------------------------------------------------------------------
 
-  Widget _buildTrialStatusCard(BuildContext context, UserProfile profile) {
+  Widget _buildTrialStatusCard(BuildContext context, UserProfile profile, AppStrings s) {
     final isActive = profile.isTrialActive;
     final daysRemaining = profile.trialDaysRemaining;
     final daysUsed = AppConstants.trialDays - daysRemaining;
@@ -628,14 +640,14 @@ class SettingsScreen extends ConsumerWidget {
                   crossAxisAlignment: CrossAxisAlignment.start,
                   children: [
                     Text(
-                      'Free Trial',
+                      s.freeTrial,
                       style: AppTypography.titleMedium,
                     ),
                     const SizedBox(height: 2),
                     Text(
                       isActive
-                          ? '$daysRemaining days remaining'
-                          : 'Trial ended',
+                          ? s.daysRemainingText(daysRemaining)
+                          : s.trialEnded,
                       style: AppTypography.bodySmall.copyWith(
                         color: isActive
                             ? AppColors.limeGreen
@@ -656,7 +668,7 @@ class SettingsScreen extends ConsumerWidget {
                     borderRadius: BorderRadius.circular(20),
                   ),
                   child: Text(
-                    'Active',
+                    s.active,
                     style: AppTypography.labelSmall.copyWith(
                       color: AppColors.limeGreen,
                       fontWeight: FontWeight.w600,
@@ -685,13 +697,13 @@ class SettingsScreen extends ConsumerWidget {
               mainAxisAlignment: MainAxisAlignment.spaceBetween,
               children: [
                 Text(
-                  '$daysUsed days used',
+                  s.daysUsedText(daysUsed),
                   style: AppTypography.labelSmall.copyWith(
                     color: AppColors.textMuted,
                   ),
                 ),
                 Text(
-                  '${AppConstants.trialDays} days total',
+                  s.daysTotalText(AppConstants.trialDays),
                   style: AppTypography.labelSmall.copyWith(
                     color: AppColors.textMuted,
                   ),
@@ -708,7 +720,7 @@ class SettingsScreen extends ConsumerWidget {
               height: 48,
               child: ElevatedButton(
                 onPressed: () {
-                  _showInfoSnackBar(context, 'Coming soon');
+                  _showInfoSnackBar(context, s.comingSoon);
                 },
                 style: ElevatedButton.styleFrom(
                   backgroundColor: AppColors.limeGreen,
@@ -721,7 +733,7 @@ class SettingsScreen extends ConsumerWidget {
                   elevation: 0,
                 ),
                 child: Text(
-                  'Subscribe',
+                  s.subscribe,
                   style: AppTypography.button.copyWith(
                     color: AppColors.darkNavy,
                   ),
@@ -741,12 +753,13 @@ class SettingsScreen extends ConsumerWidget {
   Widget _buildAccountSection(
     BuildContext context,
     WidgetRef ref,
+    AppStrings s,
   ) {
     return Column(
       crossAxisAlignment: CrossAxisAlignment.start,
       children: [
         Text(
-          'Account',
+          s.account,
           style: AppTypography.headlineSmall,
         ),
         const SizedBox(height: 16),
@@ -755,7 +768,7 @@ class SettingsScreen extends ConsumerWidget {
           height: AppConstants.buttonHeight,
           child: OutlinedButton.icon(
             onPressed: () {
-              _showSignOutDialog(context, ref);
+              _showSignOutDialog(context, ref, s);
             },
             icon: Icon(
               Icons.logout_rounded,
@@ -763,7 +776,7 @@ class SettingsScreen extends ConsumerWidget {
               color: AppColors.textMuted.withValues(alpha: 0.8),
             ),
             label: Text(
-              'Sign Out',
+              s.signOut,
               style: AppTypography.button.copyWith(
                 color: AppColors.textMuted.withValues(alpha: 0.8),
               ),
@@ -784,7 +797,7 @@ class SettingsScreen extends ConsumerWidget {
     );
   }
 
-  void _showSignOutDialog(BuildContext context, WidgetRef ref) {
+  void _showSignOutDialog(BuildContext context, WidgetRef ref, AppStrings s) {
     showDialog<void>(
       context: context,
       builder: (dialogContext) {
@@ -799,11 +812,11 @@ class SettingsScreen extends ConsumerWidget {
             ),
           ),
           title: Text(
-            'Sign Out',
+            s.signOut,
             style: AppTypography.headlineMedium,
           ),
           content: Text(
-            'Are you sure you want to sign out? Your progress will be saved.',
+            s.signOutConfirmBody,
             style: AppTypography.bodyMedium.copyWith(
               color: AppColors.textSecondary,
             ),
@@ -812,7 +825,7 @@ class SettingsScreen extends ConsumerWidget {
             TextButton(
               onPressed: () => Navigator.of(dialogContext).pop(),
               child: Text(
-                'Cancel',
+                s.cancel,
                 style: AppTypography.labelMedium.copyWith(
                   color: AppColors.textMuted,
                 ),
@@ -825,7 +838,7 @@ class SettingsScreen extends ConsumerWidget {
                 context.go(AppConstants.splashRoute);
               },
               child: Text(
-                'Sign Out',
+                s.signOut,
                 style: AppTypography.labelMedium.copyWith(
                   color: AppColors.error,
                 ),
@@ -969,12 +982,14 @@ class _ClassButton extends StatelessWidget {
     required this.classLevel,
     required this.priceLabel,
     required this.isSelected,
+    required this.classLabel,
     required this.onTap,
   });
 
   final int classLevel;
   final String priceLabel;
   final bool isSelected;
+  final String classLabel;
   final VoidCallback onTap;
 
   @override
@@ -1001,7 +1016,7 @@ class _ClassButton extends StatelessWidget {
           mainAxisAlignment: MainAxisAlignment.center,
           children: [
             Text(
-              'Class',
+              classLabel,
               style: AppTypography.labelSmall.copyWith(
                 color: isSelected ? AppColors.tealLight : AppColors.textMuted,
                 fontSize: 11,

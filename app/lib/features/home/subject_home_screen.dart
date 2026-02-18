@@ -3,6 +3,7 @@ import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:go_router/go_router.dart';
 
 import '../../core/constants/app_constants.dart';
+import '../../core/l10n/app_strings.dart';
 import '../../core/theme/app_colors.dart';
 import '../../core/theme/app_typography.dart';
 import '../../core/providers/user_profile_provider.dart';
@@ -82,6 +83,119 @@ class SubjectHomeScreen extends ConsumerWidget {
     ],
   };
 
+  // ---------------------------------------------------------------------------
+  // Class 5 — per-medium subject lists
+  // ---------------------------------------------------------------------------
+
+  static const List<Map<String, dynamic>> _class5Marathi = [
+    {'name': 'गणित', 'icon': Icons.calculate_rounded, 'chapters': 16},
+    {'name': 'बालभारती', 'icon': Icons.auto_stories_rounded, 'chapters': 28},
+    {'name': 'सुलभभारती', 'icon': Icons.menu_book_rounded, 'chapters': 40},
+    {'name': 'सुगमभारती', 'icon': Icons.book_rounded, 'chapters': 34},
+    {'name': 'माय इंग्लिश', 'icon': Icons.abc_rounded, 'chapters': 7},
+    {'name': 'सिंधुभारती', 'icon': Icons.translate_rounded, 'chapters': 20},
+    {'name': 'परिसर अभ्यास भाग-१', 'icon': Icons.eco_rounded, 'chapters': 25},
+    {'name': 'परिसर अभ्यास भाग-२', 'icon': Icons.public_rounded, 'chapters': 10},
+    {'name': 'खेळू, करू, शिकू', 'icon': Icons.sports_rounded, 'chapters': 17},
+  ];
+
+  static const List<Map<String, dynamic>> _class5Hindi = [
+    {'name': 'गणित', 'icon': Icons.calculate_rounded, 'chapters': 16},
+    {'name': 'हिंदी बालभारती', 'icon': Icons.auto_stories_rounded, 'chapters': 45},
+    {'name': 'मराठी सुलभभारती', 'icon': Icons.menu_book_rounded, 'chapters': 28},
+    {'name': 'मराठी सुगमभारती', 'icon': Icons.book_rounded, 'chapters': 20},
+    {'name': 'My English Book', 'icon': Icons.abc_rounded, 'chapters': 7},
+    {'name': 'परिसर अध्ययन भाग-१', 'icon': Icons.eco_rounded, 'chapters': 25},
+    {'name': 'परिसर अध्ययन भाग-२', 'icon': Icons.public_rounded, 'chapters': 10},
+    {'name': 'खेलें करें सीखें', 'icon': Icons.sports_rounded, 'chapters': 17},
+  ];
+
+  static const List<Map<String, dynamic>> _class5English = [
+    {'name': 'Mathematics', 'icon': Icons.calculate_rounded, 'chapters': 16},
+    {'name': 'English Balbharati', 'icon': Icons.auto_stories_rounded, 'chapters': 34},
+    {'name': 'हिंदी सुलभभारती', 'icon': Icons.menu_book_rounded, 'chapters': 40},
+    {'name': 'हिंदी सुगमभारती', 'icon': Icons.book_rounded, 'chapters': 34},
+    {'name': 'मराठी सुलभभारती', 'icon': Icons.translate_rounded, 'chapters': 28},
+    {'name': 'मराठी सुगमभारती', 'icon': Icons.translate_rounded, 'chapters': 20},
+    {'name': 'Environmental Studies Part 1', 'icon': Icons.eco_rounded, 'chapters': 25},
+    {'name': 'Environmental Studies Part 2', 'icon': Icons.public_rounded, 'chapters': 10},
+    {'name': 'Play Do Learn', 'icon': Icons.sports_rounded, 'chapters': 17},
+    {'name': 'ગુજરાતી સાહિત્ય પરિચય', 'icon': Icons.language_rounded, 'chapters': 17},
+    {'name': 'ಕನ್ನಡ ಸುಗಮಭಾರತಿ', 'icon': Icons.language_rounded, 'chapters': 28},
+    {'name': 'తెలుగు సరళ భారతి', 'icon': Icons.language_rounded, 'chapters': 22},
+    {'name': 'सिंधू भारती', 'icon': Icons.language_rounded, 'chapters': 20},
+    {'name': 'تعارفِ اُردو', 'icon': Icons.language_rounded, 'chapters': 23},
+  ];
+
+  static const List<Map<String, dynamic>> _class5Gujarati = [
+    {'name': 'ગણિત', 'icon': Icons.calculate_rounded, 'chapters': 16},
+    {'name': 'ગુજરાતી બાલભારતી', 'icon': Icons.auto_stories_rounded, 'chapters': 27},
+    {'name': 'हिंदी सुलभभारती', 'icon': Icons.menu_book_rounded, 'chapters': 40},
+    {'name': 'हिंदी सुगमभारती', 'icon': Icons.book_rounded, 'chapters': 34},
+    {'name': 'मराठी सुलभभारती', 'icon': Icons.translate_rounded, 'chapters': 28},
+    {'name': 'मराठी सुगमभारती', 'icon': Icons.translate_rounded, 'chapters': 20},
+    {'name': 'My English Book', 'icon': Icons.abc_rounded, 'chapters': 6},
+    {'name': 'પરિસર અભ્યાસ ભાગ-૧', 'icon': Icons.eco_rounded, 'chapters': 25},
+    {'name': 'પરિસર અભ્યાસ ભાગ-૨', 'icon': Icons.public_rounded, 'chapters': 10},
+    {'name': 'રમીએ કરીએ શીખીએ', 'icon': Icons.sports_rounded, 'chapters': 17},
+  ];
+
+  static const List<Map<String, dynamic>> _class5Kannada = [
+    {'name': 'ಗಣಿತ', 'icon': Icons.calculate_rounded, 'chapters': 16},
+    {'name': 'ಕನ್ನಡ ಬಾಲಭಾರತಿ', 'icon': Icons.auto_stories_rounded, 'chapters': 23},
+    {'name': 'हिंदी सुलभभारती', 'icon': Icons.menu_book_rounded, 'chapters': 40},
+    {'name': 'हिंदी सुगमभारती', 'icon': Icons.book_rounded, 'chapters': 34},
+    {'name': 'मराठी सुलभभारती', 'icon': Icons.translate_rounded, 'chapters': 28},
+    {'name': 'मराठी सुगमभारती', 'icon': Icons.translate_rounded, 'chapters': 20},
+    {'name': 'My English Book', 'icon': Icons.abc_rounded, 'chapters': 7},
+    {'name': 'ಪರಿಸರ ಅಭ್ಯಾಸ ಭಾಗ-೧', 'icon': Icons.eco_rounded, 'chapters': 25},
+    {'name': 'ಪರಿಸರ ಅಭ್ಯಾಸ ಭಾಗ-೨', 'icon': Icons.public_rounded, 'chapters': 10},
+    {'name': 'ಆಡೋಣ ಮಾಡೋಣ ಕಲಿಯೋಣ', 'icon': Icons.sports_rounded, 'chapters': 16},
+  ];
+
+  static const List<Map<String, dynamic>> _class5Telugu = [
+    {'name': 'గణితశాస్త్రం', 'icon': Icons.calculate_rounded, 'chapters': 16},
+    {'name': 'తెలుగు బాలభారతి', 'icon': Icons.auto_stories_rounded, 'chapters': 29},
+    {'name': 'हिंदी सुलभभारती', 'icon': Icons.menu_book_rounded, 'chapters': 40},
+    {'name': 'हिंदी सुगमभारती', 'icon': Icons.book_rounded, 'chapters': 34},
+    {'name': 'मराठी सुलभभारती', 'icon': Icons.translate_rounded, 'chapters': 28},
+    {'name': 'मराठी सुगमभारती', 'icon': Icons.translate_rounded, 'chapters': 20},
+    {'name': 'My English Book', 'icon': Icons.abc_rounded, 'chapters': 6},
+    {'name': 'పరిసరాల అధ్యయనం భాగం-౧', 'icon': Icons.eco_rounded, 'chapters': 25},
+    {'name': 'పరిసరాల అధ్యయనం భాగం-౨', 'icon': Icons.public_rounded, 'chapters': 10},
+    {'name': 'ఆడుదాం చేద్దాం నేర్చుకొందాం', 'icon': Icons.sports_rounded, 'chapters': 16},
+  ];
+
+  static const List<Map<String, dynamic>> _class5Urdu = [
+    {'name': 'ریاضی', 'icon': Icons.calculate_rounded, 'chapters': 16},
+    {'name': 'اُردو بال بھارتی', 'icon': Icons.auto_stories_rounded, 'chapters': 26},
+    {'name': 'हिंदी सुलभभारती', 'icon': Icons.menu_book_rounded, 'chapters': 40},
+    {'name': 'हिंदी सुगमभारती', 'icon': Icons.book_rounded, 'chapters': 34},
+    {'name': 'मराठी सुलभभारती', 'icon': Icons.translate_rounded, 'chapters': 28},
+    {'name': 'मराठी सुगमभारती', 'icon': Icons.translate_rounded, 'chapters': 20},
+    {'name': 'My English Book', 'icon': Icons.abc_rounded, 'chapters': 7},
+    {'name': 'ماحول کا مطالعہ حصّہ-۱', 'icon': Icons.eco_rounded, 'chapters': 25},
+    {'name': 'ماحول کا مطالعہ حصّہ-۲', 'icon': Icons.public_rounded, 'chapters': 10},
+    {'name': 'کھیلیں کریں سیکھیں', 'icon': Icons.sports_rounded, 'chapters': 17},
+  ];
+
+  /// Returns subjects for a given class + medium combination.
+  static List<Map<String, dynamic>> getSubjects(int classLevel, String medium) {
+    if (classLevel == 5) {
+      switch (medium.toLowerCase()) {
+        case 'marathi': return _class5Marathi;
+        case 'hindi': return _class5Hindi;
+        case 'english': return _class5English;
+        case 'gujarati': return _class5Gujarati;
+        case 'kannada': return _class5Kannada;
+        case 'telugu': return _class5Telugu;
+        case 'urdu': return _class5Urdu;
+      }
+    }
+    // Fallback for other classes (placeholder data until those classes are added)
+    return classSubjects[classLevel] ?? classSubjects[7]!;
+  }
+
   /// Friendly display name for a board identifier
   static String _boardDisplayName(String board) {
     switch (board) {
@@ -100,9 +214,11 @@ class SubjectHomeScreen extends ConsumerWidget {
   Widget build(BuildContext context, WidgetRef ref) {
     final profile = ref.watch(userProfileProvider).valueOrNull;
 
-    // Determine subjects for the user's class level (fallback to class 7)
+    // Determine subjects for the user's class level + medium
     final classLevel = profile?.classLevel ?? 7;
-    final subjects = classSubjects[classLevel] ?? classSubjects[7]!;
+    final medium = profile?.medium ?? 'english';
+    final subjects = getSubjects(classLevel, medium);
+    final s = AppStrings.of(medium);
 
     return Scaffold(
       backgroundColor: AppColors.darkNavy,
@@ -118,11 +234,11 @@ class SubjectHomeScreen extends ConsumerWidget {
               _buildAppBar(context, profile),
 
               // Profile info chips
-              if (profile != null) _buildProfileChips(profile),
+              if (profile != null) _buildProfileChips(profile, s),
 
               // Trial banner
               if (profile != null && profile.isTrialActive)
-                _buildTrialBanner(profile),
+                _buildTrialBanner(profile, s),
 
               const SizedBox(height: 20),
 
@@ -132,7 +248,7 @@ class SubjectHomeScreen extends ConsumerWidget {
                   horizontal: AppConstants.screenPadding,
                 ),
                 child: Text(
-                  'Your Subjects',
+                  s.yourSubjects,
                   style: AppTypography.headlineLarge,
                 ),
               ),
@@ -140,13 +256,13 @@ class SubjectHomeScreen extends ConsumerWidget {
 
               // Subject cards grid
               Expanded(
-                child: _buildSubjectGrid(context, subjects),
+                child: _buildSubjectGrid(context, subjects, s),
               ),
             ],
           ),
         ),
       ),
-      floatingActionButton: _buildAiChatFab(context),
+      floatingActionButton: _buildAiChatFab(context, s),
     );
   }
 
@@ -210,9 +326,9 @@ class SubjectHomeScreen extends ConsumerWidget {
   // Profile Chips (Board / Class / Medium)
   // ---------------------------------------------------------------------------
 
-  Widget _buildProfileChips(UserProfile profile) {
+  Widget _buildProfileChips(UserProfile profile, AppStrings s) {
     final boardName = _boardDisplayName(profile.board);
-    final className = 'Class ${profile.classLevel}';
+    final className = s.classDisplay(profile.classLevel);
     final medium = profile.medium;
 
     return Padding(
@@ -237,7 +353,7 @@ class SubjectHomeScreen extends ConsumerWidget {
   // Trial Banner
   // ---------------------------------------------------------------------------
 
-  Widget _buildTrialBanner(UserProfile profile) {
+  Widget _buildTrialBanner(UserProfile profile, AppStrings s) {
     final daysLeft = profile.trialDaysRemaining;
     return Padding(
       padding: const EdgeInsets.fromLTRB(
@@ -266,7 +382,7 @@ class SubjectHomeScreen extends ConsumerWidget {
             const SizedBox(width: 10),
             Expanded(
               child: Text(
-                'Free Trial: $daysLeft ${daysLeft == 1 ? 'day' : 'days'} remaining',
+                s.freeTrialDaysRemaining(daysLeft),
                 style: AppTypography.labelMedium.copyWith(
                   color: AppColors.limeGreen,
                   fontWeight: FontWeight.w600,
@@ -286,6 +402,7 @@ class SubjectHomeScreen extends ConsumerWidget {
   Widget _buildSubjectGrid(
     BuildContext context,
     List<Map<String, dynamic>> subjects,
+    AppStrings s,
   ) {
     return GridView.builder(
       padding: const EdgeInsets.fromLTRB(
@@ -303,28 +420,17 @@ class SubjectHomeScreen extends ConsumerWidget {
       itemCount: subjects.length,
       itemBuilder: (context, index) {
         final subject = subjects[index];
+        final chapterCount = subject['chapters'] as int;
         return _SubjectCard(
           name: subject['name'] as String,
           icon: subject['icon'] as IconData,
-          chapters: subject['chapters'] as int,
+          chapters: chapterCount,
+          chaptersLabel: s.nChapters(chapterCount),
+          progressLabel: s.progress,
           progress: 0.0, // Placeholder -- no progress yet
           onTap: () {
-            ScaffoldMessenger.of(context).showSnackBar(
-              SnackBar(
-                content: Text(
-                  '${subject['name']} -- Coming soon',
-                  style: AppTypography.bodyMedium.copyWith(
-                    color: AppColors.white,
-                  ),
-                ),
-                backgroundColor: AppColors.darkNavyLight,
-                behavior: SnackBarBehavior.floating,
-                shape: RoundedRectangleBorder(
-                  borderRadius: BorderRadius.circular(12),
-                ),
-                duration: const Duration(seconds: 2),
-              ),
-            );
+            final name = subject['name'] as String;
+            context.go('${AppConstants.chapterListRoute}/$name');
           },
         );
       },
@@ -335,13 +441,13 @@ class SubjectHomeScreen extends ConsumerWidget {
   // AI Chat Tutor FAB
   // ---------------------------------------------------------------------------
 
-  Widget _buildAiChatFab(BuildContext context) {
+  Widget _buildAiChatFab(BuildContext context, AppStrings s) {
     return FloatingActionButton.extended(
       onPressed: () {
         ScaffoldMessenger.of(context).showSnackBar(
           SnackBar(
             content: Text(
-              'AI Chat Tutor -- Coming soon',
+              s.aiChatTutorComingSoon,
               style: AppTypography.bodyMedium.copyWith(
                 color: AppColors.white,
               ),
@@ -360,7 +466,7 @@ class SubjectHomeScreen extends ConsumerWidget {
       elevation: 6,
       icon: const Icon(Icons.smart_toy_rounded),
       label: Text(
-        'AI Chat Tutor',
+        s.aiChatTutor,
         style: AppTypography.labelMedium.copyWith(
           color: AppColors.white,
           fontWeight: FontWeight.w600,
@@ -428,6 +534,8 @@ class _SubjectCard extends StatelessWidget {
     required this.name,
     required this.icon,
     required this.chapters,
+    required this.chaptersLabel,
+    required this.progressLabel,
     required this.progress,
     required this.onTap,
   });
@@ -435,6 +543,8 @@ class _SubjectCard extends StatelessWidget {
   final String name;
   final IconData icon;
   final int chapters;
+  final String chaptersLabel;
+  final String progressLabel;
   final double progress;
   final VoidCallback onTap;
 
@@ -497,7 +607,7 @@ class _SubjectCard extends StatelessWidget {
 
               // Chapter count
               Text(
-                '$chapters Chapters',
+                chaptersLabel,
                 style: AppTypography.bodySmall.copyWith(
                   color: AppColors.textMuted,
                 ),
@@ -513,7 +623,7 @@ class _SubjectCard extends StatelessWidget {
                     mainAxisAlignment: MainAxisAlignment.spaceBetween,
                     children: [
                       Text(
-                        'Progress',
+                        progressLabel,
                         style: AppTypography.labelSmall.copyWith(
                           color: AppColors.textMuted,
                           fontSize: 10,

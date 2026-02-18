@@ -1,0 +1,312 @@
+{
+  "chapter": {
+    "name_mr": "अपूर्णांक",
+    "name_en": "Fractions",
+    "number": 5,
+    "class": 5,
+    "subject": "गणित (Mathematics)",
+    "board": "Maharashtra State Board",
+    "medium": "Marathi",
+    "pages": "21-33",
+    "total_pages": 13
+  },
+  "concepts": [
+    {
+      "id": 1,
+      "name_en": "What is a Fraction (Numerator/Denominator)",
+      "name_mr": "अपूर्णांक म्हणजे काय (अंश/छेद)",
+      "page": 21,
+      "teaching_method": "Bhakri (flatbread) divided into 2 equal parts = 1/2. Numerator = parts taken, Denominator = total parts. Watermelon cut into 6 parts, 3 given = 3/6.",
+      "visuals": ["Photo of bhakri cut in half", "Bhakri cut into 4 parts with 2 separated", "Watermelon cut into 6 slices"],
+      "key_terms_mr": ["अंश (numerator)", "छेद (denominator)"],
+      "simulation_idea": "Interactive bhakri/watermelon cutting — tap to divide, see fraction update"
+    },
+    {
+      "id": 2,
+      "name_en": "Equivalent Fractions (Visual Proof)",
+      "name_mr": "सममूल्य अपूर्णांक",
+      "page": 21,
+      "teaching_method": "1/2 = 2/4 = 3/6 shown via bhakri divided into 2, 4, 6 parts. Two circles showing 2/3 = 4/6. Rectangle with 2/5 = 6/15 via subdivision.",
+      "visuals": ["Two circles: one in 3 parts (2 shaded), one in 6 parts (4 shaded)", "Two rectangles: 5 columns vs 15 cells"],
+      "key_rule": "Fractions that look different but represent the same amount are called equivalent fractions (सममूल्य अपूर्णांक)",
+      "simulation_idea": "Side-by-side shapes that subdivide while keeping same shaded area"
+    },
+    {
+      "id": 3,
+      "name_en": "Creating Equivalent Fractions by Multiplying",
+      "name_mr": "सममूल्य अपूर्णांक तयार करणे (गुणाकाराने)",
+      "page": 22,
+      "teaching_method": "Dialogue between teacher (शिक्षिका), Sonu, Nandu. 2/5 to 6/15: multiply both by 3. Rule: multiply numerator AND denominator by same non-zero number.",
+      "worked_examples": [
+        "Find equivalent of 5/6 with denominator 30 → 5/6 = 25/30 (multiply by 5)"
+      ],
+      "key_rule_mr": "अपूर्णांकाच्या अंशाला व छेदाला एकाच संख्येने गुणल्यास सममूल्य अपूर्णांक मिळतो",
+      "simulation_idea": "Animated multiplier — drag a x2, x3 badge onto a fraction and watch both numbers change while bar stays same"
+    },
+    {
+      "id": 4,
+      "name_en": "Creating Equivalent Fractions by Dividing (Simplifying)",
+      "name_mr": "सममूल्य अपूर्णांक तयार करणे (भागाकाराने)",
+      "page": 22,
+      "teaching_method": "Nandu asks if we can divide too. Teacher confirms: 6/15 ÷ 3 = 2/5. Dividing both by common factor gives equivalent fraction.",
+      "worked_examples": [
+        "Find equivalent of 15/40 with denominator 8 → 15/40 = 3/8 (divide both by 5)"
+      ],
+      "simulation_idea": "Reverse animation — complex fraction simplifies as divider is applied, bars merge"
+    },
+    {
+      "id": 5,
+      "name_en": "Like Fractions (Same Denominator)",
+      "name_mr": "समच्छेद अपूर्णांक",
+      "page": 23,
+      "teaching_method": "Definition: fractions with same denominator. Example: 1/7, 4/7, 6/7 are like fractions.",
+      "simulation_idea": "Visual grouping — fractions with same denominator glow same color and group together"
+    },
+    {
+      "id": 6,
+      "name_en": "Unlike Fractions (Different Denominators)",
+      "name_mr": "भिन्नछेद अपूर्णांक",
+      "page": 23,
+      "teaching_method": "Definition: fractions with different denominators. Example: 1/3, 4/8, 9/11 are unlike fractions.",
+      "simulation_idea": "Contrasting visual — unlike fractions shown with different-sized bars"
+    },
+    {
+      "id": 7,
+      "name_en": "Converting Unlike Fractions to Like Fractions",
+      "name_mr": "भिन्नछेद अपूर्णांकांचे समच्छेदांत रूपांतर",
+      "pages": "23-24",
+      "teaching_method": "Find common multiple of denominators. Convert both fractions. Examples: 5/6 and 7/9 → common denom 18 → 15/18 and 14/18. Also: 4/8 and 5/16 → denom 16 → 8/16 and 5/16. Also: 4/7 and 3/4 → denom 28 → 16/28 and 21/28.",
+      "worked_examples": [
+        "5/6 and 7/9 → 15/18 and 14/18 (common multiple 18)",
+        "4/8 and 5/16 → 8/16 and 5/16 (16 is multiple of 8)",
+        "4/7 and 3/4 → 16/28 and 21/28 (common multiple 28)"
+      ],
+      "simulation_idea": "Two bars with different divisions animate to match — bars subdivide until denominators align"
+    },
+    {
+      "id": 8,
+      "name_en": "Comparing Like Fractions",
+      "name_mr": "समच्छेद अपूर्णांकांची तुलना",
+      "page": 24,
+      "teaching_method": "Strip with 5 parts: 3 colored vs 2 colored → 3/5 > 2/5. Strip with 8 parts: 3 vs 4 → 3/8 < 4/8. Rule: same denominator → larger numerator = larger fraction.",
+      "visuals": ["Colored strip showing 3/5 vs 2/5", "Colored strip showing 3/8 vs 4/8"],
+      "key_rule_mr": "समच्छेद अपूर्णांकांमध्ये, ज्याचा अंश मोठा तो अपूर्णांक मोठा असतो",
+      "simulation_idea": "Two strips fill with color — obvious visual comparison"
+    },
+    {
+      "id": 9,
+      "name_en": "Comparing Fractions with Same Numerator",
+      "name_mr": "अंश समान असलेल्या अपूर्णांकांची तुलना",
+      "page": 25,
+      "teaching_method": "Three strips all with 2 parts shaded: 2/3, 2/4, 2/5. Shows 2/3 > 2/4 > 2/5. Rule: same numerator → larger denominator = smaller fraction.",
+      "visuals": ["Three horizontal strips showing 2/3, 2/4, 2/5"],
+      "key_rule_mr": "समान अंश असलेल्या अपूर्णांकांमध्ये ज्या अपूर्णांकाचा छेद मोठा असतो तो अपूर्णांक लहान असतो",
+      "simulation_idea": "Three identical shapes with same shading count but different total divisions — visual proof"
+    },
+    {
+      "id": 10,
+      "name_en": "Comparing Unlike Fractions",
+      "name_mr": "भिन्नछेद अपूर्णांकांची तुलना",
+      "pages": "25-26",
+      "teaching_method": "Analogy: two children on blocks of different heights — equalize blocks first. Similarly, convert to like fractions then compare. Example: 3/5 vs 4/7 → 21/35 vs 20/35 → 3/5 > 4/7.",
+      "visuals": ["Illustration of two children on different-height blocks"],
+      "key_rule_mr": "अपूर्णांकांचे छेद भिन्न असतील तर त्यांचे समान छेद असणारे सममूल्य अपूर्णांक तयार करून तुलना करावी",
+      "simulation_idea": "Two children on adjustable blocks — blocks equalize, then height comparison is obvious"
+    },
+    {
+      "id": 11,
+      "name_en": "Addition of Like Fractions",
+      "name_mr": "समच्छेद अपूर्णांकांची बेरीज",
+      "page": 26,
+      "teaching_method": "Strip with 7 parts: 3 striped + 2 dotted = 5/7. Rule: add numerators, keep denominator. Examples: 3/7+2/7=5/7, 3/8+2/8+1/8=6/8.",
+      "visuals": ["Strip showing 3/7 + 2/7 = 5/7 with different patterns", "Strip showing 3/8 + 2/8 + 1/8 = 6/8"],
+      "key_rule_mr": "समच्छेद अपूर्णांकांची बेरीज करताना अंशांची बेरीज करतात व छेद तसाच लिहितात",
+      "simulation_idea": "Colored segments slide together in a bar, fraction equation builds itself"
+    },
+    {
+      "id": 12,
+      "name_en": "n/n = 1 (Fraction equals 1 whole)",
+      "name_mr": "अपूर्णांकाची किमत 1",
+      "page": 27,
+      "teaching_method": "2/6 + 4/6 = 6/6 = 1 whole. When numerator = denominator, value = 1. Therefore 7/7=1, 10/10=1, 1=1/1=2/2=3/3.",
+      "key_rule_mr": "अपूर्णांकाचे अंश व छेद समान असतील, तर त्या अपूर्णांकाची किमत 1 असते",
+      "simulation_idea": "Bar fills completely — all segments colored — morphs into '1' with celebration"
+    },
+    {
+      "id": 13,
+      "name_en": "Subtraction of Like Fractions",
+      "name_mr": "समच्छेद अपूर्णांकांची वजाबाकी",
+      "pages": "27-28",
+      "teaching_method": "Shape with 5 parts, 4 shaded. Erase 1 = 4/5 - 1/5 = 3/5. Rule: subtract numerators, keep denominator. Examples: 7/13-5/13=2/13.",
+      "visuals": ["Strip showing 4/5 with one part erased = 3/5"],
+      "key_rule_mr": "वजाबाकी करताना अंशांची वजाबाकी करून छेद तसाच लिहितात",
+      "word_problems": [
+        "Raju got 5/12, Sanju got 3/12. How much more did Raju get? → 2/12",
+        "Wall 7/10 to paint, 4/10 done. How much left? → 3/10"
+      ],
+      "simulation_idea": "Eraser tool removes colored segments from a bar — fraction decreases"
+    },
+    {
+      "id": 14,
+      "name_en": "Addition of Unlike Fractions",
+      "name_mr": "भिन्नछेद अपूर्णांकांची बेरीज",
+      "pages": "28-29",
+      "teaching_method": "2/3 + 1/6: convert 2/3 to 4/6, then 4/6+1/6=5/6 (with strip visual). 1/2+2/5: LCM=10, 5/10+4/10=9/10. 3/8+1/16: 6/16+1/16=7/16.",
+      "visuals": ["Strip showing 2/3 converting to 4/6 then adding 1/6"],
+      "worked_examples": [
+        "2/3 + 1/6 = 4/6 + 1/6 = 5/6",
+        "1/2 + 2/5 = 5/10 + 4/10 = 9/10",
+        "3/8 + 1/16 = 6/16 + 1/16 = 7/16"
+      ],
+      "simulation_idea": "Two bars with different divisions — one bar animates to match the other's divisions, then segments combine"
+    },
+    {
+      "id": 15,
+      "name_en": "Subtraction of Unlike Fractions",
+      "name_mr": "भिन्नछेद अपूर्णांकांची वजाबाकी",
+      "page": 29,
+      "teaching_method": "3/4-5/8: convert 3/4=6/8, then 6/8-5/8=1/8. 4/5-2/3: LCM=15, 12/15-10/15=2/15.",
+      "worked_examples": [
+        "3/4 - 5/8 = 6/8 - 5/8 = 1/8",
+        "4/5 - 2/3 = 12/15 - 10/15 = 2/15"
+      ],
+      "simulation_idea": "Same as unlike addition but in reverse — segments removed after conversion"
+    },
+    {
+      "id": 16,
+      "name_en": "Fraction of a Collection/Group",
+      "name_mr": "समूहाच्या संदर्भात अपूर्णांक",
+      "pages": "30-31",
+      "teaching_method": "1/4 of 20 dots = 5. 1/2 of 20 = 10. 3/4 of 20: find 1/4 first (=5), then ×3 = 15. Real-world: Ramu travels 20km, 4/5 by car = 16km.",
+      "visuals": ["Grid of 20 dots with groups highlighted", "Marble diagrams for multiples"],
+      "word_problems": [
+        "Find 1/3 of 15 pencils, 21 balloons, 9 boys, 18 books",
+        "Find 1/5 of 20 rupees, 30 km, 15 liters, 25 cm",
+        "Find 2/3 of 30, 7/11 of 22, 3/8 of 64, 5/13 of 65"
+      ],
+      "simulation_idea": "Grid of objects — tap fraction and objects highlight/separate into groups"
+    },
+    {
+      "id": 17,
+      "name_en": "Relationship Between Multiplication and Fractions",
+      "name_mr": "अपूर्णांकांची पट (दुप्पट, तिप्पट)",
+      "page": 30,
+      "teaching_method": "5's double = 10, so 1/2 of 10 = 5. 5's triple = 15, so 1/3 of 15 = 5. Multiplication and fractions are inverse operations.",
+      "visuals": ["Marble rows showing 5×2=10 and 1/2 of 10=5", "Marble rows showing 5×3=15 and 1/3 of 15=5"],
+      "simulation_idea": "Marbles multiply into rows, then fraction divides them back — visual inverse"
+    },
+    {
+      "id": 18,
+      "name_en": "Mixed Numbers",
+      "name_mr": "पूर्णांकयुक्त अपूर्णांक",
+      "page": 31,
+      "teaching_method": "Three half-circles = 1/2+1/2+1/2 = 3/2 = 1½. A mixed number has whole part + fraction part. Examples: 2¼, 3⅖, 7⁴⁄₉.",
+      "visuals": ["Three circles each half-shaded combining to show 1½"],
+      "key_term_mr": "पूर्णांकयुक्त अपूर्णांक — पूर्ण भाग + अपूर्णांक भाग",
+      "simulation_idea": "Circles fill beyond 1 whole — overflow creates new circle + fraction label"
+    },
+    {
+      "id": 19,
+      "name_en": "Improper Fractions",
+      "name_mr": "अंशाधिक अपूर्णांक",
+      "page": 31,
+      "teaching_method": "When numerator > denominator: 3/2, 5/3 are improper fractions.",
+      "simulation_idea": "Bar that overflows its bounds — numerator literally shown as larger"
+    },
+    {
+      "id": 20,
+      "name_en": "Converting Improper Fractions to Mixed Numbers",
+      "name_mr": "अंशाधिक ते पूर्णांकयुक्त रूपांतर",
+      "page": 31,
+      "teaching_method": "3/2 = (2+1)/2 = 2/2 + 1/2 = 1 + 1/2 = 1½",
+      "simulation_idea": "Fraction splits apart — whole number separates from remainder fraction"
+    }
+  ],
+  "exercises": [
+    {
+      "id": "ex17",
+      "name": "उदाहरणसंग्रह 17",
+      "topic": "Equivalent Fractions",
+      "page": 23,
+      "problems": 5,
+      "sub_parts": "Q1 has 8 sub-parts, Q2-Q5 have 4-8 each",
+      "total_items": "~30"
+    },
+    {
+      "id": "ex18",
+      "name": "उदाहरणसंग्रह 18",
+      "topic": "Converting Unlike to Like Fractions",
+      "page": 24,
+      "problems": 8,
+      "total_items": "8 pairs"
+    },
+    {
+      "id": "ex19",
+      "name": "उदाहरणसंग्रह 19",
+      "topic": "Comparing Fractions (<, >, =)",
+      "page": 26,
+      "problems": 16,
+      "total_items": "16 pairs"
+    },
+    {
+      "id": "ex20",
+      "name": "उदाहरणसंग्रह 20",
+      "topic": "Addition of Like Fractions",
+      "page": 27,
+      "problems": "9 additions + 2 word problems",
+      "total_items": "11"
+    },
+    {
+      "id": "ex21",
+      "name": "उदाहरणसंग्रह 21",
+      "topic": "Subtraction of Like Fractions",
+      "page": 28,
+      "problems": "8 subtractions + 1 word problem",
+      "total_items": "9"
+    },
+    {
+      "id": "ex22",
+      "name": "उदाहरणसंग्रह 22",
+      "topic": "Addition & Subtraction of Unlike Fractions",
+      "page": 29,
+      "problems": "5 additions + 5 subtractions",
+      "total_items": "10"
+    },
+    {
+      "id": "ex23",
+      "name": "उदाहरणसंग्रह 23",
+      "topic": "Fraction of a Group/Collection",
+      "page": 31,
+      "problems": "3 questions (4 sub-parts each)",
+      "total_items": "12"
+    }
+  ],
+  "activities": [
+    {
+      "id": "act1",
+      "name_mr": "टोप्या रंगवा",
+      "name_en": "Color the Caps",
+      "page": 32,
+      "description": "Illustration of crowd wearing caps. Color 1/3 red, 3/5 blue. Count each."
+    },
+    {
+      "id": "act2",
+      "name_mr": "जादूची भिंगरी तयार करा",
+      "name_en": "Make a Magic Spinner",
+      "page": 32,
+      "description": "Make circular spinner divided into 6 equal colored parts. Spin to see color mixing."
+    }
+  ],
+  "story": {
+    "name_mr": "चतुर कवी",
+    "name_en": "The Clever Poet",
+    "page": 33,
+    "description": "Poet visits king, 3 guards demand fractions of reward (1/10, 2/5, 1/2). Poet asks for 100 lashes. Guards get lashes. King rewards poet with gold.",
+    "math_problems": ["1/10 of 100 = ?", "2/5 of 100 = ?", "1/2 of 100 = ?"]
+  },
+  "humor": {
+    "name_mr": "जरा हसूया",
+    "page": 32,
+    "description": "Nandu jokes about 1½ wise men — mixed fractions humor"
+  }
+}

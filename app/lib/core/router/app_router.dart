@@ -9,6 +9,8 @@ import '../../features/auth/login_screen.dart';
 import '../../features/auth/auth_service.dart';
 import '../../features/onboarding/onboarding_screen.dart';
 import '../../features/home/subject_home_screen.dart';
+import '../../features/chapters/chapter_list_screen.dart';
+import '../../features/simulation/simulation_viewer_screen.dart';
 import '../../features/settings/settings_screen.dart';
 import '../constants/app_constants.dart';
 import '../providers/user_profile_provider.dart';
@@ -220,6 +222,69 @@ final routerProvider = Provider<GoRouter>((ref) {
             );
           },
         ),
+      ),
+      GoRoute(
+        path: '${AppConstants.chapterListRoute}/:subjectName',
+        name: 'chapters',
+        pageBuilder: (context, state) {
+          final subjectName = state.pathParameters['subjectName']!;
+          return CustomTransitionPage(
+            key: state.pageKey,
+            child: ChapterListScreen(subjectName: subjectName),
+            transitionDuration: const Duration(milliseconds: 350),
+            transitionsBuilder:
+                (context, animation, secondaryAnimation, child) {
+              return SlideTransition(
+                position: Tween<Offset>(
+                  begin: const Offset(1.0, 0.0),
+                  end: Offset.zero,
+                ).animate(CurvedAnimation(
+                  parent: animation,
+                  curve: Curves.easeOutCubic,
+                )),
+                child: FadeTransition(
+                  opacity: animation,
+                  child: child,
+                ),
+              );
+            },
+          );
+        },
+        routes: [
+          GoRoute(
+            path: '${AppConstants.simulationSegment}/:chapterNum',
+            name: 'simulation',
+            pageBuilder: (context, state) {
+              final subjectName = state.pathParameters['subjectName']!;
+              final chapterNum =
+                  int.parse(state.pathParameters['chapterNum']!);
+              return CustomTransitionPage(
+                key: state.pageKey,
+                child: SimulationViewerScreen(
+                  subjectName: subjectName,
+                  chapterNumber: chapterNum,
+                ),
+                transitionDuration: const Duration(milliseconds: 350),
+                transitionsBuilder:
+                    (context, animation, secondaryAnimation, child) {
+                  return SlideTransition(
+                    position: Tween<Offset>(
+                      begin: const Offset(0.0, 1.0),
+                      end: Offset.zero,
+                    ).animate(CurvedAnimation(
+                      parent: animation,
+                      curve: Curves.easeOutCubic,
+                    )),
+                    child: FadeTransition(
+                      opacity: animation,
+                      child: child,
+                    ),
+                  );
+                },
+              );
+            },
+          ),
+        ],
       ),
     ],
     errorPageBuilder: (context, state) => MaterialPage(

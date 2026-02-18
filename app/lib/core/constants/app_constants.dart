@@ -62,6 +62,8 @@ abstract final class AppConstants {
 
   static const String onboardingRoute = '/onboarding';
   static const String settingsRoute = '/settings';
+  static const String chapterListRoute = '/chapters';
+  static const String simulationSegment = 'simulation';
   static const double logoSizeOnboarding = 40.0;
 
   /// Board identifiers used during onboarding

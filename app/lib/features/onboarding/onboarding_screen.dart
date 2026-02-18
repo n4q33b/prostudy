@@ -5,6 +5,7 @@ import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:go_router/go_router.dart';
 
 import '../../core/constants/app_constants.dart';
+import '../../core/l10n/app_strings.dart';
 import '../../core/models/user_profile.dart';
 import '../../core/providers/user_profile_provider.dart';
 import '../../core/theme/app_colors.dart';
@@ -87,6 +88,9 @@ class _OnboardingScreenState extends ConsumerState<OnboardingScreen>
   // Animation controller for the medium dropdown reveal
   late final AnimationController _mediumRevealController;
   late final Animation<double> _mediumRevealOpacity;
+
+  /// Localized strings — updates when medium is selected.
+  AppStrings get _s => AppStrings.of(_selectedMedium);
 
   // -------------------------------------------------------------------------
   // Board definitions
@@ -393,7 +397,7 @@ class _OnboardingScreenState extends ConsumerState<OnboardingScreen>
           const SizedBox(height: 24),
 
           // Title
-          Text('Choose Your Board', style: AppTypography.headlineLarge)
+          Text(_s.chooseYourBoard, style: AppTypography.headlineLarge)
               .animate(controller: _step0Controller)
               .fadeIn(duration: 500.ms, curve: Curves.easeOut)
               .slideY(
@@ -407,7 +411,7 @@ class _OnboardingScreenState extends ConsumerState<OnboardingScreen>
 
           // Subtitle
           Text(
-            'Select your education board to get started',
+            _s.selectBoardSubtitle,
             style: AppTypography.subtitle,
           )
               .animate(controller: _step0Controller)
@@ -510,7 +514,7 @@ class _OnboardingScreenState extends ConsumerState<OnboardingScreen>
                     child: Padding(
                       padding: const EdgeInsets.only(top: 12),
                       child: _buildActionButton(
-                        label: 'Continue',
+                        label: _s.continueLabel,
                         isEnabled: canContinue,
                         onTap: () => _goToStep(1),
                       ),
@@ -537,7 +541,7 @@ class _OnboardingScreenState extends ConsumerState<OnboardingScreen>
 
         // Section title
         Text(
-          'Select Medium',
+          _s.selectMedium,
           style: AppTypography.headlineMedium,
         ),
 
@@ -548,7 +552,7 @@ class _OnboardingScreenState extends ConsumerState<OnboardingScreen>
           key: ValueKey<String>('medium_dropdown_$_selectedBoard'),
           initialValue: _selectedMedium,
           decoration: InputDecoration(
-            labelText: 'Select Medium',
+            labelText: _s.selectMedium,
             labelStyle: const TextStyle(color: AppColors.textSecondary),
             enabledBorder: OutlineInputBorder(
               borderRadius: BorderRadius.circular(12),
@@ -673,7 +677,7 @@ class _OnboardingScreenState extends ConsumerState<OnboardingScreen>
                       if (isSelected) ...[
                         const SizedBox(height: 4),
                         Text(
-                          'Selected',
+                          _s.selected,
                           style: AppTypography.bodySmall.copyWith(
                             color: AppColors.teal,
                             fontWeight: FontWeight.w500,
@@ -721,7 +725,7 @@ class _OnboardingScreenState extends ConsumerState<OnboardingScreen>
                     ),
                   ),
                   child: Text(
-                    'Coming Soon',
+                    _s.comingSoon,
                     style: AppTypography.labelSmall.copyWith(
                       color: AppColors.warning,
                       fontWeight: FontWeight.w600,
@@ -751,7 +755,7 @@ class _OnboardingScreenState extends ConsumerState<OnboardingScreen>
           const SizedBox(height: 24),
 
           // Title
-          Text('Select Your Class', style: AppTypography.headlineLarge)
+          Text(_s.selectYourClass, style: AppTypography.headlineLarge)
               .animate(controller: _step1Controller)
               .fadeIn(duration: 500.ms, curve: Curves.easeOut)
               .slideY(
@@ -765,7 +769,7 @@ class _OnboardingScreenState extends ConsumerState<OnboardingScreen>
 
           // Subtitle
           Text(
-            'You can change this later from settings',
+            _s.changeFromSettings,
             style: AppTypography.subtitle,
           )
               .animate(controller: _step1Controller)
@@ -791,7 +795,7 @@ class _OnboardingScreenState extends ConsumerState<OnboardingScreen>
 
           // "Get Started" button
           _buildActionButton(
-            label: 'Get Started',
+            label: _s.getStarted,
             isEnabled: _selectedClass != null,
             onTap: _onComplete,
             useAccentGradient: true,
@@ -877,7 +881,7 @@ class _OnboardingScreenState extends ConsumerState<OnboardingScreen>
                   ),
                   const SizedBox(height: 2),
                   Text(
-                    'Class',
+                    _s.classLabel,
                     style: AppTypography.bodySmall.copyWith(
                       color: isSelected
                           ? AppColors.tealLight

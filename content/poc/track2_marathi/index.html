@@ -1,0 +1,1909 @@
+<!DOCTYPE html>
+<html lang="mr">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0, user-scalable=no">
+<title>ProStudy - पुस्तके | इयत्ता पाचवी</title>
+<style>
+/* ===== RESET & VARIABLES ===== */
+*,*::before,*::after{margin:0;padding:0;box-sizing:border-box}
+:root{
+  --navy:#0D3B4C;--navy-deep:#081E29;--navy-mid:#0F4A5E;
+  --gold:#FFE66D;--gold-dark:#F5D02A;
+  --purple:#A78BFA;--purple-deep:#7C3AED;
+  --green:#4ADE80;--green-deep:#22C55E;
+  --teal:#4ECDC4;--teal-deep:#2D9596;
+  --coral:#FF6B6B;--coral-deep:#EF4444;
+  --star:#FBBF24;--star-bright:#FDE68A;
+  --pink:#F472B6;--sky:#38BDF8;
+  --white:#FFFFFF;--light:#E2E8F0;--muted:#94A3B8;--dim:#64748B;
+  --card:rgba(255,255,255,0.07);--card-hover:rgba(255,255,255,0.12);
+  --glass:rgba(13,59,76,0.85);--glass-border:rgba(255,255,255,0.15);
+  --radius:16px;--radius-sm:10px;--radius-xs:6px;
+  --shadow:0 8px 32px rgba(0,0,0,0.4);
+  --font:'Noto Sans Devanagari','Mangal','Devanagari MT',system-ui,sans-serif;
+  --transition:0.3s cubic-bezier(0.4,0,0.2,1);
+  --bounce:0.5s cubic-bezier(0.34,1.56,0.64,1);
+}
+html{scroll-behavior:smooth;-webkit-tap-highlight-color:transparent}
+body{
+  font-family:var(--font);background:var(--navy-deep);color:var(--white);
+  min-height:100vh;min-height:100dvh;overflow-x:hidden;
+  line-height:1.8;font-size:17px;text-rendering:optimizeLegibility;
+  -webkit-font-smoothing:antialiased;
+}
+button{font-family:var(--font);cursor:pointer;border:none;outline:none;-webkit-tap-highlight-color:transparent}
+img{max-width:100%}
+
+/* ===== ANIMATED BACKGROUND ===== */
+#bgCanvas{position:fixed;top:0;left:0;width:100%;height:100%;z-index:0;pointer-events:none}
+.bg-gradient{
+  position:fixed;top:0;left:0;width:100%;height:100%;z-index:0;pointer-events:none;
+  background:radial-gradient(ellipse at 20% 20%,rgba(77,205,196,0.08) 0%,transparent 50%),
+             radial-gradient(ellipse at 80% 80%,rgba(167,139,250,0.06) 0%,transparent 50%),
+             radial-gradient(ellipse at 50% 50%,rgba(255,230,109,0.04) 0%,transparent 60%);
+}
+
+/* ===== MAIN APP CONTAINER ===== */
+#app{position:relative;z-index:1;min-height:100vh;min-height:100dvh;display:flex;flex-direction:column;padding-bottom:80px}
+
+/* ===== HEADER / XP BAR ===== */
+.header{
+  position:sticky;top:0;z-index:100;
+  background:rgba(8,30,41,0.92);backdrop-filter:blur(16px);-webkit-backdrop-filter:blur(16px);
+  border-bottom:1px solid var(--glass-border);padding:10px 16px 8px;
+}
+.header-top{display:flex;align-items:center;justify-content:space-between;margin-bottom:6px}
+.header-title{font-size:15px;font-weight:600;color:var(--light);display:flex;align-items:center;gap:6px}
+.header-title .emoji{font-size:18px}
+.score-display{
+  display:flex;align-items:center;gap:6px;
+  background:rgba(251,191,36,0.15);border:1px solid rgba(251,191,36,0.3);
+  border-radius:20px;padding:4px 12px;font-size:14px;font-weight:700;color:var(--star);
+}
+.score-display .score-num{min-width:28px;text-align:center}
+.xp-bar-container{display:flex;align-items:center;gap:8px}
+.xp-label{font-size:11px;color:var(--muted);white-space:nowrap;min-width:50px}
+.xp-bar{flex:1;height:8px;background:rgba(255,255,255,0.08);border-radius:4px;overflow:hidden;position:relative}
+.xp-fill{
+  height:100%;border-radius:4px;transition:width 0.8s cubic-bezier(0.4,0,0.2,1);
+  background:linear-gradient(90deg,var(--teal),var(--green),var(--gold));
+  position:relative;
+}
+.xp-fill::after{
+  content:'';position:absolute;top:0;right:0;width:20px;height:100%;
+  background:linear-gradient(90deg,transparent,rgba(255,255,255,0.4));
+  border-radius:4px;
+}
+.xp-percent{font-size:11px;color:var(--teal);font-weight:700;min-width:30px;text-align:right}
+.streak-badge{
+  display:none;align-items:center;gap:4px;
+  background:rgba(239,68,68,0.15);border:1px solid rgba(239,68,68,0.3);
+  border-radius:20px;padding:3px 10px;font-size:13px;font-weight:700;color:var(--coral);
+  animation:streakPulse 1s ease-in-out infinite;
+}
+.streak-badge.active{display:flex}
+@keyframes streakPulse{0%,100%{transform:scale(1)}50%{transform:scale(1.05)}}
+
+/* ===== MASCOT (Booki the Owl) ===== */
+.mascot-container{
+  position:fixed;bottom:90px;right:12px;z-index:90;
+  width:64px;height:64px;transition:var(--transition);
+}
+.mascot-container.hidden{transform:scale(0);opacity:0;pointer-events:none}
+.mascot-svg{width:100%;height:100%;filter:drop-shadow(0 4px 8px rgba(0,0,0,0.3))}
+.mascot-bubble{
+  position:absolute;bottom:68px;right:0;min-width:160px;max-width:220px;
+  background:var(--white);color:var(--navy);border-radius:12px 12px 4px 12px;
+  padding:8px 12px;font-size:13px;font-weight:500;line-height:1.5;
+  box-shadow:0 4px 16px rgba(0,0,0,0.2);
+  transform:scale(0);transform-origin:bottom right;transition:var(--bounce);
+  pointer-events:none;
+}
+.mascot-bubble.show{transform:scale(1)}
+
+/* ===== EXPERIENCE SCREENS ===== */
+.screen{
+  display:none;flex-direction:column;padding:16px;
+  animation:screenIn 0.4s ease-out;min-height:calc(100vh - 140px);min-height:calc(100dvh - 140px);
+}
+.screen.active{display:flex}
+@keyframes screenIn{from{opacity:0;transform:translateY(20px)}to{opacity:1;transform:translateY(0)}}
+
+.screen-header{text-align:center;margin-bottom:20px;padding:12px 0}
+.screen-header h2{font-size:26px;font-weight:800;margin-bottom:4px;line-height:1.4}
+.screen-header .subtitle{font-size:14px;color:var(--muted);font-weight:400}
+
+/* ===== EXPERIENCE 1: ANIMATED POEM JOURNEY ===== */
+.poem-stage{
+  position:relative;width:100%;flex:1;
+  background:radial-gradient(ellipse at center,rgba(13,59,76,0.4),transparent);
+  border-radius:var(--radius);overflow:hidden;min-height:420px;
+  border:1px solid var(--glass-border);
+}
+.poem-scene{
+  position:absolute;top:0;left:0;width:100%;height:100%;
+  display:flex;flex-direction:column;justify-content:center;align-items:center;
+  padding:24px;text-align:center;
+  opacity:0;transform:scale(0.95);transition:all 0.8s ease;pointer-events:none;
+}
+.poem-scene.active{opacity:1;transform:scale(1);pointer-events:auto}
+.poem-scene .scene-bg{position:absolute;top:0;left:0;width:100%;height:100%;z-index:0;overflow:hidden}
+.poem-scene .verse-text{
+  position:relative;z-index:2;font-size:22px;font-weight:600;
+  line-height:2;color:var(--white);text-shadow:0 2px 12px rgba(0,0,0,0.5);
+  max-width:340px;
+}
+.poem-scene .verse-text .word{
+  display:inline-block;opacity:0;transform:translateY(10px);
+  transition:all 0.4s ease;
+}
+.poem-scene .verse-text .word.revealed{opacity:1;transform:translateY(0)}
+.scene-counter{
+  position:absolute;top:12px;right:12px;z-index:5;
+  background:rgba(0,0,0,0.4);border-radius:20px;padding:4px 12px;
+  font-size:12px;color:var(--light);backdrop-filter:blur(8px);
+}
+.poem-controls{
+  display:flex;align-items:center;justify-content:center;gap:12px;margin-top:16px;
+}
+.poem-nav-btn{
+  width:48px;height:48px;border-radius:50%;
+  background:var(--card);border:1px solid var(--glass-border);
+  color:var(--white);font-size:20px;display:flex;align-items:center;justify-content:center;
+  transition:var(--transition);
+}
+.poem-nav-btn:active{transform:scale(0.9)}
+.poem-nav-btn:disabled{opacity:0.3;pointer-events:none}
+.poem-autoplay-btn{
+  padding:8px 20px;border-radius:24px;
+  background:linear-gradient(135deg,var(--teal),var(--teal-deep));
+  color:var(--white);font-size:14px;font-weight:600;
+  transition:var(--transition);display:flex;align-items:center;gap:6px;
+}
+.poem-autoplay-btn:active{transform:scale(0.95)}
+.poem-autoplay-btn.playing{background:linear-gradient(135deg,var(--coral),var(--coral-deep))}
+.poem-dots{display:flex;gap:6px;justify-content:center;margin-top:12px}
+.poem-dot{
+  width:8px;height:8px;border-radius:50%;background:rgba(255,255,255,0.2);
+  transition:var(--transition);
+}
+.poem-dot.active{background:var(--gold);width:24px;border-radius:4px}
+
+/* Scene-specific floating elements */
+.floating-element{
+  position:absolute;font-size:24px;opacity:0;
+  animation:floatUp 6s ease-in-out infinite;
+  pointer-events:none;z-index:1;
+}
+@keyframes floatUp{
+  0%{transform:translateY(100px) rotate(0deg);opacity:0}
+  15%{opacity:0.8}
+  85%{opacity:0.8}
+  100%{transform:translateY(-100px) rotate(20deg);opacity:0}
+}
+.scene-bird{animation:birdFly 4s ease-in-out infinite}
+@keyframes birdFly{
+  0%{transform:translate(-100px,0) scaleX(1)}
+  50%{transform:translate(50vw,-30px) scaleX(1)}
+  100%{transform:translate(100vw,0) scaleX(1)}
+}
+.scene-rocket{animation:rocketLaunch 3s ease-in infinite}
+@keyframes rocketLaunch{
+  0%{transform:translateY(200px) rotate(-10deg);opacity:0}
+  30%{opacity:1}
+  100%{transform:translateY(-300px) rotate(-10deg);opacity:0}
+}
+.scene-sparkle{animation:sparkle 2s ease-in-out infinite}
+@keyframes sparkle{
+  0%,100%{transform:scale(0) rotate(0deg);opacity:0}
+  50%{transform:scale(1) rotate(180deg);opacity:1}
+}
+.scene-letter{
+  font-family:var(--font);font-size:28px;font-weight:700;color:var(--gold);
+  animation:letterDance 3s ease-in-out infinite;
+}
+@keyframes letterDance{
+  0%,100%{transform:translateY(0) rotate(-5deg)}
+  25%{transform:translateY(-15px) rotate(5deg)}
+  50%{transform:translateY(0) rotate(-3deg)}
+  75%{transform:translateY(-8px) rotate(3deg)}
+}
+.wave-viz{
+  position:absolute;bottom:0;left:0;width:100%;height:40px;z-index:1;opacity:0.3;
+}
+
+/* ===== EXPERIENCE 2: WORD EXPLORER ===== */
+.word-explorer{position:relative}
+.word-poem-display{
+  background:var(--card);border:1px solid var(--glass-border);border-radius:var(--radius);
+  padding:20px;margin-bottom:16px;line-height:2.2;font-size:19px;
+}
+.word-poem-display .glow-word{
+  display:inline;cursor:pointer;position:relative;
+  color:var(--gold);font-weight:700;
+  text-decoration:underline;text-decoration-style:dotted;text-underline-offset:4px;
+  animation:wordGlow 2s ease-in-out infinite;
+  padding:2px 4px;border-radius:4px;
+  transition:var(--transition);
+}
+.word-poem-display .glow-word.collected{
+  color:var(--green);animation:none;text-decoration:none;
+  background:rgba(74,222,128,0.1);
+}
+@keyframes wordGlow{
+  0%,100%{text-shadow:0 0 4px rgba(255,230,109,0.3)}
+  50%{text-shadow:0 0 12px rgba(255,230,109,0.6)}
+}
+.word-card-overlay{
+  position:fixed;top:0;left:0;width:100%;height:100%;z-index:200;
+  background:rgba(0,0,0,0.7);backdrop-filter:blur(8px);-webkit-backdrop-filter:blur(8px);
+  display:none;align-items:center;justify-content:center;padding:20px;
+}
+.word-card-overlay.show{display:flex}
+.word-card{
+  background:linear-gradient(145deg,var(--navy-mid),var(--navy));
+  border:2px solid var(--gold);border-radius:20px;padding:28px 24px;
+  max-width:340px;width:100%;text-align:center;
+  animation:cardZoomIn 0.4s var(--bounce);
+  box-shadow:0 0 40px rgba(255,230,109,0.2);
+}
+@keyframes cardZoomIn{from{transform:scale(0.5);opacity:0}to{transform:scale(1);opacity:1}}
+.word-card .wc-word{font-size:32px;font-weight:800;color:var(--gold);margin-bottom:8px}
+.word-card .wc-meaning{font-size:16px;color:var(--light);margin-bottom:20px;line-height:1.6}
+.word-card .wc-question{font-size:15px;color:var(--muted);margin-bottom:12px}
+.word-card .wc-options{display:flex;flex-direction:column;gap:8px}
+.word-card .wc-opt{
+  padding:12px 16px;border-radius:var(--radius-sm);
+  background:var(--card);border:1px solid var(--glass-border);
+  color:var(--white);font-size:15px;font-weight:500;
+  transition:var(--transition);text-align:right;
+  min-height:48px;display:flex;align-items:center;justify-content:center;
+}
+.word-card .wc-opt:active{transform:scale(0.97)}
+.word-card .wc-opt.correct{background:rgba(74,222,128,0.2);border-color:var(--green);color:var(--green)}
+.word-card .wc-opt.wrong{background:rgba(248,113,113,0.2);border-color:var(--coral);color:var(--coral);animation:shake 0.5s ease}
+@keyframes shake{0%,100%{transform:translateX(0)}20%,60%{transform:translateX(-6px)}40%,80%{transform:translateX(6px)}}
+.treasure-chest{
+  display:flex;align-items:center;gap:10px;
+  background:linear-gradient(135deg,rgba(255,230,109,0.1),rgba(251,191,36,0.05));
+  border:1px solid rgba(255,230,109,0.2);border-radius:var(--radius);
+  padding:12px 16px;margin-top:12px;
+}
+.treasure-chest .chest-icon{font-size:28px}
+.treasure-chest .chest-bar{flex:1;height:10px;background:rgba(255,255,255,0.08);border-radius:5px;overflow:hidden}
+.treasure-chest .chest-fill{height:100%;background:linear-gradient(90deg,var(--gold),var(--star));border-radius:5px;transition:width 0.5s ease}
+.treasure-chest .chest-label{font-size:13px;color:var(--gold);font-weight:600;white-space:nowrap}
+
+/* ===== EXPERIENCE 3: DECORATE THE POEM ===== */
+.decorate-canvas{
+  background:var(--card);border:1px solid var(--glass-border);border-radius:var(--radius);
+  padding:20px;position:relative;overflow:hidden;min-height:360px;
+  line-height:2.2;font-size:18px;
+}
+.decorate-canvas .dec-word{
+  display:inline;cursor:pointer;padding:1px 3px;border-radius:4px;
+  transition:all 0.2s ease;
+}
+.decorate-canvas .dec-verse-num{
+  display:inline-flex;align-items:center;justify-content:center;
+  width:28px;height:28px;border-radius:50%;
+  background:var(--card);border:1px solid var(--glass-border);
+  font-size:12px;cursor:pointer;margin-right:6px;
+  transition:var(--transition);vertical-align:middle;
+}
+.decorate-canvas .dec-sticker{
+  display:inline;font-size:20px;vertical-align:middle;
+  animation:stickerPop 0.3s var(--bounce);
+}
+@keyframes stickerPop{from{transform:scale(0)}to{transform:scale(1)}}
+.color-palette{
+  display:flex;gap:8px;flex-wrap:wrap;justify-content:center;margin-top:16px;padding:12px;
+  background:var(--card);border-radius:var(--radius);
+}
+.color-swatch{
+  width:36px;height:36px;border-radius:50%;cursor:pointer;
+  border:2px solid transparent;transition:var(--transition);
+  position:relative;
+}
+.color-swatch.active{border-color:var(--white);transform:scale(1.15)}
+.color-swatch::after{
+  content:'';position:absolute;inset:3px;border-radius:50%;
+  background:inherit;
+}
+.sticker-tray{
+  display:flex;gap:8px;flex-wrap:wrap;justify-content:center;margin-top:8px;padding:10px;
+  background:var(--card);border-radius:var(--radius);
+}
+.sticker-btn{
+  width:40px;height:40px;border-radius:var(--radius-xs);
+  background:var(--card-hover);display:flex;align-items:center;justify-content:center;
+  font-size:22px;transition:var(--transition);
+}
+.sticker-btn:active{transform:scale(0.9)}
+.decorate-mode-toggle{
+  display:flex;gap:8px;margin-bottom:12px;
+}
+.mode-btn{
+  flex:1;padding:10px;border-radius:var(--radius-sm);
+  background:var(--card);border:1px solid var(--glass-border);
+  color:var(--muted);font-size:14px;font-weight:600;
+  transition:var(--transition);text-align:center;
+}
+.mode-btn.active{background:rgba(78,205,196,0.15);border-color:var(--teal);color:var(--teal)}
+
+/* ===== EXPERIENCE 4: LINE MATCHER (MEMORY GAME) ===== */
+.memory-game-stats{
+  display:flex;justify-content:center;gap:16px;margin-bottom:16px;
+}
+.mg-stat{
+  display:flex;align-items:center;gap:6px;
+  background:var(--card);border-radius:20px;padding:6px 14px;
+  font-size:14px;font-weight:600;
+}
+.mg-stat .stat-icon{font-size:16px}
+.mg-stat .stat-val{color:var(--gold)}
+.memory-grid{
+  display:grid;grid-template-columns:repeat(3,1fr);gap:10px;
+  max-width:400px;margin:0 auto;
+}
+.memory-card{
+  aspect-ratio:1;border-radius:var(--radius);cursor:pointer;
+  perspective:600px;position:relative;
+}
+.memory-card-inner{
+  width:100%;height:100%;position:relative;
+  transition:transform 0.6s cubic-bezier(0.4,0,0.2,1);
+  transform-style:preserve-3d;
+}
+.memory-card.flipped .memory-card-inner{transform:rotateY(180deg)}
+.memory-card.matched .memory-card-inner{transform:rotateY(180deg)}
+.memory-card-face{
+  position:absolute;width:100%;height:100%;border-radius:var(--radius);
+  display:flex;align-items:center;justify-content:center;
+  backface-visibility:hidden;-webkit-backface-visibility:hidden;
+  padding:8px;text-align:center;font-size:14px;font-weight:600;line-height:1.4;
+}
+.memory-card-front{
+  background:linear-gradient(145deg,var(--navy-mid),var(--navy));
+  border:2px solid var(--glass-border);
+  font-size:28px;
+}
+.memory-card-back{
+  transform:rotateY(180deg);
+  border:2px solid;
+}
+.memory-card.matched{pointer-events:none}
+.memory-card.matched .memory-card-back{animation:matchGlow 1s ease-in-out}
+@keyframes matchGlow{0%,100%{box-shadow:0 0 0 rgba(255,230,109,0)}50%{box-shadow:0 0 20px rgba(255,230,109,0.5)}}
+
+/* ===== EXPERIENCE 5: QUIZ CHALLENGE ===== */
+.quiz-area{flex:1;display:flex;flex-direction:column}
+.quiz-owl-host{
+  display:flex;align-items:flex-start;gap:12px;margin-bottom:20px;
+}
+.quiz-owl-svg{width:56px;height:56px;flex-shrink:0}
+.quiz-bubble{
+  background:var(--card);border:1px solid var(--glass-border);border-radius:16px 16px 16px 4px;
+  padding:14px 18px;flex:1;font-size:16px;line-height:1.7;color:var(--light);
+}
+.quiz-timer-bar{
+  width:100%;height:6px;background:rgba(255,255,255,0.08);border-radius:3px;
+  margin-bottom:16px;overflow:hidden;
+}
+.quiz-timer-fill{
+  height:100%;border-radius:3px;transition:width 0.3s linear;
+  background:linear-gradient(90deg,var(--green),var(--gold),var(--coral));
+}
+.quiz-options{display:flex;flex-direction:column;gap:10px;margin-top:auto}
+.quiz-opt{
+  padding:14px 18px;border-radius:var(--radius);
+  background:var(--card);border:2px solid var(--glass-border);
+  color:var(--white);font-size:16px;font-weight:500;
+  transition:var(--transition);text-align:right;
+  min-height:52px;display:flex;align-items:center;position:relative;
+}
+.quiz-opt .opt-letter{
+  width:28px;height:28px;border-radius:50%;
+  background:rgba(255,255,255,0.1);display:flex;align-items:center;justify-content:center;
+  font-size:13px;font-weight:700;color:var(--muted);margin-left:12px;flex-shrink:0;
+}
+.quiz-opt:active{transform:scale(0.98)}
+.quiz-opt.correct{background:rgba(74,222,128,0.15);border-color:var(--green);color:var(--green)}
+.quiz-opt.wrong{background:rgba(248,113,113,0.15);border-color:var(--coral);color:var(--coral);animation:shake 0.5s ease}
+.quiz-progress-dots{display:flex;gap:6px;justify-content:center;margin-bottom:16px}
+.quiz-pdot{width:10px;height:10px;border-radius:50%;background:rgba(255,255,255,0.1);transition:var(--transition)}
+.quiz-pdot.done{background:var(--green)}
+.quiz-pdot.wrong-dot{background:var(--coral)}
+.quiz-pdot.current{background:var(--gold);transform:scale(1.3)}
+
+/* ===== RESULTS / COMPLETION SCREENS ===== */
+.result-screen{
+  display:none;flex-direction:column;align-items:center;justify-content:center;
+  padding:32px 20px;text-align:center;min-height:calc(100vh - 140px);
+}
+.result-screen.active{display:flex}
+.result-stars{font-size:48px;margin-bottom:16px;animation:starsIn 0.8s var(--bounce)}
+@keyframes starsIn{from{transform:scale(0);opacity:0}to{transform:scale(1);opacity:1}}
+.result-title{font-size:28px;font-weight:800;margin-bottom:8px;color:var(--gold)}
+.result-subtitle{font-size:16px;color:var(--light);margin-bottom:24px;line-height:1.6}
+.result-score{
+  font-size:40px;font-weight:800;color:var(--star);margin-bottom:8px;
+}
+.result-btn{
+  padding:14px 32px;border-radius:28px;font-size:16px;font-weight:700;
+  transition:var(--transition);margin-top:12px;
+  min-height:52px;display:flex;align-items:center;gap:8px;
+}
+.result-btn:active{transform:scale(0.95)}
+.result-btn.primary{background:linear-gradient(135deg,var(--teal),var(--green));color:var(--navy)}
+.result-btn.secondary{background:var(--card);border:1px solid var(--glass-border);color:var(--white)}
+
+/* ===== BADGE DISPLAY ===== */
+.badges-row{
+  display:flex;gap:10px;justify-content:center;flex-wrap:wrap;margin:16px 0;
+}
+.badge{
+  width:52px;height:52px;border-radius:50%;
+  background:var(--card);border:2px solid var(--glass-border);
+  display:flex;align-items:center;justify-content:center;
+  font-size:24px;position:relative;transition:var(--transition);
+  filter:grayscale(1) opacity(0.4);
+}
+.badge.earned{filter:none;border-color:var(--gold);animation:badgeEarn 0.5s var(--bounce)}
+@keyframes badgeEarn{from{transform:scale(0) rotate(-180deg)}to{transform:scale(1) rotate(0deg)}}
+.badge .badge-check{
+  position:absolute;bottom:-2px;right:-2px;width:18px;height:18px;border-radius:50%;
+  background:var(--green);display:none;align-items:center;justify-content:center;
+  font-size:10px;color:var(--white);font-weight:700;
+}
+.badge.earned .badge-check{display:flex}
+
+/* ===== BOTTOM NAV ===== */
+.bottom-nav{
+  position:fixed;bottom:0;left:0;right:0;z-index:100;
+  background:rgba(8,30,41,0.95);backdrop-filter:blur(16px);-webkit-backdrop-filter:blur(16px);
+  border-top:1px solid var(--glass-border);
+  display:flex;padding:6px 8px;padding-bottom:max(6px,env(safe-area-inset-bottom));
+}
+.nav-tab{
+  flex:1;display:flex;flex-direction:column;align-items:center;gap:2px;
+  padding:6px 4px;border-radius:var(--radius-sm);
+  background:transparent;color:var(--dim);font-size:10px;font-weight:600;
+  transition:var(--transition);position:relative;
+  min-height:56px;justify-content:center;
+}
+.nav-tab .nav-icon{font-size:20px;transition:var(--transition)}
+.nav-tab .nav-label{white-space:nowrap;overflow:hidden;text-overflow:ellipsis;max-width:100%}
+.nav-tab.active{color:var(--teal);background:rgba(78,205,196,0.1)}
+.nav-tab.active .nav-icon{transform:scale(1.1)}
+.nav-tab .nav-check{
+  position:absolute;top:4px;right:8px;font-size:12px;display:none;
+}
+.nav-tab.completed .nav-check{display:block}
+.nav-tab-glow{
+  position:absolute;bottom:100%;left:50%;transform:translateX(-50%);
+  width:40px;height:3px;border-radius:2px;background:var(--teal);
+  display:none;
+}
+.nav-tab.active .nav-tab-glow{display:block}
+
+/* ===== CONFETTI ===== */
+.confetti-container{position:fixed;top:0;left:0;width:100%;height:100%;z-index:300;pointer-events:none;overflow:hidden}
+.confetti-piece{
+  position:absolute;top:-20px;width:10px;height:10px;
+  animation:confettiFall 3s ease-in forwards;
+}
+@keyframes confettiFall{
+  0%{transform:translateY(0) rotate(0deg);opacity:1}
+  100%{transform:translateY(100vh) rotate(720deg);opacity:0}
+}
+
+/* ===== PARTICLE BURST ===== */
+.particle-burst{position:fixed;pointer-events:none;z-index:250}
+.particle{
+  position:absolute;width:6px;height:6px;border-radius:50%;
+  animation:particleExplode 0.8s ease-out forwards;
+}
+@keyframes particleExplode{
+  0%{transform:translate(0,0) scale(1);opacity:1}
+  100%{transform:translate(var(--px),var(--py)) scale(0);opacity:0}
+}
+
+/* ===== SPLASH / INTRO ===== */
+.splash-screen{
+  position:fixed;top:0;left:0;width:100%;height:100%;z-index:500;
+  background:var(--navy-deep);display:flex;flex-direction:column;
+  align-items:center;justify-content:center;padding:32px;text-align:center;
+  transition:opacity 0.5s ease,transform 0.5s ease;
+}
+.splash-screen.hide{opacity:0;transform:scale(1.05);pointer-events:none}
+.splash-book{font-size:72px;margin-bottom:16px;animation:bookBounce 2s ease-in-out infinite}
+@keyframes bookBounce{0%,100%{transform:translateY(0) rotate(-3deg)}50%{transform:translateY(-12px) rotate(3deg)}}
+.splash-title{font-size:36px;font-weight:800;color:var(--gold);margin-bottom:8px;line-height:1.3}
+.splash-poet{font-size:16px;color:var(--muted);margin-bottom:4px}
+.splash-class{font-size:13px;color:var(--dim);margin-bottom:32px}
+.splash-start-btn{
+  padding:16px 40px;border-radius:28px;
+  background:linear-gradient(135deg,var(--teal),var(--green));
+  color:var(--navy);font-size:18px;font-weight:800;
+  box-shadow:0 4px 20px rgba(78,205,196,0.4);
+  animation:btnPulse 2s ease-in-out infinite;
+  transition:var(--transition);
+}
+.splash-start-btn:active{transform:scale(0.95)}
+@keyframes btnPulse{0%,100%{box-shadow:0 4px 20px rgba(78,205,196,0.4)}50%{box-shadow:0 4px 30px rgba(78,205,196,0.6)}}
+.splash-features{display:flex;gap:16px;flex-wrap:wrap;justify-content:center;margin-top:24px}
+.splash-feat{font-size:12px;color:var(--muted);display:flex;align-items:center;gap:4px}
+
+/* ===== UTILITY CLASSES ===== */
+.text-gold{color:var(--gold)}.text-green{color:var(--green)}.text-coral{color:var(--coral)}
+.text-teal{color:var(--teal)}.text-purple{color:var(--purple)}.text-star{color:var(--star)}
+.mt-8{margin-top:8px}.mt-16{margin-top:16px}.mt-24{margin-top:24px}
+.mb-8{margin-bottom:8px}.mb-16{margin-bottom:16px}
+.fw-700{font-weight:700}.fw-800{font-weight:800}
+.text-center{text-align:center}
+.hidden{display:none!important}
+
+/* ===== RESPONSIVE ===== */
+@media(max-width:380px){
+  .poem-scene .verse-text{font-size:19px}
+  .screen-header h2{font-size:22px}
+  .memory-grid{grid-template-columns:repeat(3,1fr);gap:8px}
+  .word-poem-display{font-size:17px;padding:16px}
+}
+@media(min-width:500px){
+  .memory-grid{grid-template-columns:repeat(3,1fr);max-width:420px}
+  .screen{max-width:480px;margin:0 auto}
+  .header{max-width:480px;margin:0 auto;left:0;right:0}
+}
+</style>
+</head>
+<body>
+
+<!-- BACKGROUND CANVAS FOR FLOATING ELEMENTS -->
+<canvas id="bgCanvas"></canvas>
+<div class="bg-gradient"></div>
+
+<!-- SPLASH SCREEN -->
+<div class="splash-screen" id="splashScreen">
+  <div class="splash-book">📚</div>
+  <div class="splash-title">पुस्तके</div>
+  <div class="splash-poet">कवी: सफदर हाश्मी (अनुवादित)</div>
+  <div class="splash-class">इयत्ता पाचवी | बालभारती | महाराष्ट्र बोर्ड</div>
+  <button class="splash-start-btn" onclick="startApp()">सुरू करा ✨</button>
+  <div class="splash-features">
+    <span class="splash-feat">📖 कविता प्रवास</span>
+    <span class="splash-feat">🔍 शब्द शोधा</span>
+    <span class="splash-feat">🎨 कविता सजवा</span>
+    <span class="splash-feat">🃏 ओळ जुळवा</span>
+    <span class="splash-feat">🏆 प्रश्नमंजुषा</span>
+  </div>
+</div>
+
+<!-- MAIN APP -->
+<div id="app" style="display:none">
+
+  <!-- HEADER -->
+  <div class="header">
+    <div class="header-top">
+      <div class="header-title"><span class="emoji">📚</span> पुस्तके</div>
+      <div class="streak-badge" id="streakBadge">🔥 <span id="streakCount">0</span> सलग!</div>
+      <div class="score-display">⭐ <span class="score-num" id="totalScore">0</span></div>
+    </div>
+    <div class="xp-bar-container">
+      <span class="xp-label">प्रगती</span>
+      <div class="xp-bar"><div class="xp-fill" id="xpFill" style="width:0%"></div></div>
+      <span class="xp-percent" id="xpPercent">0%</span>
+    </div>
+  </div>
+
+  <!-- SCREEN 1: ANIMATED POEM JOURNEY -->
+  <div class="screen active" id="screen1">
+    <div class="screen-header">
+      <h2>📖 पुस्तकांचं जग</h2>
+      <div class="subtitle">कविता ऐका, जग पहा!</div>
+    </div>
+    <div class="poem-stage" id="poemStage"></div>
+    <div class="poem-controls">
+      <button class="poem-nav-btn" id="poemPrev" onclick="poemNav(-1)">◀</button>
+      <button class="poem-autoplay-btn" id="poemAutoBtn" onclick="toggleAutoplay()">
+        <span id="autoIcon">▶</span> <span id="autoLabel">आपोआप</span>
+      </button>
+      <button class="poem-nav-btn" id="poemNext" onclick="poemNav(1)">▶</button>
+    </div>
+    <div class="poem-dots" id="poemDots"></div>
+  </div>
+
+  <!-- SCREEN 2: WORD EXPLORER -->
+  <div class="screen" id="screen2">
+    <div class="screen-header">
+      <h2>🔍 शब्द शोधा</h2>
+      <div class="subtitle">चमकणारे शब्द दाबा, अर्थ शोधा!</div>
+    </div>
+    <div class="word-poem-display" id="wordPoemDisplay"></div>
+    <div class="treasure-chest">
+      <div class="chest-icon">🧳</div>
+      <div class="chest-bar"><div class="chest-fill" id="chestFill" style="width:0%"></div></div>
+      <div class="chest-label" id="chestLabel">0/6 शब्द</div>
+    </div>
+  </div>
+
+  <!-- WORD CARD OVERLAY -->
+  <div class="word-card-overlay" id="wordCardOverlay">
+    <div class="word-card" id="wordCard">
+      <div class="wc-word" id="wcWord"></div>
+      <div class="wc-meaning" id="wcMeaning"></div>
+      <div class="wc-question" id="wcQuestion">या शब्दाचा अर्थ काय?</div>
+      <div class="wc-options" id="wcOptions"></div>
+    </div>
+  </div>
+
+  <!-- SCREEN 3: DECORATE THE POEM -->
+  <div class="screen" id="screen3">
+    <div class="screen-header">
+      <h2>🎨 कविता सजवा</h2>
+      <div class="subtitle">शब्दांना रंग द्या, स्टिकर्स लावा!</div>
+    </div>
+    <div class="decorate-mode-toggle">
+      <button class="mode-btn active" id="modeColor" onclick="setDecMode('color')">🎨 रंग</button>
+      <button class="mode-btn" id="modeSticker" onclick="setDecMode('sticker')">⭐ स्टिकर</button>
+    </div>
+    <div class="decorate-canvas" id="decorateCanvas"></div>
+    <div id="colorPaletteWrap">
+      <div class="color-palette" id="colorPalette"></div>
+    </div>
+    <div id="stickerTrayWrap" style="display:none">
+      <div class="sticker-tray" id="stickerTray"></div>
+    </div>
+    <div class="text-center mt-16" id="decCompleteArea" style="display:none">
+      <button class="result-btn primary" onclick="completeDec()">सजावट पूर्ण! 🎉</button>
+    </div>
+  </div>
+
+  <!-- SCREEN 4: LINE MATCHER (MEMORY GAME) -->
+  <div class="screen" id="screen4">
+    <div class="screen-header">
+      <h2>🃏 ओळ जुळवा</h2>
+      <div class="subtitle">यमक जोड्या शोधा!</div>
+    </div>
+    <div class="memory-game-stats">
+      <div class="mg-stat"><span class="stat-icon">🔄</span> <span class="stat-val" id="mgMoves">0</span></div>
+      <div class="mg-stat"><span class="stat-icon">⏱️</span> <span class="stat-val" id="mgTime">0:00</span></div>
+      <div class="mg-stat"><span class="stat-icon">✅</span> <span class="stat-val" id="mgMatched">0/4</span></div>
+    </div>
+    <div class="memory-grid" id="memoryGrid"></div>
+  </div>
+
+  <!-- SCREEN 5: QUIZ CHALLENGE -->
+  <div class="screen" id="screen5">
+    <div class="screen-header">
+      <h2>🏆 प्रश्नमंजुषा</h2>
+      <div class="subtitle">बुकीच्या प्रश्नांची उत्तरे द्या!</div>
+    </div>
+    <div class="quiz-progress-dots" id="quizDots"></div>
+    <div class="quiz-timer-bar"><div class="quiz-timer-fill" id="quizTimerFill" style="width:100%"></div></div>
+    <div class="quiz-area" id="quizArea">
+      <div class="quiz-owl-host">
+        <svg class="quiz-owl-svg" id="quizOwlSvg" viewBox="0 0 80 80"></svg>
+        <div class="quiz-bubble" id="quizBubble"></div>
+      </div>
+      <div class="quiz-options" id="quizOptions"></div>
+    </div>
+  </div>
+
+  <!-- RESULT SCREENS (per experience) -->
+  <div class="result-screen" id="result1">
+    <div class="result-stars">🌟📖🌟</div>
+    <div class="result-title">कविता प्रवास पूर्ण!</div>
+    <div class="result-subtitle">पुस्तकांचं अद्भुत जग तुम्ही पाहिलं!</div>
+    <div class="badges-row" id="badges1"></div>
+    <button class="result-btn primary" onclick="goToScreen(2)">पुढे चला: शब्द शोधा 🔍</button>
+  </div>
+  <div class="result-screen" id="result2">
+    <div class="result-stars">✨🧳✨</div>
+    <div class="result-title">शब्दसंग्राहक!</div>
+    <div class="result-subtitle">सर्व शब्द गोळा केले!</div>
+    <button class="result-btn primary" onclick="goToScreen(3)">पुढे चला: कविता सजवा 🎨</button>
+  </div>
+  <div class="result-screen" id="result3">
+    <div class="result-stars">🎨🌈🎨</div>
+    <div class="result-title">कलाकार!</div>
+    <div class="result-subtitle">तुमची कविता सजावट सुंदर आहे!</div>
+    <button class="result-btn primary" onclick="goToScreen(4)">पुढे चला: ओळ जुळवा 🃏</button>
+  </div>
+  <div class="result-screen" id="result4">
+    <div class="result-stars">🃏🎉🃏</div>
+    <div class="result-title" id="result4Title">जोड्या सापडल्या!</div>
+    <div class="result-subtitle" id="result4Sub"></div>
+    <button class="result-btn primary" onclick="goToScreen(5)">पुढे चला: प्रश्नमंजुषा 🏆</button>
+  </div>
+  <div class="result-screen" id="result5">
+    <div class="result-stars" id="result5Stars"></div>
+    <div class="result-title" id="result5Title"></div>
+    <div class="result-subtitle" id="result5Sub"></div>
+    <div class="result-score" id="result5Score"></div>
+    <div class="badges-row" id="finalBadges"></div>
+    <button class="result-btn primary" onclick="resetAll()">पुन्हा खेळा 🔄</button>
+  </div>
+
+</div>
+
+<!-- CONFETTI CONTAINER -->
+<div class="confetti-container" id="confettiContainer"></div>
+
+<!-- MASCOT -->
+<div class="mascot-container" id="mascotContainer">
+  <svg class="mascot-svg" id="mascotSvg" viewBox="0 0 80 90"></svg>
+  <div class="mascot-bubble" id="mascotBubble"></div>
+</div>
+
+<!-- BOTTOM NAV -->
+<nav class="bottom-nav" id="bottomNav" style="display:none">
+  <button class="nav-tab active" data-screen="1" onclick="goToScreen(1)">
+    <div class="nav-tab-glow"></div>
+    <span class="nav-icon">📖</span><span class="nav-label">प्रवास</span>
+    <span class="nav-check">✅</span>
+  </button>
+  <button class="nav-tab" data-screen="2" onclick="goToScreen(2)">
+    <div class="nav-tab-glow"></div>
+    <span class="nav-icon">🔍</span><span class="nav-label">शब्द</span>
+    <span class="nav-check">✅</span>
+  </button>
+  <button class="nav-tab" data-screen="3" onclick="goToScreen(3)">
+    <div class="nav-tab-glow"></div>
+    <span class="nav-icon">🎨</span><span class="nav-label">सजवा</span>
+    <span class="nav-check">✅</span>
+  </button>
+  <button class="nav-tab" data-screen="4" onclick="goToScreen(4)">
+    <div class="nav-tab-glow"></div>
+    <span class="nav-icon">🃏</span><span class="nav-label">जुळवा</span>
+    <span class="nav-check">✅</span>
+  </button>
+  <button class="nav-tab" data-screen="5" onclick="goToScreen(5)">
+    <div class="nav-tab-glow"></div>
+    <span class="nav-icon">🏆</span><span class="nav-label">प्रश्न</span>
+    <span class="nav-check">✅</span>
+  </button>
+</nav>
+
+<script>
+/* ==========================================================================
+   ProStudy - पुस्तके Interactive Experience
+   Class 5 Marathi - बालभारती - Maharashtra State Board
+   ========================================================================== */
+
+// ===== POEM DATA =====
+const VERSES = [
+  {
+    lines: ['पुस्तकं सांगतात गोष्टी', 'युगायुगांच्या.'],
+    scene: 'books', emojis: ['📚','📖','📕','📗','📘'],
+    bg: 'radial-gradient(ellipse at 30% 60%, rgba(255,230,109,0.15), transparent 70%)'
+  },
+  {
+    lines: ['माणसांच्या जगाच्या,', 'वर्तमानाच्या\u2011भूतकाळाच्या.'],
+    scene: 'time', emojis: ['🌍','⏳','🕰️','🏛️','👥'],
+    bg: 'radial-gradient(ellipse at 70% 40%, rgba(167,139,250,0.15), transparent 70%)'
+  },
+  {
+    lines: ['एकेका क्षणाच्या!', 'जिंकल्याच्या\u2011हरल्याच्या,', 'प्रेमाच्या\u2011कटुतेच्या!'],
+    scene: 'emotions', emojis: ['❤️','😊','🏆','💪','🌟'],
+    bg: 'radial-gradient(ellipse at 50% 50%, rgba(244,114,182,0.15), transparent 70%)'
+  },
+  {
+    lines: ['तुम्ही नाही का ऐकणार', 'गोष्टी पुस्तकांच्या?'],
+    scene: 'question', emojis: ['❓','👂','🤔','📚','✨'],
+    bg: 'radial-gradient(ellipse at 40% 30%, rgba(78,205,196,0.15), transparent 70%)'
+  },
+  {
+    lines: ['पुस्तके काही रू इच्छितात,', 'तुमच्याजवळ राहू इच्छितात.'],
+    scene: 'heart', emojis: ['💛','🤗','📚','🏠','💫'],
+    bg: 'radial-gradient(ellipse at 60% 60%, rgba(251,191,36,0.15), transparent 70%)'
+  },
+  {
+    lines: ['पुस्तकांत पाखरं चिवचिवतात.'],
+    scene: 'birds', emojis: ['🐦','🦜','🕊️','🦅','🐤'],
+    bg: 'radial-gradient(ellipse at 50% 30%, rgba(56,189,248,0.15), transparent 70%)'
+  },
+  {
+    lines: ['पुस्तकांत आखरं सळसळतात.'],
+    scene: 'letters', emojis: ['अ','आ','इ','ई','क','ख'],
+    bg: 'radial-gradient(ellipse at 30% 70%, rgba(255,230,109,0.15), transparent 70%)'
+  },
+  {
+    lines: ['पुस्तकांत निर्झर गुणगुणतात.'],
+    scene: 'stream', emojis: ['💧','🌊','🏞️','✨','🎵'],
+    bg: 'radial-gradient(ellipse at 70% 80%, rgba(78,205,196,0.2), transparent 70%)'
+  },
+  {
+    lines: ['पुस्तकं परीकथा ऐकवतात.'],
+    scene: 'fairy', emojis: ['🧚','🏰','🦄','🪄','✨','👸'],
+    bg: 'radial-gradient(ellipse at 50% 40%, rgba(167,139,250,0.2), transparent 70%)'
+  },
+  {
+    lines: ['पुस्तकात रॉकेटचे तंत्र आहे,', 'पुस्तकात विज्ञानाचा मंत्र आहे.'],
+    scene: 'rocket', emojis: ['🚀','🔬','⚗️','🌙','⭐','🛸'],
+    bg: 'radial-gradient(ellipse at 50% 20%, rgba(56,189,248,0.15), transparent 70%)'
+  },
+  {
+    lines: ['पुस्तकांची दुनिया न्यारी आहे,', 'ज्ञानाची उत्तुंग भरारी आहे!'],
+    scene: 'soar', emojis: ['🌈','🦅','📚','🌟','💫','🎆'],
+    bg: 'radial-gradient(ellipse at 50% 50%, rgba(74,222,128,0.15), transparent 70%)'
+  },
+  {
+    lines: ['तुम्हांला नाही का जायचं?', 'पुस्तकांच्या विश्वात?'],
+    scene: 'portal', emojis: ['🌀','🚪','✨','🌟','📚','🗝️'],
+    bg: 'radial-gradient(ellipse at 50% 50%, rgba(167,139,250,0.2), transparent 60%)'
+  },
+  {
+    lines: ['पुस्तकं काही सांगू इच्छितात,', 'तुमच्या जवळ राहू इच्छितात.'],
+    scene: 'finale', emojis: ['📚','💛','🌟','✨','🎉','❤️','💫','⭐'],
+    bg: 'radial-gradient(ellipse at 50% 50%, rgba(255,230,109,0.2), transparent 50%)'
+  }
+];
+
+// ===== VOCABULARY DATA =====
+const VOCAB = [
+  { word: 'युगायुगांच्या', meaning: 'खूप काळापासूनच्या, वेगवेगळ्या काळांतील', options: ['खूप काळापासूनच्या', 'उद्याच्या', 'आजच्या'], correct: 0 },
+  { word: 'कटुतेच्या', meaning: 'कडवटपणाच्या, दुःखाच्या', options: ['गोडपणाच्या', 'कडवटपणाच्या', 'सुंदरपणाच्या'], correct: 1 },
+  { word: 'आखरं', meaning: 'अक्षरं, लिपीतील चिन्हे', options: ['फुले', 'अक्षरं', 'पक्षी'], correct: 1 },
+  { word: 'निर्झर', meaning: 'झरा, ओहोळ', options: ['डोंगर', 'झरा', 'समुद्र'], correct: 1 },
+  { word: 'न्यारी', meaning: 'वेगळी, अनोखी', options: ['वेगळी', 'जुनी', 'मोठी'], correct: 0 },
+  { word: 'उत्तुंग', meaning: 'खूपच उंच, भव्य', options: ['लहान', 'सपाट', 'खूपच उंच'], correct: 2 }
+];
+
+// ===== MEMORY GAME PAIRS =====
+const MEMORY_PAIRS = [
+  { a: 'गोष्टी', b: 'सृष्टी', color: '#FF6B9D' },
+  { a: 'इच्छितात', b: 'चिवचिवतात', color: '#A78BFA' },
+  { a: 'तंत्र आहे', b: 'मंत्र आहे', color: '#4ECDC4' },
+  { a: 'न्यारी आहे', b: 'भरारी आहे', color: '#FFE66D' }
+];
+
+// ===== QUIZ DATA =====
+const QUIZ = [
+  {
+    q: 'पुस्तके कोणाकोणाच्या गोष्टी सांगतात?',
+    opts: ['फक्त राजांच्या', 'युगायुगांच्या माणसांच्या', 'फक्त मुलांच्या', 'फक्त प्राण्यांच्या'],
+    correct: 1, hint: 'कवितेची पहिली ओळ आठवा!'
+  },
+  {
+    q: 'पुस्तकांत कोण चिवचिवतात?',
+    opts: ['मुले', 'पाखरं', 'शिक्षक', 'मासे'],
+    correct: 1, hint: 'पक्ष्यांचा आवाज कसा असतो?'
+  },
+  {
+    q: '"निर्झर" या शब्दाचा अर्थ काय?',
+    opts: ['नदी', 'डोंगर', 'झरा', 'तलाव'],
+    correct: 2, hint: 'पाण्याचा छोटा प्रवाह...'
+  },
+  {
+    q: 'पुस्तकात कशाचे तंत्र आहे?',
+    opts: ['सायकलचे', 'रॉकेटचे', 'गाडीचे', 'विमानाचे'],
+    correct: 1, hint: 'अंतराळात जाणारे वाहन...'
+  },
+  {
+    q: 'पुस्तकांची दुनिया कशी आहे?',
+    opts: ['सामान्य', 'कंटाळवाणी', 'न्यारी', 'जुनी'],
+    correct: 2, hint: '"वेगळी" साठी दुसरा शब्द...'
+  },
+  {
+    q: 'कवितेनुसार पुस्तके काय इच्छितात?',
+    opts: ['दूर जाऊ', 'तुमच्याजवळ राहू', 'झोपू', 'खेळू'],
+    correct: 1, hint: 'पुस्तकांना तुमच्या जवळ काय करायचे आहे?'
+  }
+];
+
+// ===== GLOBAL STATE =====
+let state = {
+  score: 0, streak: 0, maxStreak: 0,
+  currentScreen: 1,
+  completed: [false, false, false, false, false],
+  // Poem
+  poemIdx: 0, autoplay: false, autoTimer: null,
+  // Word explorer
+  wordsCollected: [],
+  // Decorate
+  decMode: 'color', selectedColor: '#FFE66D', decInteractions: 0,
+  // Memory
+  memCards: [], memFlipped: [], memMatched: 0, memMoves: 0, memTimer: null, memSeconds: 0, memLocked: false,
+  // Quiz
+  quizIdx: 0, quizCorrect: 0, quizAnswered: false, quizTimer: null, quizTimeLeft: 15
+};
+
+// ===== INITIALIZATION =====
+function startApp() {
+  document.getElementById('splashScreen').classList.add('hide');
+  setTimeout(() => {
+    document.getElementById('splashScreen').style.display = 'none';
+    document.getElementById('app').style.display = 'flex';
+    document.getElementById('bottomNav').style.display = 'flex';
+    document.getElementById('mascotContainer').classList.remove('hidden');
+    initAllExperiences();
+    mascotSay('नमस्कार! मी बुकी! 📚 चला पुस्तकांच्या जादुई जगात!', 3000);
+  }, 500);
+}
+
+function initAllExperiences() {
+  buildMascotSVG();
+  buildPoemStage();
+  buildWordExplorer();
+  buildDecorateCanvas();
+  buildMemoryGame();
+  buildQuiz();
+  initBgCanvas();
+}
+
+// ===== MASCOT (BOOKI THE OWL) =====
+function buildMascotSVG() {
+  const svg = document.getElementById('mascotSvg');
+  svg.innerHTML = `
+    <g id="owlBody">
+      <!-- Body -->
+      <ellipse cx="40" cy="58" rx="26" ry="28" fill="#8B6914"/>
+      <ellipse cx="40" cy="58" rx="22" ry="24" fill="#C49B2A"/>
+      <!-- Belly -->
+      <ellipse cx="40" cy="64" rx="14" ry="16" fill="#F5E6A3"/>
+      <!-- Eyes -->
+      <circle cx="30" cy="42" r="12" fill="white" stroke="#8B6914" stroke-width="2"/>
+      <circle cx="50" cy="42" r="12" fill="white" stroke="#8B6914" stroke-width="2"/>
+      <circle cx="31" cy="41" r="6" fill="#2D1B00" id="owlLeftPupil"/>
+      <circle cx="51" cy="41" r="6" fill="#2D1B00" id="owlRightPupil"/>
+      <circle cx="33" cy="39" r="2" fill="white"/>
+      <circle cx="53" cy="39" r="2" fill="white"/>
+      <!-- Beak -->
+      <polygon points="40,48 36,53 44,53" fill="#FF8C00"/>
+      <!-- Ears -->
+      <polygon points="22,28 18,12 32,32" fill="#C49B2A"/>
+      <polygon points="58,28 62,12 48,32" fill="#C49B2A"/>
+      <polygon points="24,28 21,16 32,32" fill="#D4AA3A"/>
+      <polygon points="56,28 59,16 48,32" fill="#D4AA3A"/>
+      <!-- Feet -->
+      <ellipse cx="32" cy="84" rx="8" ry="4" fill="#FF8C00"/>
+      <ellipse cx="48" cy="84" rx="8" ry="4" fill="#FF8C00"/>
+      <!-- Book in wing -->
+      <g id="owlBook" transform="translate(58,55) rotate(15)">
+        <rect x="0" y="0" width="14" height="10" rx="1" fill="#4ECDC4"/>
+        <rect x="1" y="1" width="12" height="8" rx="1" fill="#E8F5F3"/>
+        <line x1="7" y1="1" x2="7" y2="9" stroke="#4ECDC4" stroke-width="0.5"/>
+      </g>
+    </g>
+    <!-- Blink overlay -->
+    <g id="owlBlink" opacity="0">
+      <ellipse cx="30" cy="42" rx="12" ry="2" fill="#C49B2A"/>
+      <ellipse cx="50" cy="42" rx="12" ry="2" fill="#C49B2A"/>
+    </g>
+  `;
+  // Blink animation
+  setInterval(() => {
+    const blink = document.getElementById('owlBlink');
+    if (!blink) return;
+    blink.setAttribute('opacity', '1');
+    setTimeout(() => blink.setAttribute('opacity', '0'), 150);
+  }, 3000 + Math.random() * 2000);
+
+  // Also set up the quiz owl
+  const qsvg = document.getElementById('quizOwlSvg');
+  if (qsvg) qsvg.innerHTML = svg.innerHTML;
+}
+
+function mascotSay(text, duration = 2500) {
+  const bubble = document.getElementById('mascotBubble');
+  bubble.textContent = text;
+  bubble.classList.add('show');
+  setTimeout(() => bubble.classList.remove('show'), duration);
+}
+
+function mascotReact(type) {
+  const body = document.querySelector('#mascotSvg #owlBody');
+  if (!body) return;
+  if (type === 'happy') {
+    body.style.transition = '0.3s';
+    body.style.transform = 'translateY(-5px)';
+    setTimeout(() => body.style.transform = '', 400);
+  } else if (type === 'sad') {
+    body.style.transition = '0.3s';
+    body.style.transform = 'rotate(-5deg)';
+    setTimeout(() => body.style.transform = '', 400);
+  } else if (type === 'jump') {
+    body.style.transition = '0.2s';
+    body.style.transform = 'translateY(-12px) scale(1.05)';
+    setTimeout(() => { body.style.transform = ''; }, 300);
+  }
+}
+
+// ===== SCORE & PROGRESS =====
+function addScore(pts) {
+  state.score += pts;
+  const el = document.getElementById('totalScore');
+  el.textContent = state.score;
+  el.style.transform = 'scale(1.3)';
+  setTimeout(() => el.style.transform = '', 300);
+}
+
+function addStreak() {
+  state.streak++;
+  if (state.streak > state.maxStreak) state.maxStreak = state.streak;
+  const badge = document.getElementById('streakBadge');
+  const count = document.getElementById('streakCount');
+  if (state.streak >= 2) {
+    badge.classList.add('active');
+    count.textContent = state.streak;
+  }
+}
+
+function resetStreak() {
+  state.streak = 0;
+  document.getElementById('streakBadge').classList.remove('active');
+}
+
+function updateXP() {
+  const done = state.completed.filter(Boolean).length;
+  const pct = Math.round((done / 5) * 100);
+  document.getElementById('xpFill').style.width = pct + '%';
+  document.getElementById('xpPercent').textContent = pct + '%';
+}
+
+function markComplete(idx) {
+  state.completed[idx - 1] = true;
+  updateXP();
+  const tabs = document.querySelectorAll('.nav-tab');
+  tabs[idx - 1].classList.add('completed');
+}
+
+// ===== NAVIGATION =====
+function goToScreen(num) {
+  // Hide all screens and results
+  document.querySelectorAll('.screen, .result-screen').forEach(s => {
+    s.classList.remove('active');
+  });
+  // Show requested screen
+  const screen = document.getElementById('screen' + num);
+  if (screen) {
+    screen.classList.add('active');
+    state.currentScreen = num;
+  }
+  // Update nav
+  document.querySelectorAll('.nav-tab').forEach((t, i) => {
+    t.classList.toggle('active', i === num - 1);
+  });
+  // Screen-specific init
+  if (num === 4 && state.memCards.length === 0) buildMemoryGame();
+  if (num === 5 && state.quizIdx === 0) showQuizQuestion();
+}
+
+function showResult(num) {
+  document.querySelectorAll('.screen, .result-screen').forEach(s => s.classList.remove('active'));
+  document.getElementById('result' + num).classList.add('active');
+  markComplete(num);
+  if (num < 5) addScore(20);
+  mascotReact('jump');
+  fireConfetti();
+}
+
+// ===== EXPERIENCE 1: ANIMATED POEM JOURNEY =====
+function buildPoemStage() {
+  const stage = document.getElementById('poemStage');
+  const dots = document.getElementById('poemDots');
+  stage.innerHTML = '';
+  dots.innerHTML = '';
+
+  VERSES.forEach((v, i) => {
+    // Scene
+    const scene = document.createElement('div');
+    scene.className = 'poem-scene' + (i === 0 ? ' active' : '');
+    scene.id = 'poemScene' + i;
+
+    // Background
+    const sceneBg = document.createElement('div');
+    sceneBg.className = 'scene-bg';
+    sceneBg.style.background = v.bg;
+    // Floating emojis
+    v.emojis.forEach((em, j) => {
+      const fl = document.createElement('div');
+      fl.className = 'floating-element';
+      fl.textContent = em;
+      fl.style.left = (10 + Math.random() * 80) + '%';
+      fl.style.top = (10 + Math.random() * 70) + '%';
+      fl.style.animationDelay = (j * 1.2) + 's';
+      fl.style.animationDuration = (4 + Math.random() * 4) + 's';
+      fl.style.fontSize = (20 + Math.random() * 16) + 'px';
+      sceneBg.appendChild(fl);
+    });
+    scene.appendChild(sceneBg);
+
+    // Verse text
+    const vt = document.createElement('div');
+    vt.className = 'verse-text';
+    v.lines.forEach(line => {
+      const lineDiv = document.createElement('div');
+      const words = line.split(/(\s+)/);
+      words.forEach(w => {
+        if (w.trim()) {
+          const span = document.createElement('span');
+          span.className = 'word';
+          span.textContent = w;
+          lineDiv.appendChild(span);
+        } else {
+          lineDiv.appendChild(document.createTextNode(w));
+        }
+      });
+      vt.appendChild(lineDiv);
+    });
+    scene.appendChild(vt);
+
+    // Counter
+    const counter = document.createElement('div');
+    counter.className = 'scene-counter';
+    counter.textContent = (i + 1) + '/' + VERSES.length;
+    scene.appendChild(counter);
+
+    // Wave visualization
+    const waveCanvas = document.createElement('canvas');
+    waveCanvas.className = 'wave-viz';
+    waveCanvas.width = 400;
+    waveCanvas.height = 40;
+    scene.appendChild(waveCanvas);
+
+    stage.appendChild(scene);
+
+    // Dot
+    const dot = document.createElement('div');
+    dot.className = 'poem-dot' + (i === 0 ? ' active' : '');
+    dots.appendChild(dot);
+  });
+
+  // Start first scene animation
+  revealVerseWords(0);
+  animateWaves();
+  updatePoemNav();
+}
+
+function revealVerseWords(idx) {
+  const scene = document.getElementById('poemScene' + idx);
+  if (!scene) return;
+  const words = scene.querySelectorAll('.word');
+  words.forEach((w, i) => {
+    w.classList.remove('revealed');
+    setTimeout(() => w.classList.add('revealed'), 200 + i * 180);
+  });
+}
+
+function showPoemScene(idx) {
+  if (idx < 0 || idx >= VERSES.length) return;
+  state.poemIdx = idx;
+  document.querySelectorAll('.poem-scene').forEach(s => s.classList.remove('active'));
+  document.querySelectorAll('.poem-dot').forEach(d => d.classList.remove('active'));
+  const scene = document.getElementById('poemScene' + idx);
+  scene.classList.add('active');
+  document.querySelectorAll('.poem-dot')[idx].classList.add('active');
+  revealVerseWords(idx);
+  updatePoemNav();
+}
+
+function poemNav(dir) {
+  const next = state.poemIdx + dir;
+  if (next < 0 || next >= VERSES.length) {
+    if (next >= VERSES.length) {
+      stopAutoplay();
+      showResult(1);
+    }
+    return;
+  }
+  showPoemScene(next);
+}
+
+function updatePoemNav() {
+  document.getElementById('poemPrev').disabled = state.poemIdx <= 0;
+  document.getElementById('poemNext').disabled = state.poemIdx >= VERSES.length - 1;
+}
+
+function toggleAutoplay() {
+  if (state.autoplay) {
+    stopAutoplay();
+  } else {
+    state.autoplay = true;
+    document.getElementById('poemAutoBtn').classList.add('playing');
+    document.getElementById('autoIcon').textContent = '⏸';
+    document.getElementById('autoLabel').textContent = 'थांबा';
+    autoAdvance();
+  }
+}
+
+function autoAdvance() {
+  if (!state.autoplay) return;
+  state.autoTimer = setTimeout(() => {
+    if (state.poemIdx < VERSES.length - 1) {
+      poemNav(1);
+      autoAdvance();
+    } else {
+      stopAutoplay();
+      showResult(1);
+    }
+  }, 4500);
+}
+
+function stopAutoplay() {
+  state.autoplay = false;
+  clearTimeout(state.autoTimer);
+  const btn = document.getElementById('poemAutoBtn');
+  if (btn) {
+    btn.classList.remove('playing');
+    document.getElementById('autoIcon').textContent = '▶';
+    document.getElementById('autoLabel').textContent = 'आपोआप';
+  }
+}
+
+// Wave animation for poem scenes
+function animateWaves() {
+  const canvases = document.querySelectorAll('.wave-viz');
+  let phase = 0;
+  function draw() {
+    phase += 0.03;
+    canvases.forEach(c => {
+      const ctx = c.getContext('2d');
+      if (!ctx) return;
+      ctx.clearRect(0, 0, c.width, c.height);
+      ctx.strokeStyle = 'rgba(78,205,196,0.5)';
+      ctx.lineWidth = 2;
+      ctx.beginPath();
+      for (let x = 0; x < c.width; x++) {
+        const y = 20 + Math.sin(x * 0.03 + phase) * 8 + Math.sin(x * 0.05 + phase * 1.5) * 4;
+        x === 0 ? ctx.moveTo(x, y) : ctx.lineTo(x, y);
+      }
+      ctx.stroke();
+      ctx.strokeStyle = 'rgba(255,230,109,0.3)';
+      ctx.beginPath();
+      for (let x = 0; x < c.width; x++) {
+        const y = 22 + Math.sin(x * 0.04 + phase + 1) * 6 + Math.cos(x * 0.02 + phase * 0.8) * 5;
+        x === 0 ? ctx.moveTo(x, y) : ctx.lineTo(x, y);
+      }
+      ctx.stroke();
+    });
+    requestAnimationFrame(draw);
+  }
+  draw();
+}
+
+// Touch/swipe for poem
+(function() {
+  let startX = 0, startY = 0;
+  const stage = document.getElementById('poemStage');
+  if (!stage) return;
+  stage.addEventListener('touchstart', e => {
+    startX = e.touches[0].clientX;
+    startY = e.touches[0].clientY;
+  }, { passive: true });
+  stage.addEventListener('touchend', e => {
+    const dx = e.changedTouches[0].clientX - startX;
+    const dy = e.changedTouches[0].clientY - startY;
+    if (Math.abs(dx) > 50 && Math.abs(dx) > Math.abs(dy)) {
+      if (dx < 0) poemNav(1);
+      else poemNav(-1);
+    }
+  }, { passive: true });
+})();
+
+// ===== EXPERIENCE 2: WORD EXPLORER =====
+function buildWordExplorer() {
+  const display = document.getElementById('wordPoemDisplay');
+  const fullPoem = 'पुस्तकं सांगतात गोष्टी\nयुगायुगांच्या.\nमाणसांच्या जगाच्या,\nवर्तमानाच्या\u2011भूतकाळाच्या.\nएकेका क्षणाच्या!\nजिंकल्याच्या\u2011हरल्याच्या,\nप्रेमाच्या\u2011कटुतेच्या!\nतुम्ही नाही का ऐकणार\nगोष्टी पुस्तकांच्या?\nपुस्तके काही रू इच्छितात,\nतुमच्याजवळ राहू इच्छितात.\nपुस्तकांत पाखरं चिवचिवतात.\nपुस्तकांत आखरं सळसळतात.\nपुस्तकांत निर्झर गुणगुणतात.\nपुस्तकं परीकथा ऐकवतात.\nपुस्तकात रॉकेटचे तंत्र आहे,\nपुस्तकात विज्ञानाचा मंत्र आहे.\nपुस्तकांची दुनिया न्यारी आहे,\nज्ञानाची उत्तुंग भरारी आहे!\nतुम्हांला नाही का जायचं?\nपुस्तकांच्या विश्वात?\nपुस्तकं काही सांगू इच्छितात,\nतुमच्या जवळ राहू इच्छितात.';
+
+  const vocabWords = VOCAB.map(v => v.word);
+  let html = '';
+  const lines = fullPoem.split('\n');
+  lines.forEach(line => {
+    const words = line.split(/(\s+)/);
+    words.forEach(w => {
+      const trimmed = w.trim();
+      // Check if this word is a vocab word (allowing for punctuation)
+      const cleanW = trimmed.replace(/[,.\u2011!?।]/g, '');
+      const vocabIdx = vocabWords.findIndex(vw => cleanW === vw || trimmed.includes(vw));
+      if (vocabIdx !== -1 && trimmed) {
+        html += `<span class="glow-word" data-vocab="${vocabIdx}" onclick="openWordCard(${vocabIdx})">${trimmed}</span>`;
+      } else {
+        html += w;
+      }
+    });
+    html += '<br>';
+  });
+  display.innerHTML = html;
+  updateChest();
+}
+
+function openWordCard(idx) {
+  if (state.wordsCollected.includes(idx)) return;
+  const v = VOCAB[idx];
+  document.getElementById('wcWord').textContent = v.word;
+  document.getElementById('wcMeaning').textContent = '✨ ' + v.meaning;
+  document.getElementById('wcQuestion').textContent = 'या शब्दाचा अर्थ काय?';
+  const optsDiv = document.getElementById('wcOptions');
+  optsDiv.innerHTML = '';
+  v.options.forEach((opt, i) => {
+    const btn = document.createElement('button');
+    btn.className = 'wc-opt';
+    btn.textContent = opt;
+    btn.onclick = () => checkWordAnswer(idx, i, btn);
+    optsDiv.appendChild(btn);
+  });
+  document.getElementById('wordCardOverlay').classList.add('show');
+}
+
+function checkWordAnswer(vocabIdx, ansIdx, btn) {
+  const v = VOCAB[vocabIdx];
+  const opts = document.querySelectorAll('.wc-opt');
+  if (ansIdx === v.correct) {
+    btn.classList.add('correct');
+    state.wordsCollected.push(vocabIdx);
+    addScore(10);
+    addStreak();
+    // Mark word as collected in poem
+    document.querySelectorAll(`.glow-word[data-vocab="${vocabIdx}"]`).forEach(el => {
+      el.classList.add('collected');
+    });
+    updateChest();
+    mascotReact('happy');
+    mascotSay('शाब्बास! बरोबर! ⭐', 1500);
+    createParticleBurst(btn);
+    setTimeout(() => {
+      document.getElementById('wordCardOverlay').classList.remove('show');
+      if (state.wordsCollected.length >= VOCAB.length) {
+        setTimeout(() => showResult(2), 500);
+      }
+    }, 1000);
+  } else {
+    btn.classList.add('wrong');
+    resetStreak();
+    mascotReact('sad');
+    mascotSay('जवळपास! पुन्हा प्रयत्न करा 🤔', 1500);
+    setTimeout(() => btn.classList.remove('wrong'), 600);
+  }
+}
+
+function updateChest() {
+  const count = state.wordsCollected.length;
+  const total = VOCAB.length;
+  const pct = (count / total) * 100;
+  document.getElementById('chestFill').style.width = pct + '%';
+  document.getElementById('chestLabel').textContent = count + '/' + total + ' शब्द';
+}
+
+// Close word card overlay on click outside
+document.getElementById('wordCardOverlay').addEventListener('click', function(e) {
+  if (e.target === this) this.classList.remove('show');
+});
+
+// ===== EXPERIENCE 3: DECORATE THE POEM =====
+const DEC_COLORS = ['#FFE66D','#A78BFA','#4ADE80','#4ECDC4','#FF6B6B','#F472B6','#FBBF24','#38BDF8','#FFFFFF'];
+const DEC_STICKERS = ['⭐','✨','💫','📚','🦜','🚀','🧚','❤️','🌈','🎵','🌟','🎉'];
+
+function buildDecorateCanvas() {
+  // Color palette
+  const palette = document.getElementById('colorPalette');
+  palette.innerHTML = '';
+  DEC_COLORS.forEach((c, i) => {
+    const sw = document.createElement('button');
+    sw.className = 'color-swatch' + (i === 0 ? ' active' : '');
+    sw.style.background = c;
+    sw.onclick = () => {
+      state.selectedColor = c;
+      palette.querySelectorAll('.color-swatch').forEach(s => s.classList.remove('active'));
+      sw.classList.add('active');
+    };
+    palette.appendChild(sw);
+  });
+
+  // Sticker tray
+  const tray = document.getElementById('stickerTray');
+  tray.innerHTML = '';
+  DEC_STICKERS.forEach(s => {
+    const btn = document.createElement('button');
+    btn.className = 'sticker-btn';
+    btn.textContent = s;
+    btn.onclick = () => { state.selectedSticker = s; };
+    tray.appendChild(btn);
+  });
+  state.selectedSticker = DEC_STICKERS[0];
+
+  // Build poem canvas
+  const canvas = document.getElementById('decorateCanvas');
+  const poemLines = [
+    'पुस्तकं सांगतात गोष्टी', 'युगायुगांच्या.',
+    'माणसांच्या जगाच्या,', 'वर्तमानाच्या\u2011भूतकाळाच्या.',
+    'एकेका क्षणाच्या!', 'जिंकल्याच्या\u2011हरल्याच्या,',
+    'प्रेमाच्या\u2011कटुतेच्या!', 'तुम्ही नाही का ऐकणार',
+    'गोष्टी पुस्तकांच्या?', 'पुस्तके काही रू इच्छितात,',
+    'तुमच्याजवळ राहू इच्छितात.', 'पुस्तकांत पाखरं चिवचिवतात.',
+    'पुस्तकांत आखरं सळसळतात.', 'पुस्तकांत निर्झर गुणगुणतात.',
+    'पुस्तकं परीकथा ऐकवतात.', 'पुस्तकात रॉकेटचे तंत्र आहे,',
+    'पुस्तकात विज्ञानाचा मंत्र आहे.', 'पुस्तकांची दुनिया न्यारी आहे,',
+    'ज्ञानाची उत्तुंग भरारी आहे!', 'तुम्हांला नाही का जायचं?',
+    'पुस्तकांच्या विश्वात?', 'पुस्तकं काही सांगू इच्छितात,',
+    'तुमच्या जवळ राहू इच्छितात.'
+  ];
+
+  let html = '';
+  let verseNum = 1;
+  poemLines.forEach((line, li) => {
+    if (li % 4 === 0) {
+      html += `<span class="dec-verse-num" data-vn="${verseNum}" onclick="addDecSticker(this)">${verseNum}</span> `;
+      verseNum++;
+    }
+    const words = line.split(/(\s+)/);
+    words.forEach(w => {
+      if (w.trim()) {
+        html += `<span class="dec-word" onclick="decWordTap(this)">${w}</span>`;
+      } else {
+        html += w;
+      }
+    });
+    html += '<br>';
+  });
+  canvas.innerHTML = html;
+}
+
+function setDecMode(mode) {
+  state.decMode = mode;
+  document.getElementById('modeColor').classList.toggle('active', mode === 'color');
+  document.getElementById('modeSticker').classList.toggle('active', mode === 'sticker');
+  document.getElementById('colorPaletteWrap').style.display = mode === 'color' ? '' : 'none';
+  document.getElementById('stickerTrayWrap').style.display = mode === 'sticker' ? '' : 'none';
+}
+
+function decWordTap(el) {
+  if (state.decMode === 'color') {
+    el.style.color = state.selectedColor;
+    el.style.textShadow = '0 0 8px ' + state.selectedColor + '66';
+  }
+  state.decInteractions++;
+  checkDecComplete();
+  // spring animation
+  el.style.transform = 'scale(1.15)';
+  setTimeout(() => el.style.transform = '', 200);
+}
+
+function addDecSticker(el) {
+  if (state.decMode === 'sticker') {
+    const sticker = document.createElement('span');
+    sticker.className = 'dec-sticker';
+    sticker.textContent = state.selectedSticker;
+    el.parentNode.insertBefore(sticker, el.nextSibling);
+  } else {
+    el.style.background = state.selectedColor;
+    el.style.color = el.style.background === '#FFFFFF' || el.style.background === 'rgb(255, 255, 255)' ? '#0D3B4C' : 'white';
+  }
+  state.decInteractions++;
+  checkDecComplete();
+}
+
+function checkDecComplete() {
+  if (state.decInteractions >= 8) {
+    document.getElementById('decCompleteArea').style.display = '';
+  }
+}
+
+function completeDec() {
+  showResult(3);
+}
+
+// ===== EXPERIENCE 4: LINE MATCHER (MEMORY GAME) =====
+function buildMemoryGame() {
+  const grid = document.getElementById('memoryGrid');
+  grid.innerHTML = '';
+
+  // Reset state
+  state.memCards = [];
+  state.memFlipped = [];
+  state.memMatched = 0;
+  state.memMoves = 0;
+  state.memLocked = false;
+  clearInterval(state.memTimer);
+  state.memSeconds = 0;
+
+  // Create cards array: for each pair, one card for 'a' and one for 'b'
+  let cards = [];
+  MEMORY_PAIRS.forEach((pair, i) => {
+    cards.push({ text: pair.a, pairId: i, color: pair.color, side: 'a' });
+    cards.push({ text: pair.b, pairId: i, color: pair.color, side: 'b' });
+  });
+  // Shuffle
+  for (let i = cards.length - 1; i > 0; i--) {
+    const j = Math.floor(Math.random() * (i + 1));
+    [cards[i], cards[j]] = [cards[j], cards[i]];
+  }
+  state.memCards = cards;
+
+  // Render
+  // Add 2 filler divs to make grid look nice with 8 cards in 3 columns
+  cards.forEach((card, i) => {
+    const el = document.createElement('div');
+    el.className = 'memory-card';
+    el.dataset.idx = i;
+    el.innerHTML = `
+      <div class="memory-card-inner">
+        <div class="memory-card-front">📚</div>
+        <div class="memory-card-back" style="background:${card.color}22;border-color:${card.color};color:${card.color}">${card.text}</div>
+      </div>
+    `;
+    el.onclick = () => flipCard(i, el);
+    grid.appendChild(el);
+  });
+
+  updateMemStats();
+
+  // Start timer
+  state.memTimer = setInterval(() => {
+    state.memSeconds++;
+    document.getElementById('mgTime').textContent = formatTime(state.memSeconds);
+  }, 1000);
+}
+
+function flipCard(idx, el) {
+  if (state.memLocked) return;
+  if (el.classList.contains('flipped') || el.classList.contains('matched')) return;
+  if (state.memFlipped.length >= 2) return;
+
+  el.classList.add('flipped');
+  state.memFlipped.push({ idx, el });
+
+  if (state.memFlipped.length === 2) {
+    state.memMoves++;
+    state.memLocked = true;
+    updateMemStats();
+
+    const [c1, c2] = state.memFlipped;
+    const card1 = state.memCards[c1.idx];
+    const card2 = state.memCards[c2.idx];
+
+    if (card1.pairId === card2.pairId && c1.idx !== c2.idx) {
+      // Match!
+      setTimeout(() => {
+        c1.el.classList.add('matched');
+        c2.el.classList.add('matched');
+        state.memMatched++;
+        addScore(15);
+        addStreak();
+        createParticleBurst(c1.el);
+        updateMemStats();
+        state.memFlipped = [];
+        state.memLocked = false;
+        mascotReact('happy');
+        if (state.memMatched >= MEMORY_PAIRS.length) {
+          clearInterval(state.memTimer);
+          setTimeout(() => {
+            document.getElementById('result4Sub').textContent =
+              state.memMoves + ' चाली, ' + formatTime(state.memSeconds) + ' वेळ';
+            showResult(4);
+          }, 800);
+        }
+      }, 600);
+    } else {
+      // No match
+      resetStreak();
+      setTimeout(() => {
+        c1.el.classList.remove('flipped');
+        c2.el.classList.remove('flipped');
+        state.memFlipped = [];
+        state.memLocked = false;
+      }, 1000);
+    }
+  }
+}
+
+function updateMemStats() {
+  document.getElementById('mgMoves').textContent = state.memMoves;
+  document.getElementById('mgMatched').textContent = state.memMatched + '/' + MEMORY_PAIRS.length;
+}
+
+function formatTime(s) {
+  return Math.floor(s / 60) + ':' + String(s % 60).padStart(2, '0');
+}
+
+// ===== EXPERIENCE 5: QUIZ CHALLENGE =====
+function buildQuiz() {
+  const dots = document.getElementById('quizDots');
+  dots.innerHTML = '';
+  QUIZ.forEach((_, i) => {
+    const dot = document.createElement('div');
+    dot.className = 'quiz-pdot' + (i === 0 ? ' current' : '');
+    dots.appendChild(dot);
+  });
+  state.quizIdx = 0;
+  state.quizCorrect = 0;
+}
+
+function showQuizQuestion() {
+  if (state.quizIdx >= QUIZ.length) {
+    finishQuiz();
+    return;
+  }
+  const q = QUIZ[state.quizIdx];
+  state.quizAnswered = false;
+  state.quizTimeLeft = 15;
+
+  // Update dots
+  document.querySelectorAll('.quiz-pdot').forEach((d, i) => {
+    d.classList.toggle('current', i === state.quizIdx);
+  });
+
+  // Question
+  document.getElementById('quizBubble').textContent = q.q;
+
+  // Options
+  const optsDiv = document.getElementById('quizOptions');
+  optsDiv.innerHTML = '';
+  const letters = ['अ', 'आ', 'इ', 'ई'];
+  q.opts.forEach((opt, i) => {
+    const btn = document.createElement('button');
+    btn.className = 'quiz-opt';
+    btn.innerHTML = `<span class="opt-letter">${letters[i]}</span> ${opt}`;
+    btn.onclick = () => answerQuiz(i, btn);
+    optsDiv.appendChild(btn);
+  });
+
+  // Timer
+  document.getElementById('quizTimerFill').style.width = '100%';
+  clearInterval(state.quizTimer);
+  state.quizTimer = setInterval(() => {
+    state.quizTimeLeft -= 0.1;
+    const pct = (state.quizTimeLeft / 15) * 100;
+    document.getElementById('quizTimerFill').style.width = Math.max(0, pct) + '%';
+    if (state.quizTimeLeft <= 0) {
+      clearInterval(state.quizTimer);
+      if (!state.quizAnswered) {
+        state.quizAnswered = true;
+        resetStreak();
+        // Highlight correct
+        const opts = document.querySelectorAll('.quiz-opt');
+        opts[q.correct].classList.add('correct');
+        mascotSay('वेळ संपला! ' + q.hint, 2000);
+        document.querySelectorAll('.quiz-pdot')[state.quizIdx].classList.add('wrong-dot');
+        document.querySelectorAll('.quiz-pdot')[state.quizIdx].classList.remove('current');
+        setTimeout(() => { state.quizIdx++; showQuizQuestion(); }, 2000);
+      }
+    }
+  }, 100);
+}
+
+function answerQuiz(ansIdx, btn) {
+  if (state.quizAnswered) return;
+  state.quizAnswered = true;
+  clearInterval(state.quizTimer);
+  const q = QUIZ[state.quizIdx];
+  const dots = document.querySelectorAll('.quiz-pdot');
+
+  if (ansIdx === q.correct) {
+    btn.classList.add('correct');
+    state.quizCorrect++;
+    addScore(15);
+    addStreak();
+    dots[state.quizIdx].classList.add('done');
+    dots[state.quizIdx].classList.remove('current');
+    mascotReact('happy');
+    mascotSay('बरोबर! 🎉', 1200);
+    createParticleBurst(btn);
+  } else {
+    btn.classList.add('wrong');
+    resetStreak();
+    const opts = document.querySelectorAll('.quiz-opt');
+    setTimeout(() => opts[q.correct].classList.add('correct'), 500);
+    dots[state.quizIdx].classList.add('wrong-dot');
+    dots[state.quizIdx].classList.remove('current');
+    mascotReact('sad');
+    mascotSay(q.hint, 2000);
+  }
+
+  setTimeout(() => {
+    state.quizIdx++;
+    showQuizQuestion();
+  }, 1800);
+}
+
+function finishQuiz() {
+  clearInterval(state.quizTimer);
+  const pct = state.quizCorrect / QUIZ.length;
+  let stars, title, sub;
+  if (pct >= 0.8) {
+    stars = '⭐⭐⭐';
+    title = 'काव्यतज्ञ!';
+    sub = 'तुम्ही खरोखर पुस्तकप्रेमी आहात!';
+  } else if (pct >= 0.5) {
+    stars = '⭐⭐';
+    title = 'छान प्रयत्न!';
+    sub = 'आणखी थोडा सराव करा!';
+  } else {
+    stars = '⭐';
+    title = 'पुन्हा प्रयत्न करूया!';
+    sub = 'कविता पुन्हा वाचा आणि प्रयत्न करा!';
+  }
+  document.getElementById('result5Stars').textContent = stars;
+  document.getElementById('result5Title').textContent = title;
+  document.getElementById('result5Sub').textContent = sub;
+  document.getElementById('result5Score').textContent = 'एकूण गुण: ' + state.score + ' ⭐';
+
+  // Build final badges
+  const badgesDiv = document.getElementById('finalBadges');
+  badgesDiv.innerHTML = '';
+  const badgeData = [
+    { icon: '📖', label: 'कवी' },
+    { icon: '🔍', label: 'शोधक' },
+    { icon: '🎨', label: 'कलाकार' },
+    { icon: '🃏', label: 'जोडीदार' },
+    { icon: '🏆', label: 'तज्ञ' }
+  ];
+  badgeData.forEach((b, i) => {
+    const badge = document.createElement('div');
+    badge.className = 'badge' + (state.completed[i] ? ' earned' : '');
+    badge.innerHTML = `${b.icon}<div class="badge-check">✓</div>`;
+    badge.title = b.label;
+    badgesDiv.appendChild(badge);
+  });
+
+  showResult(5);
+}
+
+// ===== RESET =====
+function resetAll() {
+  state.score = 0;
+  state.streak = 0;
+  state.maxStreak = 0;
+  state.completed = [false, false, false, false, false];
+  state.poemIdx = 0;
+  state.wordsCollected = [];
+  state.decInteractions = 0;
+  state.memCards = [];
+  state.memFlipped = [];
+  state.memMatched = 0;
+  state.memMoves = 0;
+  state.memSeconds = 0;
+  state.quizIdx = 0;
+  state.quizCorrect = 0;
+  clearInterval(state.memTimer);
+  clearInterval(state.quizTimer);
+  stopAutoplay();
+
+  document.getElementById('totalScore').textContent = '0';
+  document.getElementById('streakBadge').classList.remove('active');
+  updateXP();
+
+  document.querySelectorAll('.nav-tab').forEach(t => t.classList.remove('completed'));
+
+  // Rebuild everything
+  buildPoemStage();
+  buildWordExplorer();
+  buildDecorateCanvas();
+  buildMemoryGame();
+  buildQuiz();
+
+  document.getElementById('decCompleteArea').style.display = 'none';
+
+  goToScreen(1);
+  mascotSay('चला पुन्हा सुरू करूया! 📚✨', 2000);
+}
+
+// ===== VISUAL EFFECTS =====
+function fireConfetti() {
+  const container = document.getElementById('confettiContainer');
+  const colors = ['#FFE66D','#A78BFA','#4ADE80','#4ECDC4','#FF6B6B','#F472B6','#FBBF24','#38BDF8'];
+  for (let i = 0; i < 50; i++) {
+    const piece = document.createElement('div');
+    piece.className = 'confetti-piece';
+    piece.style.left = Math.random() * 100 + '%';
+    piece.style.background = colors[Math.floor(Math.random() * colors.length)];
+    piece.style.width = (6 + Math.random() * 8) + 'px';
+    piece.style.height = (6 + Math.random() * 8) + 'px';
+    piece.style.borderRadius = Math.random() > 0.5 ? '50%' : '2px';
+    piece.style.animationDuration = (2 + Math.random() * 2) + 's';
+    piece.style.animationDelay = (Math.random() * 0.5) + 's';
+    container.appendChild(piece);
+  }
+  setTimeout(() => container.innerHTML = '', 4000);
+}
+
+function createParticleBurst(element) {
+  if (!element) return;
+  const rect = element.getBoundingClientRect();
+  const cx = rect.left + rect.width / 2;
+  const cy = rect.top + rect.height / 2;
+  const burst = document.createElement('div');
+  burst.className = 'particle-burst';
+  burst.style.left = cx + 'px';
+  burst.style.top = cy + 'px';
+  const colors = ['#FFE66D','#4ADE80','#4ECDC4','#A78BFA','#FF6B6B','#FBBF24'];
+  for (let i = 0; i < 12; i++) {
+    const p = document.createElement('div');
+    p.className = 'particle';
+    const angle = (i / 12) * Math.PI * 2;
+    const dist = 30 + Math.random() * 40;
+    p.style.setProperty('--px', Math.cos(angle) * dist + 'px');
+    p.style.setProperty('--py', Math.sin(angle) * dist + 'px');
+    p.style.background = colors[Math.floor(Math.random() * colors.length)];
+    p.style.width = (4 + Math.random() * 4) + 'px';
+    p.style.height = p.style.width;
+    burst.appendChild(p);
+  }
+  document.body.appendChild(burst);
+  setTimeout(() => burst.remove(), 1000);
+}
+
+// ===== ANIMATED BACKGROUND CANVAS =====
+function initBgCanvas() {
+  const canvas = document.getElementById('bgCanvas');
+  const ctx = canvas.getContext('2d');
+  let w, h, particles = [];
+
+  function resize() {
+    w = canvas.width = window.innerWidth;
+    h = canvas.height = window.innerHeight;
+  }
+  resize();
+  window.addEventListener('resize', resize);
+
+  // Create floating particles: books, stars, sparkles
+  const symbols = ['📚','📖','⭐','✨','💫','🌟','📕','📗'];
+  for (let i = 0; i < 18; i++) {
+    particles.push({
+      x: Math.random() * w,
+      y: Math.random() * h,
+      vx: (Math.random() - 0.5) * 0.3,
+      vy: -0.2 - Math.random() * 0.3,
+      symbol: symbols[Math.floor(Math.random() * symbols.length)],
+      size: 14 + Math.random() * 10,
+      opacity: 0.1 + Math.random() * 0.15,
+      rotation: Math.random() * 360,
+      rotSpeed: (Math.random() - 0.5) * 0.5
+    });
+  }
+
+  function animate() {
+    ctx.clearRect(0, 0, w, h);
+    particles.forEach(p => {
+      p.x += p.vx;
+      p.y += p.vy;
+      p.rotation += p.rotSpeed;
+      if (p.y < -30) { p.y = h + 30; p.x = Math.random() * w; }
+      if (p.x < -30) p.x = w + 30;
+      if (p.x > w + 30) p.x = -30;
+      ctx.save();
+      ctx.globalAlpha = p.opacity;
+      ctx.translate(p.x, p.y);
+      ctx.rotate(p.rotation * Math.PI / 180);
+      ctx.font = p.size + 'px serif';
+      ctx.textAlign = 'center';
+      ctx.textBaseline = 'middle';
+      ctx.fillText(p.symbol, 0, 0);
+      ctx.restore();
+    });
+    requestAnimationFrame(animate);
+  }
+  animate();
+}
+
+// ===== SPRING ANIMATION FOR ALL BUTTONS =====
+document.addEventListener('pointerdown', function(e) {
+  const btn = e.target.closest('button');
+  if (btn && !btn.disabled) {
+    btn.style.transition = '0.1s ease';
+    btn.style.transform = 'scale(0.95)';
+  }
+}, { passive: true });
+document.addEventListener('pointerup', function(e) {
+  const btn = e.target.closest('button');
+  if (btn) {
+    btn.style.transition = '0.3s cubic-bezier(0.34,1.56,0.64,1)';
+    btn.style.transform = 'scale(1)';
+  }
+}, { passive: true });
+document.addEventListener('pointercancel', function(e) {
+  const btn = e.target.closest('button');
+  if (btn) {
+    btn.style.transition = '0.3s ease';
+    btn.style.transform = 'scale(1)';
+  }
+}, { passive: true });
+
+// ===== PREVENT ERRORS =====
+window.onerror = function() { return true; };
+</script>
+</body>
+</html>

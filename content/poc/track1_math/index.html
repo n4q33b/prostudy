@@ -1,0 +1,1634 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
+<title>ProStudy - Fractions: Interactive Simulation</title>
+<style>
+/*========== RESET & VARIABLES ==========*/
+*,*::before,*::after{box-sizing:border-box;margin:0;padding:0}
+:root{
+  --bg:#0D3B4C;--bg-deep:#091F2C;
+  --card:rgba(255,255,255,0.07);--card-border:rgba(255,255,255,0.12);
+  --teal:#2D9596;--lime:#4ADE80;--coral:#FF6B6B;--yellow:#FFE66D;
+  --purple:#A78BFA;--turquoise:#4ECDC4;--blue:#60A5FA;--orange:#FB923C;
+  --white:#FFFFFF;--text:#E8F0F0;--dim:#7BA3A4;
+  --font:-apple-system,BlinkMacSystemFont,'Segoe UI',Roboto,sans-serif;
+  --bounce:cubic-bezier(0.34,1.56,0.64,1);
+  --smooth:cubic-bezier(0.4,0,0.2,1);
+  --radius:16px;--radius-sm:10px;
+}
+html,body{height:100%;overflow:hidden;touch-action:manipulation}
+body{font-family:var(--font);background:var(--bg);color:var(--text);
+  -webkit-tap-highlight-color:transparent;user-select:none;-webkit-user-select:none}
+
+/*========== BACKGROUND ==========*/
+.bg-layer{position:fixed;inset:0;z-index:0;overflow:hidden;pointer-events:none}
+.bg-grad{position:absolute;inset:0;
+  background:linear-gradient(135deg,#0D3B4C 0%,#0F2B3D 40%,#112840 70%,#0D3B4C 100%);
+  animation:bgShift 12s ease-in-out infinite alternate}
+@keyframes bgShift{0%{filter:hue-rotate(0deg) brightness(1)}100%{filter:hue-rotate(8deg) brightness(1.03)}}
+.particle{position:absolute;border-radius:50%;opacity:0;animation:floatUp linear infinite}
+@keyframes floatUp{0%{transform:translateY(100vh) scale(0);opacity:0}10%{opacity:.5}90%{opacity:.2}100%{transform:translateY(-20vh) scale(1);opacity:0}}
+
+/*========== TOP BAR ==========*/
+.top-bar{position:fixed;top:0;left:0;right:0;z-index:100;
+  background:rgba(9,31,44,.92);backdrop-filter:blur(20px);-webkit-backdrop-filter:blur(20px);
+  border-bottom:1px solid var(--card-border);padding:8px 16px;
+  display:flex;align-items:center;gap:10px;height:52px}
+.top-bar .back-btn{width:36px;height:36px;border-radius:50%;border:none;
+  background:rgba(255,255,255,.08);color:var(--text);font-size:18px;cursor:pointer;
+  display:flex;align-items:center;justify-content:center;transition:all .3s var(--bounce);flex-shrink:0}
+.top-bar .back-btn:hover{background:rgba(255,255,255,.15)}
+.top-bar .title{font-size:14px;font-weight:700;color:var(--turquoise);flex-shrink:0;white-space:nowrap;overflow:hidden;text-overflow:ellipsis}
+.progress-track{flex:1;display:flex;align-items:center;gap:4px;margin-left:8px}
+.progress-track .seg{flex:1;height:4px;border-radius:2px;background:rgba(255,255,255,.1);transition:all .5s var(--smooth);position:relative;overflow:hidden}
+.progress-track .seg.done{background:var(--lime)}
+.progress-track .seg.active{background:rgba(45,149,150,.4)}
+.progress-track .seg.active::after{content:'';position:absolute;inset:0;background:var(--teal);border-radius:2px;animation:progressPulse 1.5s ease infinite}
+@keyframes progressPulse{0%,100%{opacity:.5}50%{opacity:1}}
+.progress-label{font-size:11px;color:var(--dim);white-space:nowrap;margin-left:6px}
+
+/*========== MAIN CONTAINER ==========*/
+.app{position:fixed;inset:0;z-index:1;display:flex;flex-direction:column;padding-top:52px}
+.scene-container{flex:1;overflow-y:auto;overflow-x:hidden;-webkit-overflow-scrolling:touch;scroll-behavior:smooth}
+.scene{min-height:100%;padding:20px 16px 120px;display:none;flex-direction:column;gap:20px;animation:fadeIn .6s var(--smooth)}
+.scene.active{display:flex}
+@keyframes fadeIn{from{opacity:0;transform:translateY(20px)}to{opacity:1;transform:translateY(0)}}
+
+/*========== NAV BAR (Bottom) ==========*/
+.nav-bar{position:fixed;bottom:0;left:0;right:0;z-index:100;
+  background:rgba(9,31,44,.95);backdrop-filter:blur(20px);-webkit-backdrop-filter:blur(20px);
+  border-top:1px solid var(--card-border);padding:12px 16px;
+  display:flex;align-items:center;justify-content:space-between;gap:12px}
+.nav-bar .btn-back{padding:12px 20px;border-radius:30px;border:2px solid var(--card-border);
+  background:transparent;color:var(--dim);font-size:15px;font-weight:600;cursor:pointer;
+  font-family:var(--font);transition:all .3s var(--bounce);min-width:90px}
+.nav-bar .btn-back:hover{border-color:var(--teal);color:var(--text)}
+.nav-bar .btn-back:disabled{opacity:.3;cursor:not-allowed}
+.nav-bar .scene-indicator{font-size:12px;color:var(--dim);text-align:center}
+.nav-bar .btn-next{padding:12px 28px;border-radius:30px;border:none;
+  background:linear-gradient(135deg,var(--lime),#22C55E);color:#0D3B4C;
+  font-size:15px;font-weight:700;cursor:pointer;font-family:var(--font);
+  transition:all .3s var(--bounce);min-width:110px;
+  box-shadow:0 4px 16px rgba(74,222,128,.3)}
+.nav-bar .btn-next:hover{transform:scale(1.05)}
+.nav-bar .btn-next:active{transform:scale(.97)}
+
+/*========== GLASS CARDS ==========*/
+.glass{background:var(--card);border:1px solid var(--card-border);
+  border-radius:var(--radius);padding:20px;backdrop-filter:blur(12px);-webkit-backdrop-filter:blur(12px)}
+
+/*========== SCENE HEADER ==========*/
+.scene-header{text-align:center;padding:10px 0}
+.scene-header .scene-num{font-size:11px;text-transform:uppercase;letter-spacing:2px;color:var(--dim);margin-bottom:4px}
+.scene-header h2{font-size:22px;font-weight:800;margin-bottom:6px;
+  background:linear-gradient(135deg,var(--turquoise),var(--lime));
+  -webkit-background-clip:text;-webkit-text-fill-color:transparent;background-clip:text}
+.scene-header p{font-size:14px;color:var(--dim);line-height:1.5}
+
+/*========== ANIMATION TEXT OVERLAYS ==========*/
+.anim-text{text-align:center;font-size:16px;font-weight:600;line-height:1.6;
+  opacity:0;transform:translateY(10px);transition:all .6s var(--smooth);min-height:28px}
+.anim-text.visible{opacity:1;transform:translateY(0)}
+.anim-text.highlight{color:var(--yellow);font-size:18px;font-weight:700}
+.anim-text .accent{color:var(--turquoise);font-weight:800}
+.anim-text .coral{color:var(--coral)}
+.anim-text .lime{color:var(--lime)}
+
+/*========== GENTLE OVERLAY (teaching moments) ==========*/
+.teaching-moment{position:fixed;bottom:100px;left:50%;transform:translateX(-50%) translateY(20px);
+  background:rgba(255,230,109,.12);border:1px solid rgba(255,230,109,.3);
+  border-radius:20px;padding:10px 20px;font-size:14px;font-weight:600;color:var(--yellow);
+  pointer-events:none;opacity:0;transition:all .5s var(--smooth);z-index:50;white-space:nowrap;max-width:90vw;text-align:center}
+.teaching-moment.show{opacity:1;transform:translateX(-50%) translateY(0)}
+
+/*========== CHOCOLATE BAR (Scene 1) ==========*/
+.choco-area{display:flex;flex-direction:column;align-items:center;gap:16px}
+.choco-wrapper{perspective:600px;max-width:320px;width:100%}
+.choco-grid{display:grid;gap:4px;transform:rotateX(5deg);transform-style:preserve-3d}
+.choco-piece{aspect-ratio:1;border-radius:6px;cursor:pointer;
+  transition:all .3s var(--bounce);position:relative;transform-style:preserve-3d}
+.choco-piece.present{background:linear-gradient(145deg,#8B5E3C,#6B3F1F);
+  box-shadow:inset 0 2px 4px rgba(255,255,255,.2),inset 0 -2px 4px rgba(0,0,0,.3),0 3px 8px rgba(0,0,0,.3)}
+.choco-piece.present:hover{transform:scale(1.08);
+  box-shadow:inset 0 2px 4px rgba(255,255,255,.3),0 6px 16px rgba(0,0,0,.4)}
+.choco-piece.present:active{transform:scale(.95)}
+.choco-piece.removed{background:rgba(255,255,255,.04);border:1px dashed rgba(255,255,255,.1);
+  transform:scale(.85);opacity:.3}
+.choco-piece.removing{animation:snapOff .5s var(--bounce) forwards}
+.choco-piece.returning{animation:snapOn .5s var(--bounce) forwards}
+@keyframes snapOff{0%{transform:scale(1)}30%{transform:scale(1.15) translateY(-8px)}100%{transform:scale(.85);opacity:.3}}
+@keyframes snapOn{0%{transform:scale(.85);opacity:.3}50%{transform:scale(1.1)}100%{transform:scale(1);opacity:1}}
+.snap-particle{position:absolute;width:4px;height:4px;border-radius:50%;pointer-events:none;z-index:10}
+
+.fraction-display{display:flex;align-items:center;gap:24px;justify-content:center;flex-wrap:wrap}
+.fraction-big{display:flex;flex-direction:column;align-items:center;font-size:36px;font-weight:800;line-height:1;
+  transition:all .3s var(--smooth)}
+.fraction-big .num{color:var(--coral);transition:all .3s var(--smooth)}
+.fraction-big .bar{width:44px;height:3px;background:var(--white);margin:6px 0;border-radius:2px}
+.fraction-big .den{color:var(--turquoise);transition:all .3s var(--smooth)}
+.fraction-big .label{font-size:10px;font-weight:600;color:var(--dim);margin-top:2px}
+
+.pie-mini{width:90px;height:90px;border-radius:50%;position:relative;
+  background:rgba(255,255,255,.06);border:2px solid rgba(255,255,255,.1);overflow:hidden;
+  transition:all .5s var(--smooth)}
+.pie-fill{position:absolute;inset:0;border-radius:50%;transition:all .5s var(--smooth)}
+
+.slider-row{display:flex;align-items:center;gap:12px;width:100%;max-width:320px}
+.slider-row label{font-size:13px;color:var(--dim);white-space:nowrap}
+.slider-row input[type=range]{flex:1;-webkit-appearance:none;height:6px;border-radius:3px;background:rgba(255,255,255,.12);outline:none}
+.slider-row input[type=range]::-webkit-slider-thumb{-webkit-appearance:none;width:28px;height:28px;border-radius:50%;background:var(--teal);cursor:pointer;box-shadow:0 2px 8px rgba(0,0,0,.3)}
+.slider-row .val{font-size:18px;font-weight:700;color:var(--turquoise);min-width:28px;text-align:center}
+
+/*========== PIZZA / CAKE (Scene 2) ==========*/
+.cakes-demo{display:flex;flex-direction:column;align-items:center;gap:20px}
+.cakes-row{display:flex;gap:16px;justify-content:center;flex-wrap:wrap}
+.cake-unit{display:flex;flex-direction:column;align-items:center;gap:8px;min-width:90px}
+.cake-canvas{width:110px;height:110px;border-radius:50%;position:relative;cursor:pointer;overflow:hidden;
+  transition:transform .3s var(--bounce)}
+.cake-canvas:hover{transform:scale(1.03)}
+.cake-label{font-size:13px;font-weight:600;text-align:center;transition:all .3s var(--smooth)}
+.cake-label .frac{font-size:20px;font-weight:800;display:block}
+.comparison-visual{display:flex;align-items:flex-end;justify-content:center;gap:20px;padding:10px 0}
+.compare-arrow{font-size:24px;font-weight:800;color:var(--yellow);align-self:center;animation:pulse 1.5s ease infinite}
+@keyframes pulse{0%,100%{transform:scale(1)}50%{transform:scale(1.15)}}
+.explore-circle{width:140px;height:140px;border-radius:50%;position:relative;margin:0 auto;cursor:pointer;overflow:hidden}
+
+/*========== FRACTION BARS (Scene 3) ==========*/
+.bar-stack{display:flex;flex-direction:column;gap:14px;align-items:center;width:100%}
+.bar-row{display:flex;align-items:center;gap:10px;width:100%;max-width:360px}
+.bar-row .frac-label{font-size:16px;font-weight:800;min-width:44px;text-align:center;transition:all .3s var(--smooth)}
+.frac-bar{display:flex;gap:2px;flex:1;height:40px;border-radius:8px;overflow:hidden;position:relative}
+.frac-bar .seg{flex:1;transition:all .4s var(--smooth);position:relative;border-right:1px solid rgba(0,0,0,.15)}
+.frac-bar .seg:last-child{border-right:none}
+.frac-bar .seg.shaded{transform:scaleY(1.05)}
+.eq-sign{font-size:28px;font-weight:800;text-align:center;color:var(--yellow);opacity:0;transition:all .5s var(--bounce)}
+.eq-sign.visible{opacity:1}
+.mult-badge{display:inline-flex;align-items:center;justify-content:center;
+  background:rgba(255,230,109,.15);border:1px solid rgba(255,230,109,.3);
+  border-radius:12px;padding:4px 10px;font-size:12px;font-weight:700;color:var(--yellow);
+  opacity:0;transform:scale(0);transition:all .4s var(--bounce)}
+.mult-badge.visible{opacity:1;transform:scale(1)}
+
+/*========== EXPLORE BARS (Scene 3 interactive) ==========*/
+.explore-bars{display:flex;flex-direction:column;gap:16px;align-items:center}
+.explore-bar-pair{display:flex;gap:16px;align-items:center;width:100%;max-width:360px}
+.explore-bar-col{flex:1;display:flex;flex-direction:column;gap:8px;align-items:center}
+.explore-bar-col .controls{display:flex;gap:6px;align-items:center}
+.explore-bar-col .controls button{width:32px;height:32px;border-radius:50%;border:1px solid var(--card-border);
+  background:var(--card);color:var(--text);font-size:16px;font-weight:700;cursor:pointer;
+  display:flex;align-items:center;justify-content:center;transition:all .2s var(--bounce);font-family:var(--font)}
+.explore-bar-col .controls button:active{transform:scale(.9)}
+.explore-bar-col .controls span{font-size:14px;font-weight:700;min-width:20px;text-align:center}
+.match-result{font-size:20px;font-weight:800;text-align:center;min-height:32px;transition:all .4s var(--bounce)}
+.match-result.equal{color:var(--lime)}
+
+/*========== GLASSES (Scene 4) ==========*/
+.glasses-area{display:flex;flex-direction:column;align-items:center;gap:16px}
+.glasses-row{display:flex;gap:32px;justify-content:center;align-items:flex-end}
+.glass-unit{display:flex;flex-direction:column;align-items:center;gap:10px}
+.glass-svg{position:relative;width:80px;height:180px}
+.glass-label{font-size:20px;font-weight:800;transition:all .3s var(--smooth)}
+.glass-compare{font-size:28px;font-weight:800;color:var(--yellow);align-self:center}
+.glass-controls{display:flex;flex-direction:column;gap:6px;align-items:center}
+.glass-controls .adj-row{display:flex;align-items:center;gap:6px}
+.glass-controls .adj-row button{width:36px;height:36px;border-radius:50%;border:1px solid var(--card-border);
+  background:var(--card);color:var(--text);font-size:18px;font-weight:700;cursor:pointer;
+  display:flex;align-items:center;justify-content:center;font-family:var(--font);transition:all .2s var(--bounce)}
+.glass-controls .adj-row button:active{transform:scale(.9)}
+.glass-controls .adj-row span{font-size:16px;font-weight:700;min-width:24px;text-align:center}
+.lcd-btn{display:flex;align-items:center;gap:6px;margin:0 auto;padding:10px 20px;
+  border-radius:30px;border:none;background:linear-gradient(135deg,var(--purple),#8B5CF6);
+  color:#fff;font-size:14px;font-weight:700;cursor:pointer;
+  transition:all .3s var(--bounce);font-family:var(--font)}
+.lcd-btn:hover{transform:scale(1.05)}
+.lcd-btn:active{transform:scale(.97)}
+
+/*========== BEAKER (Scene 5) ==========*/
+.beaker-area{display:flex;flex-direction:column;align-items:center;gap:16px}
+.beaker-layout{display:flex;align-items:flex-end;gap:16px;justify-content:center;flex-wrap:wrap}
+.beaker-svg{position:relative}
+.bottles-shelf{display:flex;gap:10px;flex-wrap:wrap;justify-content:center}
+.pour-bottle{width:56px;height:80px;border-radius:10px 10px 16px 16px;cursor:pointer;
+  position:relative;transition:all .3s var(--bounce);touch-action:none;
+  display:flex;flex-direction:column;align-items:center;justify-content:flex-end;padding-bottom:8px}
+.pour-bottle:hover{transform:scale(1.06)}
+.pour-bottle:active{transform:scale(.95) rotate(-15deg)}
+.pour-bottle .bottle-label{font-size:11px;font-weight:700;color:#fff;text-align:center}
+.pour-bottle.blue{background:linear-gradient(180deg,rgba(96,165,250,.3),rgba(96,165,250,.8))}
+.pour-bottle.green{background:linear-gradient(180deg,rgba(74,222,128,.3),rgba(74,222,128,.8))}
+.pour-bottle.orange{background:linear-gradient(180deg,rgba(251,146,60,.3),rgba(251,146,60,.8))}
+.drain-btn{padding:10px 20px;border-radius:30px;border:2px solid var(--coral);
+  background:transparent;color:var(--coral);font-size:14px;font-weight:700;
+  cursor:pointer;font-family:var(--font);transition:all .3s var(--bounce)}
+.drain-btn:hover{background:rgba(255,107,107,.1)}
+.drain-btn:active{transform:scale(.95)}
+.equation-display{font-size:20px;font-weight:800;text-align:center;min-height:36px;
+  transition:all .3s var(--smooth);line-height:1.4}
+.overflow-msg{color:var(--coral);font-size:14px;font-weight:600;text-align:center;
+  opacity:0;transition:all .4s var(--smooth)}
+.overflow-msg.visible{opacity:1}
+
+/*========== CELEBRATION SCREEN ==========*/
+.celebration-screen{min-height:100%;display:none;flex-direction:column;align-items:center;
+  justify-content:center;gap:24px;padding:40px 20px;text-align:center}
+.celebration-screen.active{display:flex}
+.celeb-emoji{font-size:64px;animation:celebBounce 1s var(--bounce) infinite alternate}
+@keyframes celebBounce{0%{transform:scale(1) rotate(-5deg)}100%{transform:scale(1.1) rotate(5deg)}}
+.celeb-title{font-size:28px;font-weight:800;
+  background:linear-gradient(135deg,var(--yellow),var(--orange));
+  -webkit-background-clip:text;-webkit-text-fill-color:transparent;background-clip:text}
+.recap-list{display:flex;flex-direction:column;gap:12px;width:100%;max-width:340px}
+.recap-item{display:flex;align-items:center;gap:12px;background:var(--card);
+  border:1px solid var(--card-border);border-radius:var(--radius-sm);padding:12px 16px;text-align:left;
+  animation:fadeIn .5s var(--smooth) backwards}
+.recap-item .r-icon{font-size:24px;flex-shrink:0}
+.recap-item .r-text{font-size:14px;font-weight:600;line-height:1.4}
+.celeb-btn{padding:16px 40px;border-radius:30px;border:none;
+  background:linear-gradient(135deg,var(--yellow),var(--orange));color:#0D3B4C;
+  font-size:18px;font-weight:800;cursor:pointer;font-family:var(--font);
+  transition:all .3s var(--bounce);box-shadow:0 4px 20px rgba(255,230,109,.3)}
+.celeb-btn:hover{transform:scale(1.05)}
+
+/*========== GAME: FRACTION KITCHEN ==========*/
+.kitchen-area{display:flex;flex-direction:column;align-items:center;gap:16px}
+.recipe-card{background:linear-gradient(135deg,#FEF3C7,#FDE68A);color:#78350F;
+  border-radius:var(--radius);padding:20px;max-width:340px;width:100%;
+  font-size:15px;line-height:1.6;box-shadow:0 4px 20px rgba(0,0,0,.2)}
+.recipe-card h3{font-size:18px;margin-bottom:8px}
+.bowl-visual{width:120px;height:80px;border-radius:0 0 60px 60px;
+  border:3px solid rgba(255,255,255,.2);background:rgba(255,255,255,.05);
+  position:relative;overflow:hidden;margin:0 auto}
+.bowl-fill{position:absolute;bottom:0;left:0;right:0;
+  background:linear-gradient(180deg,rgba(251,191,36,.5),rgba(251,191,36,.8));
+  transition:height .5s var(--smooth);border-radius:0 0 57px 57px}
+.answer-options{display:flex;gap:10px;flex-wrap:wrap;justify-content:center}
+.answer-btn{padding:14px 24px;border-radius:var(--radius-sm);border:2px solid var(--card-border);
+  background:var(--card);color:var(--text);font-size:18px;font-weight:700;
+  cursor:pointer;transition:all .3s var(--bounce);font-family:var(--font);min-width:80px}
+.answer-btn:hover{border-color:var(--teal);transform:scale(1.05)}
+.answer-btn:active{transform:scale(.95)}
+.answer-btn.correct{border-color:var(--lime);background:rgba(74,222,128,.15);color:var(--lime)}
+.answer-btn.wrong{border-color:var(--coral);background:rgba(255,107,107,.15);color:var(--coral)}
+.game-score{display:flex;align-items:center;gap:8px;font-size:14px;font-weight:700}
+.game-progress{display:flex;gap:6px;justify-content:center}
+.game-progress .gp-dot{width:10px;height:10px;border-radius:50%;background:rgba(255,255,255,.15);transition:all .3s var(--bounce)}
+.game-progress .gp-dot.done{background:var(--lime)}
+.game-progress .gp-dot.active{background:var(--yellow);transform:scale(1.3)}
+.game-progress .gp-dot.wrong-dot{background:var(--coral)}
+
+/*========== QUIZ ==========*/
+.quiz-area{display:flex;flex-direction:column;align-items:center;gap:16px;width:100%}
+.quiz-timer{width:100%;max-width:360px;height:6px;border-radius:3px;background:rgba(255,255,255,.1);overflow:hidden}
+.quiz-timer-fill{height:100%;background:linear-gradient(90deg,var(--coral),var(--yellow));border-radius:3px;transition:width .1s linear}
+.quiz-q{font-size:18px;font-weight:700;text-align:center;line-height:1.5;max-width:360px}
+.quiz-options{display:flex;flex-direction:column;gap:10px;width:100%;max-width:360px}
+.quiz-option{width:100%;padding:16px;border-radius:var(--radius-sm);border:2px solid var(--card-border);
+  background:var(--card);color:var(--text);font-size:15px;font-weight:600;
+  cursor:pointer;transition:all .3s var(--bounce);text-align:left;font-family:var(--font)}
+.quiz-option:hover{border-color:var(--teal);transform:translateX(4px)}
+.quiz-option.correct{border-color:var(--lime);background:rgba(74,222,128,.15);color:var(--lime)}
+.quiz-option.wrong{border-color:var(--coral);background:rgba(255,107,107,.15);color:var(--coral)}
+
+/*========== QUIZ RESULTS ==========*/
+.results-area{display:flex;flex-direction:column;align-items:center;gap:20px;text-align:center;padding:20px}
+.star-display{display:flex;gap:12px;justify-content:center;font-size:44px}
+.star-display .star{opacity:.2;transition:all .5s var(--bounce);transform:scale(.8)}
+.star-display .star.earned{opacity:1;transform:scale(1);filter:drop-shadow(0 0 8px rgba(255,230,109,.5))}
+.results-score{font-size:40px;font-weight:800;color:var(--lime)}
+.results-msg{font-size:16px;color:var(--dim);line-height:1.5}
+.restart-btn{padding:14px 32px;border-radius:30px;border:none;
+  background:linear-gradient(135deg,var(--teal),var(--turquoise));color:#fff;
+  font-size:16px;font-weight:700;cursor:pointer;font-family:var(--font);transition:all .3s var(--bounce)}
+.restart-btn:hover{transform:scale(1.05)}
+
+/*========== CONFETTI ==========*/
+.confetti-container{position:fixed;inset:0;pointer-events:none;z-index:200;overflow:hidden}
+.confetti-piece{position:absolute;top:-10px;animation:confettiFall 3s ease-out forwards}
+@keyframes confettiFall{0%{transform:translateY(0) rotate(0deg) scale(1);opacity:1}
+  100%{transform:translateY(100vh) rotate(720deg) scale(.5);opacity:0}}
+
+/*========== SECTION DIVIDER ==========*/
+.section-divider{text-align:center;padding:12px;border-radius:var(--radius);
+  background:linear-gradient(135deg,rgba(255,230,109,.08),rgba(251,146,60,.08));
+  border:1px solid rgba(255,230,109,.2)}
+.section-divider h3{font-size:16px;font-weight:800;color:var(--yellow);margin-bottom:4px}
+.section-divider p{font-size:13px;color:var(--dim)}
+
+/*========== CANVAS ==========*/
+canvas{display:block}
+
+/*========== RESPONSIVE ==========*/
+@media(max-width:380px){
+  .choco-grid{max-width:260px}
+  .cake-canvas{width:90px;height:90px}
+  .glass-svg{width:65px;height:150px}
+  .scene-header h2{font-size:19px}
+  .fraction-big{font-size:28px}
+  .glasses-row{gap:20px}
+}
+@media(min-width:500px){
+  .scene{max-width:480px;margin:0 auto}
+  .nav-bar{justify-content:center;gap:20px}
+}
+</style>
+</head>
+<body>
+
+<!-- Background -->
+<div class="bg-layer">
+  <div class="bg-grad"></div>
+  <div id="particles"></div>
+</div>
+
+<!-- Top Bar -->
+<div class="top-bar">
+  <button class="back-btn" onclick="goBack()" aria-label="Back">&#8592;</button>
+  <span class="title">Fractions</span>
+  <div class="progress-track" id="progressTrack"></div>
+  <span class="progress-label" id="progressLabel">1/7</span>
+</div>
+
+<!-- App Container -->
+<div class="app">
+  <div class="scene-container" id="sceneContainer">
+
+    <!-- ===== SCENE 1: What is a Fraction? ===== -->
+    <div class="scene" id="scene1">
+      <div class="scene-header">
+        <div class="scene-num">Scene 1 of 5</div>
+        <h2>What is a Fraction?</h2>
+        <p>Discover how pieces become numbers</p>
+      </div>
+
+      <div class="anim-text" id="s1-text1">A delicious chocolate bar appears...</div>
+
+      <div class="glass choco-area">
+        <div class="choco-wrapper">
+          <div class="choco-grid" id="chocoGrid" style="grid-template-columns:repeat(5,1fr)"></div>
+        </div>
+
+        <div class="fraction-display">
+          <div class="fraction-big" id="chocoFraction">
+            <span class="num" id="chocoNum">0</span>
+            <div class="bar"></div>
+            <span class="den" id="chocoDen">20</span>
+          </div>
+          <canvas id="chocoPie" width="90" height="90"></canvas>
+        </div>
+
+        <div id="s1-labels" style="text-align:center;opacity:0;transition:all .6s var(--smooth)">
+          <div style="display:flex;justify-content:center;gap:20px;font-size:12px;margin-top:4px">
+            <span style="color:var(--coral)">&#8593; Numerator (pieces taken)</span>
+            <span style="color:var(--turquoise)">&#8595; Denominator (total pieces)</span>
+          </div>
+        </div>
+
+        <div class="anim-text" id="s1-text2">Tap any piece to break it off! Tap again to put it back.</div>
+
+        <div class="slider-row" id="s1-slider" style="opacity:0;transition:all .6s var(--smooth)">
+          <label>Bar size:</label>
+          <input type="range" min="0" max="6" value="6" id="chocoSlider">
+          <span class="val" id="chocoSliderVal">20</span>
+        </div>
+      </div>
+    </div>
+
+    <!-- ===== SCENE 2: Dividing into Equal Parts ===== -->
+    <div class="scene" id="scene2">
+      <div class="scene-header">
+        <div class="scene-num">Scene 2 of 5</div>
+        <h2>Equal Parts</h2>
+        <p>See how more cuts make smaller pieces</p>
+      </div>
+
+      <div class="anim-text" id="s2-text1">Watch three cakes get divided differently...</div>
+
+      <div class="glass cakes-demo">
+        <div class="cakes-row" id="cakesRow">
+          <div class="cake-unit">
+            <canvas class="cake-canvas" id="cake1" width="110" height="110"></canvas>
+            <div class="cake-label">Cut into <span class="frac" id="cake1Label">2</span></div>
+          </div>
+          <div class="cake-unit">
+            <canvas class="cake-canvas" id="cake2" width="110" height="110"></canvas>
+            <div class="cake-label">Cut into <span class="frac" id="cake2Label">4</span></div>
+          </div>
+          <div class="cake-unit">
+            <canvas class="cake-canvas" id="cake3" width="110" height="110"></canvas>
+            <div class="cake-label">Cut into <span class="frac" id="cake3Label">8</span></div>
+          </div>
+        </div>
+
+        <div class="anim-text" id="s2-text2">One piece from each: see how size compares!</div>
+
+        <div class="comparison-visual" id="s2-compare">
+          <div style="text-align:center">
+            <canvas id="slice1" width="70" height="70"></canvas>
+            <div style="font-size:16px;font-weight:700;color:var(--coral)">1/2</div>
+          </div>
+          <div class="compare-arrow">&gt;</div>
+          <div style="text-align:center">
+            <canvas id="slice2" width="55" height="55"></canvas>
+            <div style="font-size:16px;font-weight:700;color:var(--teal)">1/4</div>
+          </div>
+          <div class="compare-arrow">&gt;</div>
+          <div style="text-align:center">
+            <canvas id="slice3" width="40" height="40"></canvas>
+            <div style="font-size:16px;font-weight:700;color:var(--purple)">1/8</div>
+          </div>
+        </div>
+
+        <div class="anim-text highlight" id="s2-text3">More pieces = each piece gets SMALLER!</div>
+      </div>
+
+      <div class="glass" id="s2-explore" style="opacity:0;transition:all .6s var(--smooth)">
+        <div style="text-align:center;margin-bottom:12px;font-size:15px;font-weight:600">Try it yourself! Slide to cut:</div>
+        <div style="display:flex;flex-direction:column;align-items:center;gap:12px">
+          <canvas id="exploreCircle" width="150" height="150"></canvas>
+          <div class="slider-row" style="max-width:280px">
+            <label>Cuts:</label>
+            <input type="range" min="2" max="12" value="2" id="cutSlider">
+            <span class="val" id="cutSliderVal">2</span>
+          </div>
+          <div id="s2-explore-label" style="font-size:16px;font-weight:700">Each piece = <span style="color:var(--turquoise)">1/2</span></div>
+        </div>
+      </div>
+    </div>
+
+    <!-- ===== SCENE 3: Equivalent Fractions ===== -->
+    <div class="scene" id="scene3">
+      <div class="scene-header">
+        <div class="scene-num">Scene 3 of 5</div>
+        <h2>Equivalent Fractions</h2>
+        <p>Different numbers, same amount!</p>
+      </div>
+
+      <div class="anim-text" id="s3-text1">Watch this bar split while keeping the same shaded area...</div>
+
+      <div class="glass">
+        <div class="bar-stack" id="barStack"></div>
+        <div class="anim-text highlight" id="s3-text2" style="margin-top:12px">They look different but are the SAME amount!</div>
+      </div>
+
+      <div class="glass explore-bars" id="s3-explore" style="opacity:0;transition:all .6s var(--smooth)">
+        <div style="text-align:center;font-size:15px;font-weight:600;margin-bottom:8px">Explore: do these fractions match?</div>
+        <div class="explore-bar-pair">
+          <div class="explore-bar-col">
+            <div class="controls">
+              <button onclick="adjExplore('ln',-1)">-</button>
+              <span id="expLNum">1</span>
+              <button onclick="adjExplore('ln',1)">+</button>
+            </div>
+            <div id="expBar1" style="width:100%;height:36px;border-radius:6px;overflow:hidden;display:flex;gap:1px"></div>
+            <div class="controls">
+              <button onclick="adjExplore('ld',-1)">-</button>
+              <span id="expLDen">2</span>
+              <button onclick="adjExplore('ld',1)">+</button>
+            </div>
+          </div>
+          <div id="expEqSign" class="eq-sign" style="font-size:32px">=</div>
+          <div class="explore-bar-col">
+            <div class="controls">
+              <button onclick="adjExplore('rn',-1)">-</button>
+              <span id="expRNum">2</span>
+              <button onclick="adjExplore('rn',1)">+</button>
+            </div>
+            <div id="expBar2" style="width:100%;height:36px;border-radius:6px;overflow:hidden;display:flex;gap:1px"></div>
+            <div class="controls">
+              <button onclick="adjExplore('rd',-1)">-</button>
+              <span id="expRDen">4</span>
+              <button onclick="adjExplore('rd',1)">+</button>
+            </div>
+          </div>
+        </div>
+        <div class="match-result" id="expResult"></div>
+      </div>
+    </div>
+
+    <!-- ===== SCENE 4: Comparing Fractions ===== -->
+    <div class="scene" id="scene4">
+      <div class="scene-header">
+        <div class="scene-num">Scene 4 of 5</div>
+        <h2>Comparing Fractions</h2>
+        <p>Which glass has more juice?</p>
+      </div>
+
+      <div class="anim-text" id="s4-text1">Watch the juice pour in...</div>
+
+      <div class="glass glasses-area">
+        <div class="glasses-row">
+          <div class="glass-unit">
+            <canvas id="glass1" width="80" height="180"></canvas>
+            <div class="glass-label" id="glass1Label" style="color:var(--blue)">2/5</div>
+          </div>
+          <div class="glass-compare" id="glassCompare" style="opacity:0">?</div>
+          <div class="glass-unit">
+            <canvas id="glass2" width="80" height="180"></canvas>
+            <div class="glass-label" id="glass2Label" style="color:var(--lime)">3/5</div>
+          </div>
+        </div>
+        <div class="anim-text" id="s4-text2"></div>
+      </div>
+
+      <div class="glass" id="s4-explore" style="opacity:0;transition:all .6s var(--smooth)">
+        <div style="text-align:center;font-size:15px;font-weight:600;margin-bottom:12px">Compare any two fractions!</div>
+        <div style="display:flex;gap:24px;justify-content:center;align-items:center;flex-wrap:wrap">
+          <div class="glass-controls">
+            <div class="adj-row">
+              <button onclick="adjGlass(1,'n',-1)">-</button>
+              <span id="g1n">1</span>
+              <button onclick="adjGlass(1,'n',1)">+</button>
+            </div>
+            <div style="width:50px;height:2px;background:var(--white);border-radius:1px;margin:4px auto"></div>
+            <div class="adj-row">
+              <button onclick="adjGlass(1,'d',-1)">-</button>
+              <span id="g1d">4</span>
+              <button onclick="adjGlass(1,'d',1)">+</button>
+            </div>
+          </div>
+          <div style="display:flex;flex-direction:column;align-items:center;gap:8px">
+            <canvas id="glassExp1" width="60" height="140"></canvas>
+            <canvas id="glassExp2" width="60" height="140"></canvas>
+          </div>
+          <div class="glass-controls">
+            <div class="adj-row">
+              <button onclick="adjGlass(2,'n',-1)">-</button>
+              <span id="g2n">3</span>
+              <button onclick="adjGlass(2,'n',1)">+</button>
+            </div>
+            <div style="width:50px;height:2px;background:var(--white);border-radius:1px;margin:4px auto"></div>
+            <div class="adj-row">
+              <button onclick="adjGlass(2,'d',-1)">-</button>
+              <span id="g2d">4</span>
+              <button onclick="adjGlass(2,'d',1)">+</button>
+            </div>
+          </div>
+        </div>
+        <div id="glassExpResult" style="text-align:center;font-size:20px;font-weight:800;margin-top:10px;min-height:28px"></div>
+        <button class="lcd-btn" id="lcdBtn" onclick="showLCD()" style="margin-top:10px;display:none">Make Same Denominator</button>
+        <div id="lcdExplain" style="text-align:center;font-size:14px;color:var(--dim);margin-top:8px;min-height:20px"></div>
+      </div>
+    </div>
+
+    <!-- ===== SCENE 5: Adding & Subtracting ===== -->
+    <div class="scene" id="scene5">
+      <div class="scene-header">
+        <div class="scene-num">Scene 5 of 5</div>
+        <h2>Adding & Subtracting</h2>
+        <p>Pour in and drain out fractions!</p>
+      </div>
+
+      <div class="anim-text" id="s5-text1">Watch liquids pour into the beaker...</div>
+
+      <div class="glass beaker-area">
+        <div class="beaker-layout">
+          <canvas id="beakerCanvas" width="140" height="220"></canvas>
+        </div>
+        <div class="equation-display" id="beakerEq"></div>
+        <div class="overflow-msg" id="overflowMsg">Overflow! That is more than 1 whole!</div>
+
+        <div class="anim-text" id="s5-text2"></div>
+
+        <div id="s5-controls" style="opacity:0;transition:all .6s var(--smooth)">
+          <div style="text-align:center;font-size:14px;font-weight:600;margin-bottom:10px">Tap a bottle to pour, or drain:</div>
+          <div class="slider-row" style="max-width:280px;margin:0 auto 12px">
+            <label>Sections:</label>
+            <input type="range" min="2" max="10" value="5" id="beakerSlider">
+            <span class="val" id="beakerSliderVal">5</span>
+          </div>
+          <div class="bottles-shelf">
+            <div class="pour-bottle blue" onclick="pourBottle(0)"><span class="bottle-label">1 part</span></div>
+            <div class="pour-bottle green" onclick="pourBottle(1)"><span class="bottle-label">2 parts</span></div>
+            <div class="pour-bottle orange" onclick="pourBottle(2)"><span class="bottle-label">3 parts</span></div>
+          </div>
+          <div style="display:flex;gap:10px;justify-content:center;margin-top:12px">
+            <button class="drain-btn" onclick="drainBeaker()">Drain 1 part</button>
+            <button class="drain-btn" onclick="resetBeaker()" style="border-color:var(--dim);color:var(--dim)">Reset</button>
+          </div>
+        </div>
+      </div>
+    </div>
+
+    <!-- ===== CELEBRATION SCREEN ===== -->
+    <div class="celebration-screen" id="celebScreen">
+      <div class="celeb-emoji">&#127881;</div>
+      <div class="celeb-title">You've Learned Fractions!</div>
+      <p style="color:var(--dim);font-size:15px;max-width:320px">You explored 5 big ideas. Now let's see how much you remember!</p>
+      <div class="recap-list" id="recapList">
+        <div class="recap-item" style="animation-delay:.1s"><span class="r-icon">&#127851;</span><span class="r-text">What a fraction is</span></div>
+        <div class="recap-item" style="animation-delay:.2s"><span class="r-icon">&#127856;</span><span class="r-text">Equal parts get smaller</span></div>
+        <div class="recap-item" style="animation-delay:.3s"><span class="r-icon">&#9878;</span><span class="r-text">Equivalent fractions</span></div>
+        <div class="recap-item" style="animation-delay:.4s"><span class="r-icon">&#129346;</span><span class="r-text">Comparing fractions</span></div>
+        <div class="recap-item" style="animation-delay:.5s"><span class="r-icon">&#129514;</span><span class="r-text">Adding & subtracting</span></div>
+      </div>
+      <button class="celeb-btn" onclick="startGames()">Start Games &#8594;</button>
+    </div>
+
+    <!-- ===== GAME: FRACTION KITCHEN ===== -->
+    <div class="scene" id="sceneGame">
+      <div class="scene-header">
+        <div class="scene-num">Fraction Kitchen</div>
+        <h2>Cooking Challenge!</h2>
+      </div>
+      <div class="game-progress" id="gameProgress"></div>
+      <div class="glass kitchen-area" id="kitchenArea"></div>
+    </div>
+
+    <!-- ===== QUIZ: FRACTION CHAMPION ===== -->
+    <div class="scene" id="sceneQuiz">
+      <div class="scene-header">
+        <div class="scene-num">Final Quiz</div>
+        <h2>Fraction Champion</h2>
+      </div>
+      <div class="game-progress" id="quizProgress"></div>
+      <div class="quiz-area" id="quizArea"></div>
+    </div>
+
+    <!-- ===== RESULTS ===== -->
+    <div class="scene" id="sceneResults">
+      <div class="results-area" id="resultsArea"></div>
+    </div>
+
+  </div>
+</div>
+
+<!-- Bottom Navigation -->
+<div class="nav-bar" id="navBar">
+  <button class="btn-back" id="btnBack" onclick="prevScene()">&#8592; Back</button>
+  <span class="scene-indicator" id="sceneIndicator">Scene 1 of 5</span>
+  <button class="btn-next" id="btnNext" onclick="nextScene()">Next &#8594;</button>
+</div>
+
+<!-- Teaching Moment Overlay -->
+<div class="teaching-moment" id="teachingMoment"></div>
+
+<!-- Confetti Container -->
+<div class="confetti-container" id="confettiBox"></div>
+
+<script>
+/* ============================================================
+   PROSTUDY V4 — FRACTIONS INTERACTIVE SIMULATION
+   Pure learning experience: NO questions in simulation scenes
+   ============================================================ */
+
+// ---- AUDIO ENGINE (Web Audio API) ----
+const AudioCtx = window.AudioContext || window.webkitAudioContext;
+let audioCtx;
+function ensureAudio(){if(!audioCtx)audioCtx=new AudioCtx()}
+function playTone(freq,dur,type='sine',vol=.12){
+  try{ensureAudio();const o=audioCtx.createOscillator(),g=audioCtx.createGain();
+  o.type=type;o.frequency.value=freq;g.gain.value=vol;
+  g.gain.exponentialRampToValueAtTime(.001,audioCtx.currentTime+dur);
+  o.connect(g);g.connect(audioCtx.destination);o.start();o.stop(audioCtx.currentTime+dur)}catch(e){}}
+function snapSound(){playTone(800,.08,'square',.06);setTimeout(()=>playTone(600,.06,'square',.04),40)}
+function pourSound(){playTone(200,.3,'sine',.08);setTimeout(()=>playTone(250,.2,'sine',.06),100)}
+function successSound(){playTone(523,.1,'sine',.1);setTimeout(()=>playTone(659,.1,'sine',.1),100);setTimeout(()=>playTone(784,.2,'sine',.12),200)}
+function celebSound(){[523,587,659,698,784].forEach((f,i)=>setTimeout(()=>playTone(f,.15,'sine',.1),i*80))}
+function wrongSound(){playTone(300,.15,'square',.08);setTimeout(()=>playTone(250,.2,'square',.06),100)}
+
+// ---- PARTICLES ----
+function createParticles(){
+  const c=document.getElementById('particles');
+  for(let i=0;i<20;i++){const p=document.createElement('div');p.className='particle';
+    const s=Math.random()*4+2;p.style.cssText=`width:${s}px;height:${s}px;left:${Math.random()*100}%;
+    background:${['#2D9596','#4ADE80','#A78BFA','#4ECDC4','#FFE66D'][Math.floor(Math.random()*5)]};
+    animation-duration:${Math.random()*8+6}s;animation-delay:${Math.random()*6}s`;c.appendChild(p)}}
+createParticles();
+
+// ---- STATE ----
+let currentScene = 0; // 0-4 = sim scenes, 5=celeb, 6=game, 7=quiz, 8=results
+const totalSimScenes = 5;
+const sceneIds = ['scene1','scene2','scene3','scene4','scene5','celebScreen','sceneGame','sceneQuiz','sceneResults'];
+let sceneInited = [false,false,false,false,false,false,false,false,false];
+
+// Scene 1 state
+let chocoSizes = [4,6,8,10,12,16,20];
+let chocoSizeIdx = 6;
+let chocoTotal = 20;
+let chocoRemoved = new Set();
+
+// Scene 3 explore
+let expL = {n:1,d:2}, expR = {n:2,d:4};
+
+// Scene 4 explore
+let gExp = [{n:1,d:4},{n:3,d:4}];
+
+// Scene 5 state
+let beakerSections = 5;
+let beakerFills = []; // array of {color, count}
+let beakerLevel = 0;
+
+// Game state
+let gameQ = 0, gameScore = 0;
+const gameQuestions = [
+  {recipe:"Mix flour and sugar",q:"1/6 cup flour + 2/6 cup sugar = ?",opts:["3/6","2/6","1/6","4/6"],ans:0},
+  {recipe:"Add water and milk",q:"2/8 glass water + 3/8 glass milk = ?",opts:["5/8","4/8","6/8","1/8"],ans:0},
+  {recipe:"Combine two spices",q:"1/4 spoon cumin + 2/4 spoon turmeric = ?",opts:["3/4","2/4","1/4","4/4"],ans:0},
+  {recipe:"Which is the same as 2/4?",q:"2/4 = ?",opts:["1/2","1/3","2/3","3/4"],ans:0},
+  {recipe:"Which is bigger?",q:"3/5 vs 2/5 — which is MORE?",opts:["3/5","2/5","Same","Can't tell"],ans:0},
+];
+
+// Quiz state
+let quizQ = 0, quizScore = 0, quizTimer = null, quizTimeLeft = 15;
+const quizQuestions = [
+  {q:"In the fraction 3/7, what is the denominator?",opts:["7","3","10","4"],ans:0},
+  {q:"If you cut a pizza into 8 equal slices, what fraction is 1 slice?",opts:["1/8","1/4","8/1","2/8"],ans:0},
+  {q:"Which fraction is equivalent to 1/2?",opts:["3/6","2/3","1/3","3/4"],ans:0},
+  {q:"Which is greater: 3/5 or 2/5?",opts:["3/5","2/5","Equal","Neither"],ans:0},
+  {q:"What is 2/9 + 4/9?",opts:["6/9","6/18","2/9","8/9"],ans:0},
+];
+
+// ---- NAVIGATION ----
+function updateProgress(){
+  const track=document.getElementById('progressTrack');
+  const total=7; // 5 sim + game + quiz
+  track.innerHTML='';
+  for(let i=0;i<total;i++){
+    const s=document.createElement('div');s.className='seg';
+    if(i<currentScene)s.classList.add('done');
+    else if(i===currentScene)s.classList.add('active');
+    track.appendChild(s);
+  }
+  let label='';
+  if(currentScene<5)label=`${currentScene+1}/5`;
+  else if(currentScene===5)label='Done!';
+  else if(currentScene===6)label='Game';
+  else if(currentScene===7)label='Quiz';
+  else label='Results';
+  document.getElementById('progressLabel').textContent=label;
+
+  // Nav bar
+  const nav=document.getElementById('navBar');
+  const ind=document.getElementById('sceneIndicator');
+  const btnB=document.getElementById('btnBack');
+  const btnN=document.getElementById('btnNext');
+  if(currentScene<5){
+    nav.style.display='flex';
+    ind.textContent=`Scene ${currentScene+1} of 5`;
+    btnB.disabled=currentScene===0;
+    btnN.textContent='Next \u2192';
+  } else if(currentScene===5){
+    nav.style.display='none';
+  } else if(currentScene===6 || currentScene===7){
+    nav.style.display='none';
+  } else {
+    nav.style.display='none';
+  }
+}
+
+function showScene(idx){
+  document.querySelectorAll('.scene,.celebration-screen').forEach(s=>{s.classList.remove('active');if(s.style)s.style.display=''});
+  const el=document.getElementById(sceneIds[idx]);
+  if(el){el.classList.add('active');if(el.classList.contains('celebration-screen'))el.style.display='flex'}
+  document.getElementById('sceneContainer').scrollTop=0;
+  currentScene=idx;
+  updateProgress();
+  if(!sceneInited[idx]){sceneInited[idx]=true;initScene(idx)}
+}
+
+function nextScene(){
+  if(currentScene<5)showScene(currentScene+1);
+  else if(currentScene===5)startGames();
+}
+function prevScene(){if(currentScene>0&&currentScene<5)showScene(currentScene-1)}
+function goBack(){if(currentScene>0)prevScene()}
+
+// ---- SCENE INIT ----
+function initScene(idx){
+  switch(idx){
+    case 0:initScene1();break;
+    case 1:initScene2();break;
+    case 2:initScene3();break;
+    case 3:initScene4();break;
+    case 4:initScene5();break;
+    case 5:initCeleb();break;
+    case 6:initGame();break;
+    case 7:initQuiz();break;
+  }
+}
+
+// ---- HELPERS ----
+function delay(ms){return new Promise(r=>setTimeout(r,ms))}
+function showText(id){const el=document.getElementById(id);if(el)el.classList.add('visible')}
+function hideText(id){const el=document.getElementById(id);if(el)el.classList.remove('visible')}
+function showEl(id,op=1){const el=document.getElementById(id);if(el)el.style.opacity=op}
+function gcd(a,b){return b?gcd(b,a%b):a}
+function simplify(n,d){const g=gcd(Math.abs(n),Math.abs(d));return[n/g,d/g]}
+function lcm(a,b){return(a*b)/gcd(a,b)}
+
+function showTeaching(msg,dur=2500){
+  const el=document.getElementById('teachingMoment');
+  el.textContent=msg;el.classList.add('show');
+  setTimeout(()=>el.classList.remove('show'),dur);
+}
+
+function fireConfetti(count=40){
+  const box=document.getElementById('confettiBox');
+  const colors=['#FF6B6B','#4ADE80','#FFE66D','#60A5FA','#A78BFA','#4ECDC4','#FB923C'];
+  for(let i=0;i<count;i++){
+    const p=document.createElement('div');p.className='confetti-piece';
+    const s=Math.random()*8+4;
+    p.style.cssText=`left:${Math.random()*100}%;width:${s}px;height:${s*0.6}px;
+    background:${colors[Math.floor(Math.random()*colors.length)]};
+    border-radius:${Math.random()>.5?'50%':'2px'};
+    animation-delay:${Math.random()*.5}s;animation-duration:${2+Math.random()*2}s`;
+    box.appendChild(p);
+  }
+  setTimeout(()=>{box.innerHTML=''},4000);
+}
+
+// ---- CANVAS HELPERS ----
+function drawPieChart(canvas,fraction,total,fillColor='#FF6B6B',bgColor='rgba(255,255,255,0.06)'){
+  const ctx=canvas.getContext('2d');
+  const w=canvas.width,h=canvas.height,cx=w/2,cy=h/2,r=Math.min(w,h)/2-2;
+  ctx.clearRect(0,0,w,h);
+  ctx.beginPath();ctx.arc(cx,cy,r,0,Math.PI*2);ctx.fillStyle=bgColor;ctx.fill();
+  if(fraction>0){
+    const angle=(fraction/total)*Math.PI*2;
+    ctx.beginPath();ctx.moveTo(cx,cy);
+    ctx.arc(cx,cy,r,-Math.PI/2,-Math.PI/2+angle);
+    ctx.closePath();ctx.fillStyle=fillColor;ctx.fill();
+  }
+  ctx.beginPath();ctx.arc(cx,cy,r,0,Math.PI*2);ctx.strokeStyle='rgba(255,255,255,0.15)';ctx.lineWidth=2;ctx.stroke();
+}
+
+function drawCake(canvas,slices,highlightIdx=-1,highlightColor='#FF6B6B'){
+  const ctx=canvas.getContext('2d');
+  const w=canvas.width,h=canvas.height,cx=w/2,cy=h/2,r=Math.min(w,h)/2-3;
+  ctx.clearRect(0,0,w,h);
+  // base
+  const grad=ctx.createRadialGradient(cx,cy,0,cx,cy,r);
+  grad.addColorStop(0,'#F5D090');grad.addColorStop(.6,'#E8B86D');grad.addColorStop(1,'#C4923C');
+  ctx.beginPath();ctx.arc(cx,cy,r,0,Math.PI*2);ctx.fillStyle=grad;ctx.fill();
+  // highlight
+  if(highlightIdx>=0 && slices>0){
+    const sa=-Math.PI/2+(highlightIdx*(Math.PI*2/slices));
+    const ea=sa+Math.PI*2/slices;
+    ctx.beginPath();ctx.moveTo(cx,cy);ctx.arc(cx,cy,r,sa,ea);ctx.closePath();
+    ctx.fillStyle=highlightColor;ctx.globalAlpha=.5;ctx.fill();ctx.globalAlpha=1;
+  }
+  // cut lines
+  if(slices>1){
+    ctx.strokeStyle='rgba(100,60,20,.5)';ctx.lineWidth=2;
+    for(let i=0;i<slices;i++){
+      const a=-Math.PI/2+(i*(Math.PI*2/slices));
+      ctx.beginPath();ctx.moveTo(cx,cy);ctx.lineTo(cx+Math.cos(a)*r,cy+Math.sin(a)*r);ctx.stroke();
+    }
+  }
+  ctx.beginPath();ctx.arc(cx,cy,r,0,Math.PI*2);ctx.strokeStyle='rgba(100,60,20,.4)';ctx.lineWidth=2;ctx.stroke();
+}
+
+function drawSlice(canvas,slices,color){
+  const ctx=canvas.getContext('2d');
+  const w=canvas.width,h=canvas.height,cx=w/2,cy=h/2,r=Math.min(w,h)/2-2;
+  ctx.clearRect(0,0,w,h);
+  const angle=Math.PI*2/slices;
+  ctx.beginPath();ctx.moveTo(cx,cy);ctx.arc(cx,cy,r,-Math.PI/2,-Math.PI/2+angle);ctx.closePath();
+  ctx.fillStyle=color;ctx.globalAlpha=.7;ctx.fill();ctx.globalAlpha=1;
+  ctx.strokeStyle='rgba(255,255,255,.3)';ctx.lineWidth=1.5;ctx.stroke();
+}
+
+function drawGlass(canvas,num,den,color='rgba(96,165,250,0.7)',animate=false){
+  const ctx=canvas.getContext('2d');
+  const w=canvas.width,h=canvas.height;
+  ctx.clearRect(0,0,w,h);
+  const margin=8,top=12,bot=h-8;
+  const glassH=bot-top;
+  const glassW=w-margin*2;
+  // glass outline
+  ctx.strokeStyle='rgba(255,255,255,0.25)';ctx.lineWidth=2.5;
+  ctx.beginPath();ctx.moveTo(margin,top);ctx.lineTo(margin,bot);
+  ctx.quadraticCurveTo(margin,bot+6,margin+8,bot+6);
+  ctx.lineTo(w-margin-8,bot+6);ctx.quadraticCurveTo(w-margin,bot+6,w-margin,bot);
+  ctx.lineTo(w-margin,top);ctx.stroke();
+  // marks
+  if(den>0){
+    ctx.strokeStyle='rgba(255,255,255,0.08)';ctx.lineWidth=1;
+    for(let i=1;i<den;i++){
+      const y=bot-((i/den)*glassH);
+      ctx.beginPath();ctx.moveTo(margin+4,y);ctx.lineTo(w-margin-4,y);ctx.stroke();
+    }
+  }
+  // liquid
+  if(num>0 && den>0){
+    const fillH=(Math.min(num,den)/den)*glassH;
+    const ly=bot-fillH;
+    ctx.fillStyle=color;
+    ctx.beginPath();ctx.moveTo(margin+2,bot);
+    ctx.lineTo(margin+2,ly);
+    // wave
+    const waveH=3;
+    ctx.quadraticCurveTo(w/2,ly-waveH,w-margin-2,ly);
+    ctx.lineTo(w-margin-2,bot);ctx.closePath();ctx.fill();
+    // bubbles
+    for(let i=0;i<3;i++){
+      const bx=margin+10+Math.random()*(glassW-20);
+      const by=ly+Math.random()*fillH*.8;
+      const br=1+Math.random()*2;
+      ctx.beginPath();ctx.arc(bx,by,br,0,Math.PI*2);
+      ctx.fillStyle='rgba(255,255,255,0.25)';ctx.fill();
+    }
+  }
+}
+
+function drawBeaker(canvas,sections,fills,level){
+  const ctx=canvas.getContext('2d');
+  const w=canvas.width,h=canvas.height;
+  ctx.clearRect(0,0,w,h);
+  const mx=20,top=16,bot=h-12;
+  const bH=bot-top;
+  const bW=w-mx*2;
+  // beaker outline
+  ctx.strokeStyle='rgba(255,255,255,0.3)';ctx.lineWidth=2.5;
+  ctx.beginPath();ctx.moveTo(mx-4,top-4);ctx.lineTo(mx,top);ctx.lineTo(mx,bot);
+  ctx.quadraticCurveTo(mx,bot+8,mx+12,bot+8);
+  ctx.lineTo(w-mx-12,bot+8);ctx.quadraticCurveTo(w-mx,bot+8,w-mx,bot);
+  ctx.lineTo(w-mx,top);ctx.lineTo(w-mx+4,top-4);ctx.stroke();
+  // section marks
+  ctx.strokeStyle='rgba(255,255,255,0.1)';ctx.lineWidth=1;
+  for(let i=1;i<=sections;i++){
+    const y=bot-((i/sections)*bH);
+    ctx.beginPath();ctx.moveTo(mx+4,y);ctx.lineTo(w-mx-4,y);ctx.stroke();
+    ctx.fillStyle='rgba(255,255,255,0.2)';ctx.font='10px sans-serif';ctx.textAlign='right';
+    ctx.fillText(`${i}/${sections}`,w-mx+18,y+4);
+  }
+  // fills
+  const colors=['rgba(96,165,250,0.6)','rgba(74,222,128,0.6)','rgba(251,146,60,0.6)','rgba(167,139,250,0.6)'];
+  let drawn=0;
+  for(let f=0;f<fills.length;f++){
+    const count=fills[f].count;
+    const col=fills[f].color;
+    for(let c=0;c<count;c++){
+      const y1=bot-((drawn+1)/sections)*bH;
+      const y2=bot-(drawn/sections)*bH;
+      ctx.fillStyle=col;
+      ctx.fillRect(mx+2,y1,bW-4,y2-y1);
+      drawn++;
+      if(drawn>=sections) break; // cap at full
+    }
+    if(drawn>=sections)break;
+  }
+  // wave top
+  if(level>0){
+    const waveY=bot-((Math.min(level,sections)/sections)*bH);
+    ctx.strokeStyle='rgba(255,255,255,0.3)';ctx.lineWidth=1.5;
+    ctx.beginPath();
+    ctx.moveTo(mx+2,waveY);
+    ctx.quadraticCurveTo(w/2,waveY-3,w-mx-2,waveY);
+    ctx.stroke();
+  }
+  // overflow foam
+  if(level>sections){
+    ctx.fillStyle='rgba(255,255,255,0.15)';
+    for(let i=0;i<5;i++){
+      const fx=mx+10+Math.random()*(bW-20);
+      const fy=top-4-Math.random()*12;
+      ctx.beginPath();ctx.arc(fx,fy,3+Math.random()*4,0,Math.PI*2);ctx.fill();
+    }
+  }
+}
+
+// ================================================
+// SCENE 1: WHAT IS A FRACTION?
+// ================================================
+async function initScene1(){
+  buildChocoGrid();
+  // Animation sequence
+  await delay(300);showText('s1-text1');
+  await delay(1500);
+  document.getElementById('s1-text1').textContent='This chocolate bar has 20 pieces';
+  await delay(1500);
+
+  // Auto-break 3 pieces
+  document.getElementById('s1-text1').textContent='An animated hand breaks off 3 pieces...';
+  await delay(800);
+  for(let i=0;i<3;i++){
+    await delay(500);
+    breakPiece(i,true);
+  }
+  await delay(800);
+  document.getElementById('s1-text1').textContent='3 pieces out of 20 = a fraction!';
+  await delay(1200);
+
+  // Show labels
+  document.getElementById('s1-labels').style.opacity='1';
+  await delay(1500);
+
+  // Enable interaction
+  showText('s1-text2');
+  await delay(800);
+  showEl('s1-slider');
+  document.getElementById('chocoSlider').addEventListener('input',onChocoSliderChange);
+}
+
+function buildChocoGrid(){
+  const grid=document.getElementById('chocoGrid');
+  grid.innerHTML='';
+  chocoTotal=chocoSizes[chocoSizeIdx];
+  const cols=chocoTotal<=6?chocoTotal:chocoTotal<=12?Math.ceil(chocoTotal/2):5;
+  grid.style.gridTemplateColumns=`repeat(${cols},1fr)`;
+  chocoRemoved=new Set();
+  for(let i=0;i<chocoTotal;i++){
+    const pc=document.createElement('div');
+    pc.className='choco-piece present';
+    pc.dataset.idx=i;
+    pc.addEventListener('click',()=>togglePiece(i));
+    grid.appendChild(pc);
+  }
+  updateChocoDisplay();
+}
+
+function togglePiece(idx){
+  if(chocoRemoved.has(idx)){
+    // put back
+    chocoRemoved.delete(idx);
+    const pc=document.getElementById('chocoGrid').children[idx];
+    pc.className='choco-piece returning';
+    setTimeout(()=>{pc.className='choco-piece present'},500);
+    snapSound();
+  } else {
+    breakPiece(idx,false);
+  }
+  updateChocoDisplay();
+  checkChocoTeaching();
+}
+
+function breakPiece(idx,auto){
+  chocoRemoved.add(idx);
+  const pc=document.getElementById('chocoGrid').children[idx];
+  if(pc){
+    pc.className='choco-piece removing';
+    setTimeout(()=>{pc.className='choco-piece removed';pc.addEventListener('click',()=>togglePiece(idx))},500);
+  }
+  snapSound();
+  updateChocoDisplay();
+}
+
+function updateChocoDisplay(){
+  const taken=chocoRemoved.size;
+  document.getElementById('chocoNum').textContent=taken;
+  document.getElementById('chocoDen').textContent=chocoTotal;
+  drawPieChart(document.getElementById('chocoPie'),taken,chocoTotal,'#FF6B6B');
+}
+
+function checkChocoTeaching(){
+  const taken=chocoRemoved.size;
+  if(taken===chocoTotal/2)showTeaching('Half! The most common fraction!');
+  else if(taken===chocoTotal)showTeaching('That is the WHOLE thing! = 1');
+  else if(taken===0)showTeaching('Zero pieces taken = 0 = nothing!');
+  else if(taken===1)showTeaching(`Just one piece = 1/${chocoTotal}`);
+}
+
+function onChocoSliderChange(e){
+  chocoSizeIdx=parseInt(e.target.value);
+  document.getElementById('chocoSliderVal').textContent=chocoSizes[chocoSizeIdx];
+  buildChocoGrid();
+}
+
+// ================================================
+// SCENE 2: DIVIDING INTO EQUAL PARTS
+// ================================================
+async function initScene2(){
+  // Draw initial cakes
+  drawCake(document.getElementById('cake1'),0);
+  drawCake(document.getElementById('cake2'),0);
+  drawCake(document.getElementById('cake3'),0);
+  document.getElementById('s2-compare').style.opacity='0';
+  document.getElementById('s2-text3').style.opacity='0';
+
+  await delay(400);showText('s2-text1');
+
+  // Animate cutting
+  await delay(1000);
+  drawCake(document.getElementById('cake1'),2,0,'rgba(255,107,107,0.5)');
+  document.getElementById('cake1Label').textContent='2';snapSound();
+  await delay(800);
+  drawCake(document.getElementById('cake2'),4,0,'rgba(45,149,150,0.5)');
+  document.getElementById('cake2Label').textContent='4';snapSound();
+  await delay(800);
+  drawCake(document.getElementById('cake3'),8,0,'rgba(167,139,250,0.5)');
+  document.getElementById('cake3Label').textContent='8';snapSound();
+
+  await delay(800);showText('s2-text2');
+
+  // Show comparison
+  await delay(600);
+  document.getElementById('s2-compare').style.opacity='1';
+  document.getElementById('s2-compare').style.transition='opacity .6s';
+  drawSlice(document.getElementById('slice1'),2,'#FF6B6B');
+  drawSlice(document.getElementById('slice2'),4,'#2D9596');
+  drawSlice(document.getElementById('slice3'),8,'#A78BFA');
+
+  await delay(1200);
+  document.getElementById('s2-text3').style.opacity='1';
+  showText('s2-text3');
+
+  // Show explore
+  await delay(1000);
+  showEl('s2-explore');
+  drawCake(document.getElementById('exploreCircle'),2,0,'rgba(78,205,196,0.5)');
+  document.getElementById('cutSlider').addEventListener('input',onCutSliderChange);
+}
+
+function onCutSliderChange(e){
+  const n=parseInt(e.target.value);
+  document.getElementById('cutSliderVal').textContent=n;
+  drawCake(document.getElementById('exploreCircle'),n,0,'rgba(78,205,196,0.5)');
+  document.getElementById('s2-explore-label').innerHTML=`Each piece = <span style="color:var(--turquoise)">1/${n}</span>`;
+  snapSound();
+}
+
+// ================================================
+// SCENE 3: EQUIVALENT FRACTIONS
+// ================================================
+async function initScene3(){
+  const stack=document.getElementById('barStack');
+  stack.innerHTML='';
+  document.getElementById('s3-text2').style.opacity='0';
+
+  await delay(400);showText('s3-text1');
+
+  // Build bars one by one
+  const pairs=[{n:1,d:2,color:'#60A5FA'},{n:2,d:4,color:'#60A5FA'},{n:3,d:6,color:'#60A5FA'},{n:4,d:8,color:'#60A5FA'}];
+  const mults=['','x2','x3','x4'];
+
+  for(let i=0;i<pairs.length;i++){
+    await delay(800);
+    const row=document.createElement('div');row.className='bar-row';row.style.opacity='0';row.style.transform='translateY(10px)';row.style.transition='all .5s var(--smooth)';
+    const label=document.createElement('div');label.className='frac-label';
+    label.style.color='#60A5FA';
+    label.textContent=`${pairs[i].n}/${pairs[i].d}`;
+    const bar=document.createElement('div');bar.className='frac-bar';
+    for(let s=0;s<pairs[i].d;s++){
+      const seg=document.createElement('div');seg.className='seg';
+      seg.style.background=s<pairs[i].n?'rgba(96,165,250,0.5)':'rgba(255,255,255,0.05)';
+      if(s<pairs[i].n)seg.classList.add('shaded');
+      bar.appendChild(seg);
+    }
+    const badge=document.createElement('div');badge.className='mult-badge';
+    if(mults[i])badge.textContent=mults[i];
+    row.appendChild(label);row.appendChild(bar);if(mults[i])row.appendChild(badge);
+    stack.appendChild(row);
+    requestAnimationFrame(()=>{row.style.opacity='1';row.style.transform='translateY(0)'});
+    if(mults[i])setTimeout(()=>badge.classList.add('visible'),400);
+    snapSound();
+  }
+
+  // Equation
+  await delay(600);
+  const eq=document.createElement('div');eq.className='eq-sign';eq.textContent='1/2 = 2/4 = 3/6 = 4/8';
+  eq.style.fontSize='18px';
+  stack.appendChild(eq);
+  requestAnimationFrame(()=>{eq.classList.add('visible')});
+  successSound();
+
+  await delay(800);
+  document.getElementById('s3-text2').style.opacity='1';
+  showText('s3-text2');
+
+  await delay(1000);
+  showEl('s3-explore');
+  updateExploreBars();
+}
+
+function adjExplore(which,delta){
+  if(which==='ln'){expL.n=Math.max(0,Math.min(expL.d,expL.n+delta))}
+  else if(which==='ld'){expL.d=Math.max(1,Math.min(12,expL.d+delta));expL.n=Math.min(expL.n,expL.d)}
+  else if(which==='rn'){expR.n=Math.max(0,Math.min(expR.d,expR.n+delta))}
+  else if(which==='rd'){expR.d=Math.max(1,Math.min(12,expR.d+delta));expR.n=Math.min(expR.n,expR.d)}
+  updateExploreBars();
+}
+
+function updateExploreBars(){
+  document.getElementById('expLNum').textContent=expL.n;
+  document.getElementById('expLDen').textContent=expL.d;
+  document.getElementById('expRNum').textContent=expR.n;
+  document.getElementById('expRDen').textContent=expR.d;
+
+  // Build bars
+  const b1=document.getElementById('expBar1');b1.innerHTML='';
+  for(let i=0;i<expL.d;i++){
+    const s=document.createElement('div');s.style.flex='1';s.style.borderRadius='3px';
+    s.style.background=i<expL.n?'rgba(96,165,250,0.5)':'rgba(255,255,255,0.05)';
+    s.style.transition='all .3s';b1.appendChild(s);
+  }
+  const b2=document.getElementById('expBar2');b2.innerHTML='';
+  for(let i=0;i<expR.d;i++){
+    const s=document.createElement('div');s.style.flex='1';s.style.borderRadius='3px';
+    s.style.background=i<expR.n?'rgba(74,222,128,0.5)':'rgba(255,255,255,0.05)';
+    s.style.transition='all .3s';b2.appendChild(s);
+  }
+
+  // Check equivalence
+  const lVal=expL.d>0?expL.n/expL.d:0;
+  const rVal=expR.d>0?expR.n/expR.d:0;
+  const eq=document.getElementById('expEqSign');
+  const res=document.getElementById('expResult');
+  if(Math.abs(lVal-rVal)<0.001 && expL.n>0){
+    eq.textContent='=';eq.style.color='var(--lime)';eq.classList.add('visible');
+    res.textContent='They are equal!';res.className='match-result equal';
+    successSound();
+  } else if(lVal>rVal){
+    eq.textContent='>';eq.style.color='var(--coral)';eq.classList.add('visible');
+    res.textContent=`${expL.n}/${expL.d} is bigger`;res.className='match-result';res.style.color='var(--coral)';
+  } else if(lVal<rVal){
+    eq.textContent='<';eq.style.color='var(--coral)';eq.classList.add('visible');
+    res.textContent=`${expR.n}/${expR.d} is bigger`;res.className='match-result';res.style.color='var(--blue)';
+  } else {
+    eq.textContent='=';eq.style.color='var(--lime)';eq.classList.add('visible');
+    res.textContent='Both are zero';res.className='match-result';res.style.color='var(--dim)';
+  }
+}
+
+// ================================================
+// SCENE 4: COMPARING FRACTIONS
+// ================================================
+async function initScene4(){
+  document.getElementById('glassCompare').style.opacity='0';
+  document.getElementById('s4-text2').textContent='';
+
+  await delay(400);showText('s4-text1');
+
+  // Pour glass 1
+  await delay(1000);
+  animatePour('glass1',0,2,5,'rgba(96,165,250,0.7)');
+  await delay(1500);
+  // Pour glass 2
+  animatePour('glass2',0,3,5,'rgba(74,222,128,0.7)');
+  await delay(1500);
+
+  // Show comparison
+  document.getElementById('glassCompare').style.opacity='1';
+  document.getElementById('glassCompare').style.transition='opacity .5s';
+  document.getElementById('glassCompare').textContent='3/5 > 2/5';
+  document.getElementById('glassCompare').style.color='var(--yellow)';
+  successSound();
+
+  await delay(800);
+  document.getElementById('s4-text2').textContent='Same bottom number? Just compare the tops!';
+  showText('s4-text2');
+
+  // Show LCD example
+  await delay(2000);
+  document.getElementById('s4-text2').textContent='What about different denominators?';
+
+  await delay(1500);
+  animatePour('glass1',2,2,3,'rgba(96,165,250,0.7)');
+  document.getElementById('glass1Label').textContent='2/3';
+  await delay(800);
+  animatePour('glass2',3,3,4,'rgba(74,222,128,0.7)');
+  document.getElementById('glass2Label').textContent='3/4';
+
+  await delay(1000);
+  document.getElementById('glassCompare').textContent='3/4 > 2/3';
+  document.getElementById('s4-text2').textContent='Different bottoms? Make them the same first! (LCD)';
+
+  await delay(1500);
+  showEl('s4-explore');
+  updateGlassExplore();
+}
+
+function animatePour(canvasId,fromNum,toNum,den,color){
+  const canvas=document.getElementById(canvasId);
+  let current=fromNum;
+  const step=0.05;
+  const dir=toNum>fromNum?1:-1;
+  pourSound();
+  const anim=()=>{
+    current+=step*dir;
+    if((dir>0&&current>=toNum)||(dir<0&&current<=toNum)){current=toNum;drawGlass(canvas,current,den,color);return}
+    drawGlass(canvas,current,den,color);
+    requestAnimationFrame(anim);
+  };
+  anim();
+}
+
+function adjGlass(glass,part,delta){
+  const idx=glass-1;
+  if(part==='n')gExp[idx].n=Math.max(0,Math.min(gExp[idx].d,gExp[idx].n+delta));
+  else gExp[idx].d=Math.max(1,Math.min(12,gExp[idx].d+delta));
+  gExp[idx].n=Math.min(gExp[idx].n,gExp[idx].d);
+  updateGlassExplore();
+}
+
+function updateGlassExplore(){
+  document.getElementById('g1n').textContent=gExp[0].n;
+  document.getElementById('g1d').textContent=gExp[0].d;
+  document.getElementById('g2n').textContent=gExp[1].n;
+  document.getElementById('g2d').textContent=gExp[1].d;
+
+  drawGlass(document.getElementById('glassExp1'),gExp[0].n,gExp[0].d,'rgba(96,165,250,0.7)');
+  drawGlass(document.getElementById('glassExp2'),gExp[1].n,gExp[1].d,'rgba(74,222,128,0.7)');
+
+  const v1=gExp[0].d>0?gExp[0].n/gExp[0].d:0;
+  const v2=gExp[1].d>0?gExp[1].n/gExp[1].d:0;
+  const res=document.getElementById('glassExpResult');
+  const f1=`${gExp[0].n}/${gExp[0].d}`, f2=`${gExp[1].n}/${gExp[1].d}`;
+
+  if(Math.abs(v1-v2)<0.001){
+    res.innerHTML=`<span style="color:var(--lime)">${f1} = ${f2}</span>`;
+  } else if(v1>v2){
+    res.innerHTML=`<span style="color:var(--blue)">${f1}</span> > <span style="color:var(--lime)">${f2}</span>`;
+  } else {
+    res.innerHTML=`<span style="color:var(--blue)">${f1}</span> < <span style="color:var(--lime)">${f2}</span>`;
+  }
+
+  // Show LCD button if different denominators
+  const btn=document.getElementById('lcdBtn');
+  if(gExp[0].d!==gExp[1].d)btn.style.display='';
+  else btn.style.display='none';
+  document.getElementById('lcdExplain').textContent='';
+}
+
+function showLCD(){
+  const l=lcm(gExp[0].d,gExp[1].d);
+  const m1=l/gExp[0].d, m2=l/gExp[1].d;
+  const n1=gExp[0].n*m1, n2=gExp[1].n*m2;
+  const el=document.getElementById('lcdExplain');
+  el.innerHTML=`${gExp[0].n}/${gExp[0].d} = <span style="color:var(--blue)">${n1}/${l}</span> &nbsp;&nbsp; ${gExp[1].n}/${gExp[1].d} = <span style="color:var(--lime)">${n2}/${l}</span>`;
+  successSound();
+}
+
+// ================================================
+// SCENE 5: ADDING & SUBTRACTING
+// ================================================
+async function initScene5(){
+  beakerSections=5;beakerFills=[];beakerLevel=0;
+  drawBeaker(document.getElementById('beakerCanvas'),beakerSections,beakerFills,beakerLevel);
+  document.getElementById('beakerEq').textContent='';
+  document.getElementById('overflowMsg').classList.remove('visible');
+
+  await delay(400);showText('s5-text1');
+
+  // Auto pour 1/5 blue
+  await delay(1000);
+  beakerFills.push({color:'rgba(96,165,250,0.6)',count:1});beakerLevel=1;
+  animateBeaker();pourSound();
+  document.getElementById('beakerEq').innerHTML='<span style="color:var(--blue)">1/5</span>';
+
+  await delay(1200);
+  document.getElementById('s5-text2').textContent='1/5 of the beaker is full';
+  showText('s5-text2');
+
+  // Pour 2/5 green
+  await delay(1200);
+  beakerFills.push({color:'rgba(74,222,128,0.6)',count:2});beakerLevel=3;
+  animateBeaker();pourSound();
+  document.getElementById('beakerEq').innerHTML='<span style="color:var(--blue)">1/5</span> + <span style="color:var(--lime)">2/5</span> = <span style="color:var(--turquoise)">3/5</span>';
+
+  await delay(1200);
+  document.getElementById('s5-text2').textContent='Same bottom number? Just add the tops! 1+2=3';
+  showText('s5-text2');
+
+  // Drain 1/5
+  await delay(2000);
+  document.getElementById('s5-text2').textContent='Now subtract: drain 1 part out...';
+  await delay(800);
+  if(beakerFills.length>0){
+    const last=beakerFills[beakerFills.length-1];
+    if(last.count>1)last.count--;
+    else beakerFills.pop();
+    beakerLevel=Math.max(0,beakerLevel-1);
+  }
+  animateBeaker();snapSound();
+  document.getElementById('beakerEq').innerHTML='3/5 - 1/5 = <span style="color:var(--turquoise)">2/5</span>';
+
+  await delay(1500);
+  document.getElementById('s5-text2').textContent='Your turn! Pour and drain freely below:';
+  showEl('s5-controls');
+
+  document.getElementById('beakerSlider').addEventListener('input',(e)=>{
+    beakerSections=parseInt(e.target.value);
+    document.getElementById('beakerSliderVal').textContent=beakerSections;
+    beakerFills=[];beakerLevel=0;
+    animateBeaker();updateBeakerEq();
+  });
+}
+
+function pourBottle(idx){
+  const amounts=[1,2,3];
+  const colors=['rgba(96,165,250,0.6)','rgba(74,222,128,0.6)','rgba(251,146,60,0.6)'];
+  const amt=amounts[idx];
+  beakerFills.push({color:colors[idx],count:amt});
+  beakerLevel+=amt;
+  animateBeaker();pourSound();updateBeakerEq();
+  if(beakerLevel>beakerSections){
+    document.getElementById('overflowMsg').classList.add('visible');
+    showTeaching('More than 1 whole! That is an improper fraction!');
+  } else {
+    document.getElementById('overflowMsg').classList.remove('visible');
+  }
+}
+
+function drainBeaker(){
+  if(beakerLevel<=0)return;
+  if(beakerFills.length>0){
+    const last=beakerFills[beakerFills.length-1];
+    if(last.count>1)last.count--;
+    else beakerFills.pop();
+  }
+  beakerLevel=Math.max(0,beakerLevel-1);
+  animateBeaker();snapSound();updateBeakerEq();
+  if(beakerLevel<=beakerSections)document.getElementById('overflowMsg').classList.remove('visible');
+}
+
+function resetBeaker(){
+  beakerFills=[];beakerLevel=0;
+  animateBeaker();updateBeakerEq();
+  document.getElementById('overflowMsg').classList.remove('visible');
+}
+
+function animateBeaker(){
+  drawBeaker(document.getElementById('beakerCanvas'),beakerSections,beakerFills,beakerLevel);
+}
+
+function updateBeakerEq(){
+  if(beakerLevel===0){document.getElementById('beakerEq').textContent='Empty';return}
+  const colorNames=['blue','green','orange'];
+  const colorStyles=['var(--blue)','var(--lime)','var(--orange)'];
+  const colors=['rgba(96,165,250,0.6)','rgba(74,222,128,0.6)','rgba(251,146,60,0.6)'];
+  let parts=[];
+  for(const f of beakerFills){
+    const ci=colors.indexOf(f.color);
+    const style=ci>=0?colorStyles[ci]:'var(--text)';
+    parts.push(`<span style="color:${style}">${f.count}/${beakerSections}</span>`);
+  }
+  let html=parts.join(' + ');
+  if(parts.length>1 || (parts.length===1 && beakerFills[0].count>0)){
+    html+=` = <span style="color:var(--turquoise)">${beakerLevel}/${beakerSections}</span>`;
+  }
+  document.getElementById('beakerEq').innerHTML=html;
+}
+
+// ================================================
+// CELEBRATION SCREEN
+// ================================================
+function initCeleb(){
+  celebSound();
+  fireConfetti(60);
+}
+
+// ================================================
+// GAME: FRACTION KITCHEN
+// ================================================
+function startGames(){
+  showScene(6);
+}
+
+function initGame(){
+  gameQ=0;gameScore=0;
+  showGameQuestion();
+}
+
+function showGameQuestion(){
+  if(gameQ>=gameQuestions.length){
+    // Move to quiz
+    showScene(7);
+    return;
+  }
+  const q=gameQuestions[gameQ];
+  const area=document.getElementById('kitchenArea');
+  const prog=document.getElementById('gameProgress');
+  prog.innerHTML='';
+  for(let i=0;i<gameQuestions.length;i++){
+    const d=document.createElement('div');d.className='gp-dot';
+    if(i<gameQ)d.classList.add('done');else if(i===gameQ)d.classList.add('active');
+    prog.appendChild(d);
+  }
+  area.innerHTML=`
+    <div class="recipe-card"><h3>Challenge ${gameQ+1}</h3><p>${q.recipe}</p></div>
+    <div style="font-size:18px;font-weight:700;text-align:center;padding:8px 0">${q.q}</div>
+    <div class="bowl-visual"><div class="bowl-fill" id="bowlFill" style="height:0"></div></div>
+    <div class="answer-options" id="gameOpts"></div>
+  `;
+  const opts=document.getElementById('gameOpts');
+  q.opts.forEach((o,i)=>{
+    const btn=document.createElement('button');btn.className='answer-btn';btn.textContent=o;
+    btn.addEventListener('click',()=>pickGameAnswer(i));
+    opts.appendChild(btn);
+  });
+}
+
+function pickGameAnswer(idx){
+  const q=gameQuestions[gameQ];
+  const opts=document.getElementById('gameOpts').children;
+  const correct=idx===q.ans;
+  if(correct){
+    opts[idx].classList.add('correct');successSound();gameScore++;
+    document.getElementById('bowlFill').style.height='70%';
+  } else {
+    opts[idx].classList.add('wrong');wrongSound();
+    opts[q.ans].classList.add('correct');
+  }
+  // Disable all
+  for(let b of opts)b.style.pointerEvents='none';
+  // Next after delay
+  setTimeout(()=>{gameQ++;showGameQuestion()},1200);
+}
+
+// ================================================
+// QUIZ: FRACTION CHAMPION
+// ================================================
+function initQuiz(){
+  quizQ=0;quizScore=0;
+  showQuizQuestion();
+}
+
+function showQuizQuestion(){
+  if(quizQ>=quizQuestions.length){
+    showScene(8);
+    initResults();
+    return;
+  }
+  const q=quizQuestions[quizQ];
+  const area=document.getElementById('quizArea');
+  const prog=document.getElementById('quizProgress');
+  prog.innerHTML='';
+  for(let i=0;i<quizQuestions.length;i++){
+    const d=document.createElement('div');d.className='gp-dot';
+    if(i<quizQ)d.classList.add('done');else if(i===quizQ)d.classList.add('active');
+    prog.appendChild(d);
+  }
+  quizTimeLeft=15;
+  area.innerHTML=`
+    <div class="quiz-timer"><div class="quiz-timer-fill" id="quizTimerFill" style="width:100%"></div></div>
+    <div class="quiz-q">${q.q}</div>
+    <div class="quiz-options" id="quizOpts"></div>
+  `;
+  const opts=document.getElementById('quizOpts');
+  q.opts.forEach((o,i)=>{
+    const btn=document.createElement('button');btn.className='quiz-option';btn.textContent=o;
+    btn.addEventListener('click',()=>pickQuizAnswer(i));
+    opts.appendChild(btn);
+  });
+  // Timer
+  clearInterval(quizTimer);
+  quizTimer=setInterval(()=>{
+    quizTimeLeft-=0.1;
+    const pct=Math.max(0,(quizTimeLeft/15)*100);
+    const fill=document.getElementById('quizTimerFill');
+    if(fill)fill.style.width=pct+'%';
+    if(quizTimeLeft<=0){clearInterval(quizTimer);quizTimeout()}
+  },100);
+}
+
+function pickQuizAnswer(idx){
+  clearInterval(quizTimer);
+  const q=quizQuestions[quizQ];
+  const opts=document.getElementById('quizOpts').children;
+  if(idx===q.ans){opts[idx].classList.add('correct');successSound();quizScore++}
+  else{opts[idx].classList.add('wrong');wrongSound();opts[q.ans].classList.add('correct')}
+  for(let b of opts)b.style.pointerEvents='none';
+  setTimeout(()=>{quizQ++;showQuizQuestion()},1200);
+}
+
+function quizTimeout(){
+  const q=quizQuestions[quizQ];
+  const opts=document.getElementById('quizOpts');
+  if(opts&&opts.children){
+    opts.children[q.ans].classList.add('correct');
+    for(let b of opts.children)b.style.pointerEvents='none';
+  }
+  wrongSound();
+  setTimeout(()=>{quizQ++;showQuizQuestion()},1200);
+}
+
+// ================================================
+// RESULTS
+// ================================================
+function initResults(){
+  const total=quizQuestions.length;
+  const pct=quizScore/total;
+  const stars=pct>=.8?3:pct>=.6?2:pct>=.4?1:0;
+  const area=document.getElementById('resultsArea');
+  area.innerHTML=`
+    <div class="star-display">
+      <span class="star ${stars>=1?'earned':''}">&#11088;</span>
+      <span class="star ${stars>=2?'earned':''}">&#11088;</span>
+      <span class="star ${stars>=3?'earned':''}">&#11088;</span>
+    </div>
+    <div class="results-score">${quizScore}/${total}</div>
+    <div class="results-msg">${
+      stars===3?'Perfect! You are a Fraction Champion!':
+      stars===2?'Great job! You really understand fractions!':
+      stars===1?'Good start! Try reviewing the simulation again.':
+      'Keep practicing! Revisit the simulation to learn more.'
+    }</div>
+    <button class="restart-btn" onclick="restart()">Start Over</button>
+  `;
+  if(stars>=2){fireConfetti(50);celebSound()}
+  else successSound();
+}
+
+function restart(){
+  sceneInited=sceneInited.map(()=>false);
+  showScene(0);
+}
+
+// ---- INIT ----
+showScene(0);
+</script>
+</body>
+</html>
