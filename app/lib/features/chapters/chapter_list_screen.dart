@@ -268,20 +268,6 @@ class _ChapterCard extends StatelessWidget {
                         maxLines: 1,
                         overflow: TextOverflow.ellipsis,
                       ),
-                      if (chapter.nameEn.isNotEmpty) ...[
-                        const SizedBox(height: 2),
-                        Text(
-                          chapter.nameEn,
-                          style: AppTypography.bodySmall.copyWith(
-                            color: isAvailable
-                                ? AppColors.textSecondary
-                                : AppColors.textMuted.withValues(alpha: 0.7),
-                            fontSize: 12,
-                          ),
-                          maxLines: 1,
-                          overflow: TextOverflow.ellipsis,
-                        ),
-                      ],
                     ],
                   ),
                 ),
