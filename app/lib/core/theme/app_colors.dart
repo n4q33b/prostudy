@@ -28,12 +28,25 @@ abstract final class AppColors {
   /// Off-white for subtle backgrounds
   static const Color offWhite = Color(0xFFF8FAFA);
 
+  // Surface & Border Tokens
+  /// Card surface color (alias for darkNavyLight)
+  static const Color cardSurface = darkNavyLight;
+
+  /// Card border color (teal at 30% opacity) — use in BoxDecoration borders
+  static Color get cardBorder => teal.withValues(alpha: 0.3);
+
+  /// Glassmorphism card overlay
+  static Color get glassOverlay => darkNavyLight.withValues(alpha: 0.55);
+
+  /// Glassmorphism border
+  static Color get glassBorder => teal.withValues(alpha: 0.15);
+
   // Semantic Colors
   /// Error state color
   static const Color error = Color(0xFFEF4444);
 
   /// Success state color
-  static const Color success = Color(0xFF22C55E);
+  static const Color success = Color(0xFF4ADE80);
 
   /// Warning state color
   static const Color warning = Color(0xFFF59E0B);

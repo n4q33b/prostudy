@@ -1,0 +1,1422 @@
+<!--
+  ProStudy Simulation Template v1.0
+
+  RULES:
+  - NO white backgrounds — always use dark navy theme
+  - NO external CDN libraries (no Bootstrap, jQuery, Tailwind)
+  - NO questions that block "Next" in concept sections
+  - NO English-only text in language-medium books
+  - File size MUST be < 150KB (excluding embedded images)
+  - All touch targets minimum 44x44px
+  - Use CSS variables from :root (injected by Flutter app at runtime)
+  - Concept scenes = PURE LEARNING first, quiz AFTER
+
+  STRUCTURE:
+  1. HERO SECTION       — Visual hook, chapter title, XP badge
+  2. CONCEPT SCENES     — 70% of content. Pure learning. "Next" always available.
+  3. INTERACTIVE SECTION — Touch-based activity placeholder
+  4. QUICK CHECK        — 2-3 MCQs with correct/incorrect feedback
+  5. CELEBRATION        — Stars, XP earned
+  6. GAMES/QUIZ         — Gamified content placeholder
+
+  SCROLL PROGRESS:
+  - The Flutter WebView listens on the "ScrollProgress" JavaScript channel.
+  - This template includes a scroll reporter that posts 0.000-1.000 values.
+  - The Flutter FAB ("Mark Done") appears when progress >= 0.80.
+
+  CSS VARIABLES:
+  - The Flutter app injects :root variables at runtime via _injectCssVariables().
+  - The defaults below match the app's AppColors exactly so the template
+    also renders correctly standalone in any browser.
+
+  FILE NAMING CONVENTION:
+  - Copy this template and rename to: {subject_slug}_ch{NN}.html
+  - Example: mathematics_ch01.html, marathi_sulabhbharati_ch05.html
+-->
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
+  <title>ProStudy Simulation</title>
+  <style>
+    /* ================================================================
+       DESIGN TOKENS
+       These match Flutter AppColors exactly. The Flutter WebView
+       re-injects them at runtime, so these serve as fallback defaults
+       for standalone browser testing.
+       ================================================================ */
+    :root {
+      /* Primary palette */
+      --ps-dark-navy: #0D3B4C;
+      --ps-dark-navy-light: #1A5568;
+      --ps-teal: #2D9596;
+      --ps-teal-light: #3DB5B6;
+      --ps-lime-green: #4ADE80;
+      --ps-white: #FFFFFF;
+
+      /* Text colors */
+      --ps-text-secondary: #B0C4CE;
+      --ps-text-muted: #7A9BA8;
+
+      /* Semantic colors */
+      --ps-error: #EF4444;
+      --ps-warning: #F59E0B;
+      --ps-success: #4ADE80;
+
+      /* Typography */
+      --ps-font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, "Noto Sans Devanagari", sans-serif;
+
+      /* Spacing scale (8px base) */
+      --ps-spacing-s1: 8px;
+      --ps-spacing-s2: 16px;
+      --ps-spacing-s3: 24px;
+      --ps-spacing-s4: 32px;
+
+      /* Border radii */
+      --ps-border-radius: 16px;
+      --ps-border-radius-sm: 12px;
+
+      /* Transition */
+      --ps-transition: 0.25s cubic-bezier(0.4, 0, 0.2, 1);
+
+      /* ============================================================
+         Legacy variable aliases (backward compat with older sims)
+         ============================================================ */
+      --color-primary: #2D9596;
+      --color-success: #4ADE80;
+      --color-bg: #0D3B4C;
+      --color-card: #1A5568;
+      --color-text: #E8F4F5;
+      --color-text-muted: #7DBFBF;
+      --color-warning: #F59E0B;
+      --color-error: #EF4444;
+      --font-body: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, "Noto Sans Devanagari", sans-serif;
+      --radius: 16px;
+      --spacing: 8px;
+      --transition: 0.25s cubic-bezier(0.4, 0, 0.2, 1);
+    }
+
+    /* ================================================================
+       BASE RESET & BODY
+       ================================================================ */
+    *, *::before, *::after {
+      box-sizing: border-box;
+      margin: 0;
+      padding: 0;
+    }
+
+    body {
+      background: var(--ps-dark-navy);
+      color: var(--ps-white);
+      font-family: var(--ps-font-family);
+      margin: 0;
+      padding: var(--ps-spacing-s2);
+      -webkit-tap-highlight-color: transparent;
+      overscroll-behavior: none;
+      line-height: 1.6;
+      -webkit-font-smoothing: antialiased;
+      -moz-osx-font-smoothing: grayscale;
+    }
+
+    /* Scrollbar styling for desktop preview */
+    ::-webkit-scrollbar { width: 4px; }
+    ::-webkit-scrollbar-track { background: var(--ps-dark-navy); }
+    ::-webkit-scrollbar-thumb { background: var(--ps-teal); border-radius: 2px; }
+
+    /* ================================================================
+       ACCESSIBILITY: Reduced motion
+       ================================================================ */
+    @media (prefers-reduced-motion: reduce) {
+      *, *::before, *::after {
+        animation-duration: 0.01ms !important;
+        animation-iteration-count: 1 !important;
+        transition-duration: 0.01ms !important;
+      }
+    }
+
+    /* ================================================================
+       LAYOUT UTILITIES
+       ================================================================ */
+    .ps-container {
+      max-width: 600px;
+      margin: 0 auto;
+      padding-bottom: var(--ps-spacing-s4);
+    }
+
+    .ps-section {
+      margin-bottom: var(--ps-spacing-s4);
+    }
+
+    .ps-section-title {
+      font-size: 1.25rem;
+      font-weight: 700;
+      color: var(--ps-white);
+      margin-bottom: var(--ps-spacing-s2);
+      display: flex;
+      align-items: center;
+      gap: var(--ps-spacing-s1);
+    }
+
+    .ps-section-subtitle {
+      font-size: 0.875rem;
+      color: var(--ps-text-secondary);
+      margin-bottom: var(--ps-spacing-s2);
+      line-height: 1.5;
+    }
+
+    .ps-divider {
+      height: 1px;
+      background: linear-gradient(
+        90deg,
+        transparent,
+        var(--ps-teal),
+        transparent
+      );
+      opacity: 0.3;
+      margin: var(--ps-spacing-s3) 0;
+    }
+
+    /* ================================================================
+       PROGRESS DOTS
+       Teal filled = completed, outline = upcoming, .active = 1.3x scale
+       ================================================================ */
+    .ps-progress-dots {
+      display: flex;
+      justify-content: center;
+      gap: var(--ps-spacing-s1);
+      padding: var(--ps-spacing-s2) 0;
+      position: sticky;
+      top: 0;
+      z-index: 100;
+      background: linear-gradient(
+        180deg,
+        var(--ps-dark-navy) 60%,
+        transparent
+      );
+      padding-bottom: var(--ps-spacing-s3);
+    }
+
+    .ps-dot {
+      width: 10px;
+      height: 10px;
+      border-radius: 50%;
+      border: 2px solid var(--ps-teal);
+      background: transparent;
+      transition: transform var(--ps-transition), background var(--ps-transition);
+      cursor: pointer;
+      /* Touch target: padded area around the dot */
+      padding: 0;
+      position: relative;
+    }
+
+    .ps-dot::after {
+      content: '';
+      position: absolute;
+      top: -17px;
+      left: -17px;
+      right: -17px;
+      bottom: -17px;
+    }
+
+    .ps-dot.done {
+      background: var(--ps-teal);
+    }
+
+    .ps-dot.active {
+      background: var(--ps-teal-light);
+      transform: scale(1.3);
+      box-shadow: 0 0 12px rgba(45, 149, 150, 0.5);
+    }
+
+    /* ================================================================
+       HERO SECTION
+       ================================================================ */
+    .ps-hero {
+      text-align: center;
+      padding: var(--ps-spacing-s4) var(--ps-spacing-s2);
+      margin-bottom: var(--ps-spacing-s3);
+      background: linear-gradient(
+        135deg,
+        var(--ps-dark-navy) 0%,
+        var(--ps-dark-navy-light) 50%,
+        var(--ps-dark-navy) 100%
+      );
+      border-radius: var(--ps-border-radius);
+      border: 1px solid rgba(45, 149, 150, 0.2);
+      position: relative;
+      overflow: hidden;
+    }
+
+    .ps-hero::before {
+      content: '';
+      position: absolute;
+      top: -50%;
+      left: -50%;
+      width: 200%;
+      height: 200%;
+      background: radial-gradient(
+        circle at 30% 40%,
+        rgba(45, 149, 150, 0.08) 0%,
+        transparent 60%
+      );
+      pointer-events: none;
+    }
+
+    .ps-hero-emoji {
+      font-size: 4rem;
+      display: block;
+      margin-bottom: var(--ps-spacing-s2);
+      animation: ps-float 3s ease-in-out infinite;
+    }
+
+    @keyframes ps-float {
+      0%, 100% { transform: translateY(0); }
+      50% { transform: translateY(-8px); }
+    }
+
+    .ps-hero-title {
+      font-size: 1.75rem;
+      font-weight: 800;
+      margin-bottom: var(--ps-spacing-s1);
+      background: linear-gradient(135deg, var(--ps-teal-light), var(--ps-lime-green));
+      -webkit-background-clip: text;
+      -webkit-text-fill-color: transparent;
+      background-clip: text;
+    }
+
+    .ps-hero-subtitle {
+      font-size: 1rem;
+      color: var(--ps-text-secondary);
+      margin-bottom: var(--ps-spacing-s2);
+    }
+
+    .ps-xp-badge {
+      display: inline-flex;
+      align-items: center;
+      gap: 6px;
+      background: rgba(74, 222, 128, 0.15);
+      color: var(--ps-lime-green);
+      font-size: 0.8125rem;
+      font-weight: 700;
+      padding: 6px 16px;
+      border-radius: 100px;
+      border: 1px solid rgba(74, 222, 128, 0.3);
+    }
+
+    /* ================================================================
+       CONCEPT CARDS
+       Dark navy light bg, teal left border 4px, subtle shadow
+       ================================================================ */
+    .ps-concept-card {
+      background: var(--ps-dark-navy-light);
+      border-left: 4px solid var(--ps-teal);
+      border-radius: var(--ps-border-radius-sm);
+      padding: var(--ps-spacing-s3);
+      margin-bottom: var(--ps-spacing-s2);
+      box-shadow: 0 4px 20px rgba(45, 149, 150, 0.15);
+      transition: transform var(--ps-transition), box-shadow var(--ps-transition);
+    }
+
+    .ps-concept-card:active {
+      transform: scale(0.99);
+    }
+
+    .ps-concept-card h3 {
+      font-size: 1.125rem;
+      font-weight: 700;
+      color: var(--ps-white);
+      margin-bottom: var(--ps-spacing-s1);
+    }
+
+    .ps-concept-card p {
+      font-size: 0.9375rem;
+      color: var(--ps-text-secondary);
+      line-height: 1.7;
+    }
+
+    .ps-concept-card p + p {
+      margin-top: var(--ps-spacing-s1);
+    }
+
+    /* ================================================================
+       HIGHLIGHT BOXES
+       Insight (teal), Mistake (amber), Real World (lime), Definition (muted)
+       ================================================================ */
+    .ps-highlight {
+      border-radius: var(--ps-border-radius-sm);
+      padding: var(--ps-spacing-s2);
+      margin: var(--ps-spacing-s2) 0;
+      font-size: 0.875rem;
+      line-height: 1.6;
+      display: flex;
+      gap: var(--ps-spacing-s1);
+      align-items: flex-start;
+    }
+
+    .ps-highlight-icon {
+      font-size: 1.25rem;
+      flex-shrink: 0;
+      line-height: 1;
+      margin-top: 2px;
+    }
+
+    .ps-highlight-content {
+      flex: 1;
+    }
+
+    .ps-highlight-content strong {
+      display: block;
+      margin-bottom: 4px;
+      font-size: 0.8125rem;
+      text-transform: uppercase;
+      letter-spacing: 0.5px;
+    }
+
+    /* Insight — teal */
+    .ps-highlight--insight {
+      background: rgba(45, 149, 150, 0.12);
+      border: 1px solid rgba(45, 149, 150, 0.3);
+      color: var(--ps-teal-light);
+    }
+    .ps-highlight--insight strong { color: var(--ps-teal); }
+
+    /* Mistake — amber */
+    .ps-highlight--mistake {
+      background: rgba(245, 158, 11, 0.1);
+      border: 1px solid rgba(245, 158, 11, 0.3);
+      color: #FCD34D;
+    }
+    .ps-highlight--mistake strong { color: var(--ps-warning); }
+
+    /* Real World — lime */
+    .ps-highlight--realworld {
+      background: rgba(74, 222, 128, 0.1);
+      border: 1px solid rgba(74, 222, 128, 0.25);
+      color: #86EFAC;
+    }
+    .ps-highlight--realworld strong { color: var(--ps-lime-green); }
+
+    /* Definition — muted */
+    .ps-highlight--definition {
+      background: rgba(122, 155, 168, 0.1);
+      border: 1px solid rgba(122, 155, 168, 0.25);
+      color: var(--ps-text-secondary);
+    }
+    .ps-highlight--definition strong { color: var(--ps-text-muted); }
+
+    /* ================================================================
+       FORMULA BLOCK
+       Dark navy bg, monospace, teal border, centered text
+       ================================================================ */
+    .ps-formula {
+      background: var(--ps-dark-navy);
+      border: 2px solid var(--ps-teal);
+      border-radius: var(--ps-border-radius-sm);
+      padding: var(--ps-spacing-s3);
+      margin: var(--ps-spacing-s2) 0;
+      text-align: center;
+      font-family: "SF Mono", "Fira Code", "Cascadia Code", "Consolas", monospace;
+      font-size: 1.125rem;
+      font-weight: 600;
+      color: var(--ps-teal-light);
+      letter-spacing: 1px;
+      box-shadow: 0 0 20px rgba(45, 149, 150, 0.1);
+    }
+
+    .ps-formula-label {
+      display: block;
+      font-family: var(--ps-font-family);
+      font-size: 0.75rem;
+      font-weight: 600;
+      color: var(--ps-text-muted);
+      text-transform: uppercase;
+      letter-spacing: 1.5px;
+      margin-bottom: var(--ps-spacing-s1);
+    }
+
+    /* ================================================================
+       VISUAL / DIAGRAM PLACEHOLDER
+       For SVG diagrams, canvas-based visuals, or animated illustrations
+       ================================================================ */
+    .ps-visual {
+      background: var(--ps-dark-navy-light);
+      border: 1px dashed rgba(45, 149, 150, 0.3);
+      border-radius: var(--ps-border-radius);
+      padding: var(--ps-spacing-s4);
+      margin: var(--ps-spacing-s2) 0;
+      text-align: center;
+      min-height: 200px;
+      display: flex;
+      flex-direction: column;
+      align-items: center;
+      justify-content: center;
+      gap: var(--ps-spacing-s1);
+      color: var(--ps-text-muted);
+      font-size: 0.875rem;
+    }
+
+    .ps-visual-emoji {
+      font-size: 3rem;
+      opacity: 0.7;
+    }
+
+    /* ================================================================
+       INTERACTIVE SECTION
+       Touch-based activity area
+       ================================================================ */
+    .ps-interactive {
+      background: linear-gradient(
+        135deg,
+        var(--ps-dark-navy-light),
+        rgba(45, 149, 150, 0.08)
+      );
+      border: 1px solid rgba(45, 149, 150, 0.25);
+      border-radius: var(--ps-border-radius);
+      padding: var(--ps-spacing-s3);
+      margin: var(--ps-spacing-s2) 0;
+      text-align: center;
+    }
+
+    .ps-interactive-title {
+      font-size: 1rem;
+      font-weight: 700;
+      color: var(--ps-teal-light);
+      margin-bottom: var(--ps-spacing-s1);
+    }
+
+    .ps-interactive-desc {
+      font-size: 0.875rem;
+      color: var(--ps-text-secondary);
+      margin-bottom: var(--ps-spacing-s2);
+    }
+
+    .ps-interactive-area {
+      background: var(--ps-dark-navy);
+      border: 2px dashed rgba(45, 149, 150, 0.2);
+      border-radius: var(--ps-border-radius-sm);
+      min-height: 180px;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      color: var(--ps-text-muted);
+      font-size: 0.875rem;
+      touch-action: manipulation;
+    }
+
+    /* ================================================================
+       QUIZ / MCQ BUTTONS
+       Full width, dark-navy-light bg, teal border on hover.
+       .correct = lime flash. .incorrect = red shake.
+       ================================================================ */
+    .ps-quiz-question {
+      font-size: 1rem;
+      font-weight: 600;
+      color: var(--ps-white);
+      margin-bottom: var(--ps-spacing-s2);
+      line-height: 1.5;
+    }
+
+    .ps-quiz-options {
+      display: flex;
+      flex-direction: column;
+      gap: var(--ps-spacing-s1);
+    }
+
+    .ps-quiz-btn {
+      width: 100%;
+      min-height: 52px;
+      padding: var(--ps-spacing-s2) var(--ps-spacing-s3);
+      background: var(--ps-dark-navy-light);
+      color: var(--ps-white);
+      border: 2px solid transparent;
+      border-radius: var(--ps-border-radius-sm);
+      font-family: var(--ps-font-family);
+      font-size: 0.9375rem;
+      font-weight: 500;
+      text-align: left;
+      cursor: pointer;
+      transition:
+        border-color var(--ps-transition),
+        background var(--ps-transition),
+        transform var(--ps-transition),
+        box-shadow var(--ps-transition);
+      -webkit-tap-highlight-color: transparent;
+      touch-action: manipulation;
+      display: flex;
+      align-items: center;
+      gap: var(--ps-spacing-s1);
+    }
+
+    .ps-quiz-btn:hover {
+      border-color: var(--ps-teal);
+    }
+
+    .ps-quiz-btn:active {
+      transform: scale(0.98);
+    }
+
+    .ps-quiz-btn .ps-option-label {
+      display: inline-flex;
+      align-items: center;
+      justify-content: center;
+      width: 28px;
+      height: 28px;
+      border-radius: 50%;
+      background: rgba(45, 149, 150, 0.2);
+      color: var(--ps-teal-light);
+      font-weight: 700;
+      font-size: 0.8125rem;
+      flex-shrink: 0;
+    }
+
+    .ps-quiz-btn.correct {
+      border-color: var(--ps-lime-green);
+      background: rgba(74, 222, 128, 0.15);
+      animation: ps-correct-flash 0.6s ease-out;
+    }
+
+    .ps-quiz-btn.correct .ps-option-label {
+      background: var(--ps-lime-green);
+      color: var(--ps-dark-navy);
+    }
+
+    .ps-quiz-btn.incorrect {
+      border-color: var(--ps-error);
+      background: rgba(239, 68, 68, 0.1);
+      animation: ps-shake 0.5s ease-out;
+    }
+
+    .ps-quiz-btn.incorrect .ps-option-label {
+      background: var(--ps-error);
+      color: var(--ps-white);
+    }
+
+    .ps-quiz-btn.disabled {
+      opacity: 0.5;
+      pointer-events: none;
+    }
+
+    @keyframes ps-correct-flash {
+      0% { box-shadow: 0 0 0 0 rgba(74, 222, 128, 0.5); }
+      50% { box-shadow: 0 0 20px 4px rgba(74, 222, 128, 0.3); }
+      100% { box-shadow: 0 0 0 0 transparent; }
+    }
+
+    @keyframes ps-shake {
+      0%, 100% { transform: translateX(0); }
+      15% { transform: translateX(-6px); }
+      30% { transform: translateX(6px); }
+      45% { transform: translateX(-4px); }
+      60% { transform: translateX(4px); }
+      75% { transform: translateX(-2px); }
+      90% { transform: translateX(2px); }
+    }
+
+    .ps-quiz-feedback {
+      margin-top: var(--ps-spacing-s1);
+      padding: var(--ps-spacing-s1) var(--ps-spacing-s2);
+      border-radius: var(--ps-border-radius-sm);
+      font-size: 0.875rem;
+      line-height: 1.5;
+      opacity: 0;
+      transform: translateY(-4px);
+      transition: opacity var(--ps-transition), transform var(--ps-transition);
+    }
+
+    .ps-quiz-feedback.visible {
+      opacity: 1;
+      transform: translateY(0);
+    }
+
+    .ps-quiz-feedback.correct {
+      background: rgba(74, 222, 128, 0.1);
+      color: var(--ps-lime-green);
+      border: 1px solid rgba(74, 222, 128, 0.2);
+    }
+
+    .ps-quiz-feedback.incorrect {
+      background: rgba(239, 68, 68, 0.08);
+      color: #FCA5A5;
+      border: 1px solid rgba(239, 68, 68, 0.2);
+    }
+
+    /* ================================================================
+       NAVIGATION BUTTON ("Next")
+       Always available in concept sections — never blocked.
+       ================================================================ */
+    .ps-nav-btn {
+      display: inline-flex;
+      align-items: center;
+      justify-content: center;
+      gap: var(--ps-spacing-s1);
+      min-width: 120px;
+      min-height: 48px;
+      padding: var(--ps-spacing-s1) var(--ps-spacing-s3);
+      background: var(--ps-teal);
+      color: var(--ps-white);
+      border: none;
+      border-radius: var(--ps-border-radius-sm);
+      font-family: var(--ps-font-family);
+      font-size: 1rem;
+      font-weight: 600;
+      cursor: pointer;
+      transition: background var(--ps-transition), transform var(--ps-transition);
+      -webkit-tap-highlight-color: transparent;
+      touch-action: manipulation;
+    }
+
+    .ps-nav-btn:hover {
+      background: var(--ps-teal-light);
+    }
+
+    .ps-nav-btn:active {
+      transform: scale(0.97);
+    }
+
+    .ps-nav-btn--secondary {
+      background: transparent;
+      border: 2px solid var(--ps-teal);
+      color: var(--ps-teal-light);
+    }
+
+    .ps-nav-btn--secondary:hover {
+      background: rgba(45, 149, 150, 0.1);
+    }
+
+    .ps-nav-row {
+      display: flex;
+      justify-content: flex-end;
+      gap: var(--ps-spacing-s1);
+      margin-top: var(--ps-spacing-s3);
+    }
+
+    /* ================================================================
+       CELEBRATION / XP EARNED
+       ================================================================ */
+    .ps-celebration {
+      text-align: center;
+      padding: var(--ps-spacing-s4) var(--ps-spacing-s2);
+      background: linear-gradient(
+        135deg,
+        var(--ps-dark-navy-light),
+        rgba(74, 222, 128, 0.05)
+      );
+      border-radius: var(--ps-border-radius);
+      border: 1px solid rgba(74, 222, 128, 0.2);
+    }
+
+    .ps-celebration-stars {
+      font-size: 3rem;
+      letter-spacing: 8px;
+      margin-bottom: var(--ps-spacing-s2);
+      animation: ps-bounce-in 0.8s ease-out;
+    }
+
+    @keyframes ps-bounce-in {
+      0% { transform: scale(0); opacity: 0; }
+      50% { transform: scale(1.15); }
+      100% { transform: scale(1); opacity: 1; }
+    }
+
+    .ps-celebration h2 {
+      font-size: 1.5rem;
+      font-weight: 800;
+      color: var(--ps-lime-green);
+      margin-bottom: var(--ps-spacing-s1);
+    }
+
+    .ps-celebration p {
+      color: var(--ps-text-secondary);
+      font-size: 0.9375rem;
+    }
+
+    .ps-xp-earned {
+      display: inline-flex;
+      align-items: center;
+      gap: 8px;
+      margin-top: var(--ps-spacing-s2);
+      padding: var(--ps-spacing-s1) var(--ps-spacing-s3);
+      background: rgba(74, 222, 128, 0.15);
+      border: 1px solid rgba(74, 222, 128, 0.3);
+      border-radius: 100px;
+      color: var(--ps-lime-green);
+      font-size: 1.25rem;
+      font-weight: 800;
+    }
+
+    /* ================================================================
+       GAMES/QUIZ SECTION PLACEHOLDER
+       ================================================================ */
+    .ps-game-zone {
+      background: var(--ps-dark-navy-light);
+      border: 2px solid rgba(45, 149, 150, 0.2);
+      border-radius: var(--ps-border-radius);
+      padding: var(--ps-spacing-s3);
+      text-align: center;
+    }
+
+    .ps-game-zone-title {
+      font-size: 1.125rem;
+      font-weight: 700;
+      color: var(--ps-teal-light);
+      margin-bottom: var(--ps-spacing-s1);
+    }
+
+    .ps-game-zone-desc {
+      color: var(--ps-text-secondary);
+      font-size: 0.875rem;
+    }
+
+    .ps-game-grid {
+      display: grid;
+      grid-template-columns: repeat(2, 1fr);
+      gap: var(--ps-spacing-s2);
+      margin-top: var(--ps-spacing-s2);
+    }
+
+    .ps-game-card {
+      background: var(--ps-dark-navy);
+      border: 1px solid rgba(45, 149, 150, 0.2);
+      border-radius: var(--ps-border-radius-sm);
+      padding: var(--ps-spacing-s2);
+      text-align: center;
+      cursor: pointer;
+      transition: border-color var(--ps-transition), transform var(--ps-transition);
+      min-height: 100px;
+      display: flex;
+      flex-direction: column;
+      align-items: center;
+      justify-content: center;
+      gap: 6px;
+      touch-action: manipulation;
+    }
+
+    .ps-game-card:hover {
+      border-color: var(--ps-teal);
+    }
+
+    .ps-game-card:active {
+      transform: scale(0.97);
+    }
+
+    .ps-game-card-emoji {
+      font-size: 2rem;
+    }
+
+    .ps-game-card-label {
+      font-size: 0.8125rem;
+      font-weight: 600;
+      color: var(--ps-text-secondary);
+    }
+
+    /* ================================================================
+       STEP / NUMBERED LIST
+       For step-by-step explanations
+       ================================================================ */
+    .ps-steps {
+      list-style: none;
+      counter-reset: ps-step;
+      padding: 0;
+    }
+
+    .ps-steps li {
+      counter-increment: ps-step;
+      display: flex;
+      gap: var(--ps-spacing-s2);
+      margin-bottom: var(--ps-spacing-s2);
+      align-items: flex-start;
+    }
+
+    .ps-steps li::before {
+      content: counter(ps-step);
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      min-width: 32px;
+      height: 32px;
+      border-radius: 50%;
+      background: var(--ps-teal);
+      color: var(--ps-white);
+      font-weight: 700;
+      font-size: 0.875rem;
+      flex-shrink: 0;
+    }
+
+    .ps-steps li span {
+      padding-top: 4px;
+      font-size: 0.9375rem;
+      color: var(--ps-text-secondary);
+      line-height: 1.6;
+    }
+
+    /* ================================================================
+       TABLE COMPONENT
+       For data presentation within concepts
+       ================================================================ */
+    .ps-table-wrap {
+      overflow-x: auto;
+      margin: var(--ps-spacing-s2) 0;
+      border-radius: var(--ps-border-radius-sm);
+      border: 1px solid rgba(45, 149, 150, 0.2);
+    }
+
+    .ps-table {
+      width: 100%;
+      border-collapse: collapse;
+      font-size: 0.875rem;
+    }
+
+    .ps-table th {
+      background: var(--ps-dark-navy);
+      color: var(--ps-teal-light);
+      font-weight: 700;
+      padding: var(--ps-spacing-s1) var(--ps-spacing-s2);
+      text-align: left;
+      border-bottom: 2px solid var(--ps-teal);
+      white-space: nowrap;
+    }
+
+    .ps-table td {
+      padding: var(--ps-spacing-s1) var(--ps-spacing-s2);
+      color: var(--ps-text-secondary);
+      border-bottom: 1px solid rgba(45, 149, 150, 0.1);
+    }
+
+    .ps-table tr:last-child td {
+      border-bottom: none;
+    }
+
+    .ps-table tr:hover td {
+      background: rgba(45, 149, 150, 0.05);
+    }
+
+    /* ================================================================
+       TAG / CHIP
+       ================================================================ */
+    .ps-tag {
+      display: inline-flex;
+      align-items: center;
+      gap: 4px;
+      padding: 4px 12px;
+      border-radius: 100px;
+      font-size: 0.75rem;
+      font-weight: 600;
+    }
+
+    .ps-tag--teal {
+      background: rgba(45, 149, 150, 0.15);
+      color: var(--ps-teal-light);
+      border: 1px solid rgba(45, 149, 150, 0.3);
+    }
+
+    .ps-tag--lime {
+      background: rgba(74, 222, 128, 0.15);
+      color: var(--ps-lime-green);
+      border: 1px solid rgba(74, 222, 128, 0.3);
+    }
+
+    /* ================================================================
+       FADE-IN ON SCROLL (intersection observer target)
+       ================================================================ */
+    .ps-fade-in {
+      opacity: 0;
+      transform: translateY(16px);
+      transition: opacity 0.5s ease-out, transform 0.5s ease-out;
+    }
+
+    .ps-fade-in.visible {
+      opacity: 1;
+      transform: translateY(0);
+    }
+  </style>
+</head>
+<body>
+
+  <div class="ps-container">
+
+    <!-- ============================================================
+         PROGRESS DOTS
+         Update via JS: add .done to completed, .active to current
+         ============================================================ -->
+    <nav class="ps-progress-dots" aria-label="Simulation progress">
+      <span class="ps-dot done active" data-section="0" role="button" tabindex="0" aria-label="Section 1, current"></span>
+      <span class="ps-dot" data-section="1" role="button" tabindex="0" aria-label="Section 2"></span>
+      <span class="ps-dot" data-section="2" role="button" tabindex="0" aria-label="Section 3"></span>
+      <span class="ps-dot" data-section="3" role="button" tabindex="0" aria-label="Section 4"></span>
+      <span class="ps-dot" data-section="4" role="button" tabindex="0" aria-label="Section 5"></span>
+      <span class="ps-dot" data-section="5" role="button" tabindex="0" aria-label="Section 6"></span>
+    </nav>
+
+
+    <!-- ============================================================
+         SECTION 1: HERO
+         Big visual hook, chapter title, XP available badge
+         ============================================================ -->
+    <section class="ps-section ps-fade-in" data-section="0" id="section-hero">
+      <div class="ps-hero">
+        <span class="ps-hero-emoji" aria-hidden="true">&#x1F9EE;</span>
+        <h1 class="ps-hero-title">Chapter Title Here</h1>
+        <p class="ps-hero-subtitle">A one-line description of what the student will learn in this simulation.</p>
+        <span class="ps-xp-badge">&#x2B50; 120 XP Available</span>
+      </div>
+    </section>
+
+
+    <!-- ============================================================
+         SECTION 2: CONCEPT SCENES (70% of content)
+         Pure learning. "Next" is ALWAYS available. No blocking questions.
+         ============================================================ -->
+    <section class="ps-section ps-fade-in" data-section="1" id="section-concepts">
+      <h2 class="ps-section-title">&#x1F4D6; Key Concepts</h2>
+      <p class="ps-section-subtitle">Read through each concept at your own pace. Tap "Next" whenever you are ready.</p>
+
+      <!-- Concept Card 1 -->
+      <div class="ps-concept-card">
+        <h3>What is a Fraction?</h3>
+        <p>A fraction represents a <strong>part of a whole</strong>. When we divide a bhakri (flatbread) into 4 equal pieces and take 1 piece, we have taken one-fourth of the bhakri.</p>
+        <p>Every fraction has two parts: the <strong>numerator</strong> (top number, how many parts we took) and the <strong>denominator</strong> (bottom number, total equal parts).</p>
+
+        <!-- Definition highlight -->
+        <div class="ps-highlight ps-highlight--definition">
+          <span class="ps-highlight-icon" aria-hidden="true">&#x1F4D6;</span>
+          <div class="ps-highlight-content">
+            <strong>Definition</strong>
+            A fraction is a number that represents one or more equal parts of a whole. Written as a/b, where a is the numerator and b is the denominator.
+          </div>
+        </div>
+      </div>
+
+      <!-- Formula Block Example -->
+      <div class="ps-formula">
+        <span class="ps-formula-label">Formula</span>
+        Fraction = Numerator / Denominator
+      </div>
+
+      <!-- Concept Card 2 -->
+      <div class="ps-concept-card">
+        <h3>Types of Fractions</h3>
+        <p>Fractions come in different forms. Understanding which type you are working with helps you solve problems faster.</p>
+
+        <!-- Step-by-step list -->
+        <ol class="ps-steps">
+          <li><span><strong>Proper Fraction</strong> - Numerator is less than the denominator. Example: 3/4</span></li>
+          <li><span><strong>Improper Fraction</strong> - Numerator is greater than or equal to the denominator. Example: 7/4</span></li>
+          <li><span><strong>Mixed Number</strong> - A whole number combined with a proper fraction. Example: 1 3/4</span></li>
+        </ol>
+
+        <!-- Insight highlight -->
+        <div class="ps-highlight ps-highlight--insight">
+          <span class="ps-highlight-icon" aria-hidden="true">&#x1F4A1;</span>
+          <div class="ps-highlight-content">
+            <strong>Insight</strong>
+            Every improper fraction can be written as a mixed number. Divide the numerator by the denominator: the quotient is the whole part, and the remainder becomes the new numerator.
+          </div>
+        </div>
+      </div>
+
+      <!-- Visual / Diagram Placeholder -->
+      <div class="ps-visual">
+        <span class="ps-visual-emoji" aria-hidden="true">&#x1F3A8;</span>
+        <span>Visual diagram or animation goes here</span>
+        <span>(SVG, Canvas, or animated HTML illustration)</span>
+      </div>
+
+      <!-- Concept Card 3 -->
+      <div class="ps-concept-card">
+        <h3>Equivalent Fractions</h3>
+        <p>Two fractions are equivalent if they represent the same value. You can create equivalent fractions by multiplying or dividing both numerator and denominator by the same number.</p>
+
+        <!-- Table example -->
+        <div class="ps-table-wrap">
+          <table class="ps-table">
+            <thead>
+              <tr>
+                <th>Original</th>
+                <th>Multiply by</th>
+                <th>Equivalent</th>
+              </tr>
+            </thead>
+            <tbody>
+              <tr>
+                <td>1/2</td>
+                <td>x 2</td>
+                <td>2/4</td>
+              </tr>
+              <tr>
+                <td>1/2</td>
+                <td>x 3</td>
+                <td>3/6</td>
+              </tr>
+              <tr>
+                <td>1/2</td>
+                <td>x 4</td>
+                <td>4/8</td>
+              </tr>
+            </tbody>
+          </table>
+        </div>
+
+        <!-- Mistake highlight -->
+        <div class="ps-highlight ps-highlight--mistake">
+          <span class="ps-highlight-icon" aria-hidden="true">&#x26A0;&#xFE0F;</span>
+          <div class="ps-highlight-content">
+            <strong>Common Mistake</strong>
+            Students sometimes multiply only the numerator and forget to multiply the denominator too. Always apply the same operation to BOTH parts of the fraction.
+          </div>
+        </div>
+
+        <!-- Real World highlight -->
+        <div class="ps-highlight ps-highlight--realworld">
+          <span class="ps-highlight-icon" aria-hidden="true">&#x1F30D;</span>
+          <div class="ps-highlight-content">
+            <strong>Real World</strong>
+            When a recipe says "1/2 cup of sugar" and you want to double the recipe, you need 2/2 = 1 full cup. You just used equivalent fractions!
+          </div>
+        </div>
+      </div>
+
+      <!-- Nav row: "Next" is always available -->
+      <div class="ps-nav-row">
+        <button class="ps-nav-btn" onclick="advanceSection(2)">Next &#x2192;</button>
+      </div>
+    </section>
+
+    <div class="ps-divider"></div>
+
+
+    <!-- ============================================================
+         SECTION 3: INTERACTIVE SECTION
+         Touch-based activity placeholder
+         ============================================================ -->
+    <section class="ps-section ps-fade-in" data-section="2" id="section-interactive">
+      <h2 class="ps-section-title">&#x270B; Try It Yourself</h2>
+      <p class="ps-section-subtitle">Interact with the activity below. Tap, drag, or swipe to explore.</p>
+
+      <div class="ps-interactive">
+        <div class="ps-interactive-title">Build a Fraction</div>
+        <div class="ps-interactive-desc">Drag pieces to create the fraction shown above the box.</div>
+        <div class="ps-interactive-area" id="interactive-area">
+          &#x1F449; Interactive activity will be coded here
+        </div>
+      </div>
+
+      <div class="ps-nav-row">
+        <button class="ps-nav-btn ps-nav-btn--secondary" onclick="advanceSection(1)">&#x2190; Back</button>
+        <button class="ps-nav-btn" onclick="advanceSection(3)">Next &#x2192;</button>
+      </div>
+    </section>
+
+    <div class="ps-divider"></div>
+
+
+    <!-- ============================================================
+         SECTION 4: QUICK CHECK
+         2-3 MCQs with correct/incorrect feedback. Not blocking.
+         ============================================================ -->
+    <section class="ps-section ps-fade-in" data-section="3" id="section-quiz">
+      <h2 class="ps-section-title">&#x2705; Quick Check</h2>
+      <p class="ps-section-subtitle">Test your understanding. Pick the best answer for each question.</p>
+
+      <!-- Question 1 -->
+      <div class="ps-concept-card" id="q1">
+        <p class="ps-quiz-question">1. Which of these is an improper fraction?</p>
+        <div class="ps-quiz-options">
+          <button class="ps-quiz-btn" data-correct="false" onclick="handleQuiz(this, 'q1')">
+            <span class="ps-option-label">A</span> 3/4
+          </button>
+          <button class="ps-quiz-btn" data-correct="true" onclick="handleQuiz(this, 'q1')">
+            <span class="ps-option-label">B</span> 7/4
+          </button>
+          <button class="ps-quiz-btn" data-correct="false" onclick="handleQuiz(this, 'q1')">
+            <span class="ps-option-label">C</span> 1/2
+          </button>
+          <button class="ps-quiz-btn" data-correct="false" onclick="handleQuiz(this, 'q1')">
+            <span class="ps-option-label">D</span> 2/5
+          </button>
+        </div>
+        <div class="ps-quiz-feedback" id="q1-feedback"></div>
+      </div>
+
+      <!-- Question 2 -->
+      <div class="ps-concept-card" id="q2">
+        <p class="ps-quiz-question">2. Which fraction is equivalent to 1/3?</p>
+        <div class="ps-quiz-options">
+          <button class="ps-quiz-btn" data-correct="false" onclick="handleQuiz(this, 'q2')">
+            <span class="ps-option-label">A</span> 2/5
+          </button>
+          <button class="ps-quiz-btn" data-correct="true" onclick="handleQuiz(this, 'q2')">
+            <span class="ps-option-label">B</span> 3/9
+          </button>
+          <button class="ps-quiz-btn" data-correct="false" onclick="handleQuiz(this, 'q2')">
+            <span class="ps-option-label">C</span> 4/6
+          </button>
+        </div>
+        <div class="ps-quiz-feedback" id="q2-feedback"></div>
+      </div>
+
+      <!-- Question 3 -->
+      <div class="ps-concept-card" id="q3">
+        <p class="ps-quiz-question">3. If you cut a watermelon into 8 equal slices and eat 3, what fraction did you eat?</p>
+        <div class="ps-quiz-options">
+          <button class="ps-quiz-btn" data-correct="false" onclick="handleQuiz(this, 'q3')">
+            <span class="ps-option-label">A</span> 8/3
+          </button>
+          <button class="ps-quiz-btn" data-correct="true" onclick="handleQuiz(this, 'q3')">
+            <span class="ps-option-label">B</span> 3/8
+          </button>
+          <button class="ps-quiz-btn" data-correct="false" onclick="handleQuiz(this, 'q3')">
+            <span class="ps-option-label">C</span> 3/5
+          </button>
+        </div>
+        <div class="ps-quiz-feedback" id="q3-feedback"></div>
+      </div>
+
+      <div class="ps-nav-row">
+        <button class="ps-nav-btn ps-nav-btn--secondary" onclick="advanceSection(2)">&#x2190; Back</button>
+        <button class="ps-nav-btn" onclick="advanceSection(4)">Next &#x2192;</button>
+      </div>
+    </section>
+
+    <div class="ps-divider"></div>
+
+
+    <!-- ============================================================
+         SECTION 5: CELEBRATION
+         Stars/confetti placeholder, XP earned
+         ============================================================ -->
+    <section class="ps-section ps-fade-in" data-section="4" id="section-celebration">
+      <div class="ps-celebration">
+        <div class="ps-celebration-stars" aria-hidden="true">&#x2B50;&#x2B50;&#x2B50;</div>
+        <h2>Great Work!</h2>
+        <p>You completed the Fractions simulation. Keep learning to earn even more XP.</p>
+        <div class="ps-xp-earned">&#x1F3C6; +120 XP</div>
+      </div>
+
+      <div class="ps-nav-row">
+        <button class="ps-nav-btn ps-nav-btn--secondary" onclick="advanceSection(3)">&#x2190; Review</button>
+        <button class="ps-nav-btn" onclick="advanceSection(5)">Play Games &#x2192;</button>
+      </div>
+    </section>
+
+    <div class="ps-divider"></div>
+
+
+    <!-- ============================================================
+         SECTION 6: GAMES / QUIZ
+         Gamified content placeholder
+         ============================================================ -->
+    <section class="ps-section ps-fade-in" data-section="5" id="section-games">
+      <h2 class="ps-section-title">&#x1F3AE; Games &amp; Challenges</h2>
+      <p class="ps-section-subtitle">Reinforce what you learned with fun activities.</p>
+
+      <div class="ps-game-zone">
+        <div class="ps-game-zone-title">Choose a Game</div>
+        <div class="ps-game-zone-desc">Each game tests different skills from this chapter.</div>
+
+        <div class="ps-game-grid">
+          <div class="ps-game-card" tabindex="0" role="button" aria-label="Match the Pairs game">
+            <span class="ps-game-card-emoji" aria-hidden="true">&#x1F0CF;</span>
+            <span class="ps-game-card-label">Match the Pairs</span>
+            <span class="ps-tag ps-tag--teal">+30 XP</span>
+          </div>
+          <div class="ps-game-card" tabindex="0" role="button" aria-label="Speed Quiz game">
+            <span class="ps-game-card-emoji" aria-hidden="true">&#x26A1;</span>
+            <span class="ps-game-card-label">Speed Quiz</span>
+            <span class="ps-tag ps-tag--teal">+40 XP</span>
+          </div>
+          <div class="ps-game-card" tabindex="0" role="button" aria-label="Fill the Blanks game">
+            <span class="ps-game-card-emoji" aria-hidden="true">&#x270D;&#xFE0F;</span>
+            <span class="ps-game-card-label">Fill the Blanks</span>
+            <span class="ps-tag ps-tag--lime">+25 XP</span>
+          </div>
+          <div class="ps-game-card" tabindex="0" role="button" aria-label="Sort It Out game">
+            <span class="ps-game-card-emoji" aria-hidden="true">&#x1F9E9;</span>
+            <span class="ps-game-card-label">Sort It Out</span>
+            <span class="ps-tag ps-tag--lime">+35 XP</span>
+          </div>
+        </div>
+      </div>
+
+      <div class="ps-nav-row" style="margin-top: var(--ps-spacing-s3);">
+        <button class="ps-nav-btn ps-nav-btn--secondary" onclick="advanceSection(4)">&#x2190; Back</button>
+      </div>
+    </section>
+
+    <!-- Bottom padding so the Flutter FAB does not overlap content -->
+    <div style="height: 80px;" aria-hidden="true"></div>
+
+  </div><!-- /.ps-container -->
+
+
+  <!-- ==============================================================
+       JAVASCRIPT
+       - Scroll progress reporter (posts to ScrollProgress channel)
+       - Quiz logic with correct/incorrect feedback
+       - Progress dots navigation
+       - Fade-in on scroll (IntersectionObserver)
+       ============================================================== -->
+  <script>
+    (function () {
+      'use strict';
+
+      // ── Scroll Progress Reporter ──────────────────────────────
+      // Posts a 0.000 - 1.000 float to the Flutter WebView's
+      // ScrollProgress JavaScriptChannel every time the user scrolls.
+      var lastReported = -1;
+
+      function reportScrollProgress() {
+        var scrollHeight = document.documentElement.scrollHeight - window.innerHeight;
+        var progress = scrollHeight > 0 ? window.scrollY / scrollHeight : 0;
+        var rounded = Math.round(progress * 1000) / 1000;
+        if (rounded !== lastReported) {
+          lastReported = rounded;
+          try {
+            ScrollProgress.postMessage(rounded.toFixed(3));
+          } catch (e) {
+            // Not inside Flutter WebView — silently ignore
+          }
+        }
+      }
+
+      var scrollTicking = false;
+      window.addEventListener('scroll', function () {
+        if (!scrollTicking) {
+          requestAnimationFrame(function () {
+            reportScrollProgress();
+            scrollTicking = false;
+          });
+          scrollTicking = true;
+        }
+      }, { passive: true });
+
+
+      // ── Progress Dots ─────────────────────────────────────────
+      var currentSection = 0;
+      var dots = document.querySelectorAll('.ps-dot');
+
+      function updateDots(sectionIndex) {
+        dots.forEach(function (dot, i) {
+          dot.classList.remove('active');
+          if (i < sectionIndex) {
+            dot.classList.add('done');
+          } else if (i === sectionIndex) {
+            dot.classList.add('done');
+            dot.classList.add('active');
+          } else {
+            dot.classList.remove('done');
+          }
+        });
+        currentSection = sectionIndex;
+      }
+
+      // Click on dot to jump to section
+      dots.forEach(function (dot, i) {
+        dot.addEventListener('click', function () {
+          advanceSection(i);
+        });
+      });
+
+      // Expose advanceSection globally for inline onclick handlers
+      window.advanceSection = function (sectionIndex) {
+        updateDots(sectionIndex);
+        var target = document.querySelector('[data-section="' + sectionIndex + '"]');
+        if (target) {
+          target.scrollIntoView({ behavior: 'smooth', block: 'start' });
+        }
+      };
+
+
+      // ── Quiz Logic ────────────────────────────────────────────
+      // Tracks which questions have been answered to prevent re-answering
+      var answeredQuestions = {};
+
+      window.handleQuiz = function (btn, questionId) {
+        if (answeredQuestions[questionId]) return;
+        answeredQuestions[questionId] = true;
+
+        var isCorrect = btn.getAttribute('data-correct') === 'true';
+        var container = document.getElementById(questionId);
+        var allBtns = container.querySelectorAll('.ps-quiz-btn');
+        var feedback = document.getElementById(questionId + '-feedback');
+
+        // Disable all buttons in this question
+        allBtns.forEach(function (b) {
+          b.classList.add('disabled');
+          // Also highlight the correct answer if user got it wrong
+          if (b.getAttribute('data-correct') === 'true' && !isCorrect) {
+            b.classList.add('correct');
+          }
+        });
+
+        // Mark clicked button
+        if (isCorrect) {
+          btn.classList.remove('disabled');
+          btn.classList.add('correct');
+          feedback.textContent = 'Correct! Well done.';
+          feedback.className = 'ps-quiz-feedback correct visible';
+        } else {
+          btn.classList.remove('disabled');
+          btn.classList.add('incorrect');
+          feedback.textContent = 'Not quite. The correct answer is highlighted above.';
+          feedback.className = 'ps-quiz-feedback incorrect visible';
+        }
+      };
+
+
+      // ── Fade-In on Scroll (IntersectionObserver) ──────────────
+      if ('IntersectionObserver' in window) {
+        var fadeObserver = new IntersectionObserver(function (entries) {
+          entries.forEach(function (entry) {
+            if (entry.isIntersecting) {
+              entry.target.classList.add('visible');
+              fadeObserver.unobserve(entry.target);
+            }
+          });
+        }, {
+          threshold: 0.1,
+          rootMargin: '0px 0px -40px 0px'
+        });
+
+        document.querySelectorAll('.ps-fade-in').forEach(function (el) {
+          fadeObserver.observe(el);
+        });
+      } else {
+        // Fallback: make everything visible immediately
+        document.querySelectorAll('.ps-fade-in').forEach(function (el) {
+          el.classList.add('visible');
+        });
+      }
+
+
+      // ── Auto-Update Progress Dots on Scroll ───────────────────
+      // Uses IntersectionObserver to track which section is in view
+      if ('IntersectionObserver' in window) {
+        var sectionObserver = new IntersectionObserver(function (entries) {
+          entries.forEach(function (entry) {
+            if (entry.isIntersecting) {
+              var idx = parseInt(entry.target.getAttribute('data-section'), 10);
+              if (!isNaN(idx)) {
+                updateDots(idx);
+              }
+            }
+          });
+        }, {
+          threshold: 0.3
+        });
+
+        document.querySelectorAll('[data-section]').forEach(function (section) {
+          sectionObserver.observe(section);
+        });
+      }
+
+
+      // ── Initial State ─────────────────────────────────────────
+      updateDots(0);
+      reportScrollProgress();
+
+    })();
+  </script>
+
+</body>
+</html>

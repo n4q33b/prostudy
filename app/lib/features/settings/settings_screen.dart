@@ -5,6 +5,7 @@ import 'package:go_router/go_router.dart';
 import '../../core/constants/app_constants.dart';
 import '../../core/l10n/app_strings.dart';
 import '../../core/models/user_profile.dart';
+import '../../core/providers/gamification_provider.dart';
 import '../../core/providers/user_profile_provider.dart';
 import '../../core/theme/app_colors.dart';
 import '../../core/theme/app_typography.dart';
@@ -223,7 +224,7 @@ class SettingsScreen extends ConsumerWidget {
           const SizedBox(height: 8),
 
           // Section 1 -- Profile Info
-          _buildProfileInfoCard(profile, s),
+          _buildProfileInfoCard(profile, s, ref),
           const SizedBox(height: 24),
 
           // Section 2 -- Change Medium
@@ -250,7 +251,7 @@ class SettingsScreen extends ConsumerWidget {
   // Section 1 -- Profile Info
   // ---------------------------------------------------------------------------
 
-  Widget _buildProfileInfoCard(UserProfile profile, AppStrings s) {
+  Widget _buildProfileInfoCard(UserProfile profile, AppStrings s, WidgetRef ref) {
     return _SectionCard(
       child: Column(
         crossAxisAlignment: CrossAxisAlignment.start,
@@ -306,6 +307,17 @@ class SettingsScreen extends ConsumerWidget {
               Icons.edit_outlined,
               color: AppColors.tealLight,
               size: 18,
+            ),
+          ),
+          const _ThinDivider(),
+
+          // Level
+          _ProfileRow(
+            label: s.level,
+            value: ref.watch(gamificationProvider).levelName,
+            trailing: Text(
+              ref.watch(gamificationProvider).levelEmoji,
+              style: const TextStyle(fontSize: 18),
             ),
           ),
         ],

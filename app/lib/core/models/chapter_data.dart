@@ -5,6 +5,9 @@ class ChapterData {
     required this.name,
     required this.nameEn,
     this.hasSimulation = false,
+    this.xpReward = 50,
+    this.estimatedMinutes = 5,
+    this.isCompleted = false,
   });
 
   /// Chapter number (1-based)
@@ -18,4 +21,13 @@ class ChapterData {
 
   /// Whether a simulation HTML file exists for this chapter
   final bool hasSimulation;
+
+  /// XP reward for completing this chapter
+  final int xpReward;
+
+  /// Estimated time to complete in minutes
+  final int estimatedMinutes;
+
+  /// Whether the student has completed this chapter
+  final bool isCompleted;
 }

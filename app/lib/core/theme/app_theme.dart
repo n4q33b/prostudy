@@ -153,6 +153,15 @@ abstract final class AppTheme {
       splashColor: AppColors.teal.withValues(alpha: 0.1),
       highlightColor: AppColors.teal.withValues(alpha: 0.05),
 
+      // Bottom navigation (prep for future use)
+      bottomNavigationBarTheme: const BottomNavigationBarThemeData(
+        backgroundColor: AppColors.darkNavy,
+        selectedItemColor: AppColors.teal,
+        unselectedItemColor: AppColors.textMuted,
+        type: BottomNavigationBarType.fixed,
+        elevation: 0,
+      ),
+
       // Page transitions
       pageTransitionsTheme: const PageTransitionsTheme(
         builders: {

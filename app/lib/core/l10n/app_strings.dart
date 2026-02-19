@@ -49,6 +49,12 @@ class AppStrings {
     required this.chaptersComingSoon,
     // Simulation
     required this.couldNotLoadSimulation,
+    // Gamification & Enhanced UI
+    required this.continueLearning,
+    required this.markDone,
+    required this.leaderboard,
+    required this.minutesShort,
+    required this.level,
   });
 
   /// Returns localized strings for the given medium.
@@ -109,6 +115,13 @@ class AppStrings {
   // -- Simulation --
   final String couldNotLoadSimulation;
 
+  // -- Gamification & Enhanced UI --
+  final String continueLearning;
+  final String markDone;
+  final String leaderboard;
+  final String minutesShort;
+  final String level;
+
   // ---------------------------------------------------------------------------
   // Parameterized strings
   // ---------------------------------------------------------------------------
@@ -162,6 +175,13 @@ class AppStrings {
     return 'Free during trial ($n ${n == 1 ? 'day' : 'days'} remaining)';
   }
 
+  String xpDisplay(int xp) => '$xp XP';
+
+  String streakDisplay(int days) {
+    if (langCode == 'mr') return '$days दिवस';
+    return '$days ${days == 1 ? 'day' : 'days'}';
+  }
+
   // ---------------------------------------------------------------------------
   // English
   // ---------------------------------------------------------------------------
@@ -210,6 +230,12 @@ class AppStrings {
     chaptersComingSoon: 'Chapters coming soon',
     // Simulation
     couldNotLoadSimulation: 'Could not load simulation',
+    // Gamification & Enhanced UI
+    continueLearning: 'Continue Learning',
+    markDone: 'Mark Done',
+    leaderboard: 'Leaderboard',
+    minutesShort: 'min',
+    level: 'Level',
   );
 
   // ---------------------------------------------------------------------------
@@ -260,5 +286,11 @@ class AppStrings {
     chaptersComingSoon: 'धडे लवकरच येत आहेत',
     // Simulation
     couldNotLoadSimulation: 'सिम्युलेशन लोड करता आले नाही',
+    // Gamification & Enhanced UI
+    continueLearning: 'शिकणे सुरू ठेवा',
+    markDone: 'पूर्ण झाले',
+    leaderboard: 'लीडरबोर्ड',
+    minutesShort: 'मिनि',
+    level: 'स्तर',
   );
 }

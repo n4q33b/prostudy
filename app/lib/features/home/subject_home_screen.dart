@@ -1,4 +1,5 @@
 import 'package:flutter/material.dart';
+import 'package:flutter_animate/flutter_animate.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:go_router/go_router.dart';
 
@@ -6,6 +7,7 @@ import '../../core/constants/app_constants.dart';
 import '../../core/l10n/app_strings.dart';
 import '../../core/theme/app_colors.dart';
 import '../../core/theme/app_typography.dart';
+import '../../core/providers/gamification_provider.dart';
 import '../../core/providers/user_profile_provider.dart';
 import '../../core/models/user_profile.dart';
 
@@ -231,7 +233,7 @@ class SubjectHomeScreen extends ConsumerWidget {
             crossAxisAlignment: CrossAxisAlignment.start,
             children: [
               // Custom App Bar
-              _buildAppBar(context, profile),
+              _buildAppBar(context, profile, ref),
 
               // Profile info chips
               if (profile != null) _buildProfileChips(profile, s),
@@ -239,6 +241,21 @@ class SubjectHomeScreen extends ConsumerWidget {
               // Trial banner
               if (profile != null && profile.isTrialActive)
                 _buildTrialBanner(profile, s),
+
+              // Continue Learning card
+              _buildContinueLearning(s)
+                  .animate()
+                  .fadeIn(
+                    duration: const Duration(milliseconds: 500),
+                    delay: const Duration(milliseconds: 200),
+                  )
+                  .slideY(
+                    begin: 0.03,
+                    end: 0,
+                    duration: const Duration(milliseconds: 500),
+                    delay: const Duration(milliseconds: 200),
+                    curve: Curves.easeOutCubic,
+                  ),
 
               const SizedBox(height: 20),
 
@@ -252,7 +269,11 @@ class SubjectHomeScreen extends ConsumerWidget {
                   style: AppTypography.headlineLarge,
                 ),
               ),
-              const SizedBox(height: 16),
+              const SizedBox(height: 8),
+
+              // Leaderboard teaser
+              _buildLeaderboardTeaser(s),
+              const SizedBox(height: 12),
 
               // Subject cards grid
               Expanded(
@@ -270,7 +291,7 @@ class SubjectHomeScreen extends ConsumerWidget {
   // App Bar
   // ---------------------------------------------------------------------------
 
-  Widget _buildAppBar(BuildContext context, UserProfile? profile) {
+  Widget _buildAppBar(BuildContext context, UserProfile? profile, WidgetRef ref) {
     return Padding(
       padding: const EdgeInsets.fromLTRB(
         AppConstants.screenPadding,
@@ -300,6 +321,12 @@ class SubjectHomeScreen extends ConsumerWidget {
             ),
           ),
           const Spacer(),
+          // XP display
+          _buildXpChip(ref),
+          const SizedBox(width: 6),
+          // Streak display
+          _buildStreakChip(ref),
+          const SizedBox(width: 8),
           // Settings gear
           Material(
             color: Colors.transparent,
@@ -350,43 +377,167 @@ class SubjectHomeScreen extends ConsumerWidget {
   }
 
   // ---------------------------------------------------------------------------
-  // Trial Banner
+  // Trial Banner (animated gradient border)
   // ---------------------------------------------------------------------------
 
   Widget _buildTrialBanner(UserProfile profile, AppStrings s) {
     final daysLeft = profile.trialDaysRemaining;
     return Padding(
       padding: const EdgeInsets.fromLTRB(
-        AppConstants.screenPadding,
-        12,
-        AppConstants.screenPadding,
-        0,
+        AppConstants.screenPadding, 12, AppConstants.screenPadding, 0,
       ),
       child: Container(
-        width: double.infinity,
-        padding: const EdgeInsets.symmetric(horizontal: 16, vertical: 10),
         decoration: BoxDecoration(
-          color: AppColors.limeGreen.withValues(alpha: 0.15),
           borderRadius: BorderRadius.circular(12),
+          gradient: LinearGradient(
+            colors: [
+              AppColors.teal.withValues(alpha: 0.4),
+              AppColors.limeGreen.withValues(alpha: 0.4),
+              AppColors.teal.withValues(alpha: 0.4),
+            ],
+          ),
+        ),
+        padding: const EdgeInsets.all(1.5),
+        child: Container(
+          width: double.infinity,
+          padding: const EdgeInsets.symmetric(horizontal: 16, vertical: 10),
+          decoration: BoxDecoration(
+            color: AppColors.darkNavy,
+            borderRadius: BorderRadius.circular(10.5),
+          ),
+          child: Row(
+            children: [
+              const Text('\u{1F381}', style: TextStyle(fontSize: 18)),
+              const SizedBox(width: 10),
+              Expanded(
+                child: Text(
+                  s.freeTrialDaysRemaining(daysLeft),
+                  style: AppTypography.labelMedium.copyWith(
+                    color: AppColors.limeGreen,
+                    fontWeight: FontWeight.w600,
+                  ),
+                ),
+              ),
+            ],
+          ),
+        ),
+      ).animate(onPlay: (c) => c.repeat(reverse: true))
+        .shimmer(
+          duration: const Duration(milliseconds: 2000),
+          color: AppColors.limeGreen.withValues(alpha: 0.15),
+        ),
+    );
+  }
+
+  // ---------------------------------------------------------------------------
+  // Continue Learning Card
+  // ---------------------------------------------------------------------------
+
+  Widget _buildContinueLearning(AppStrings s) {
+    return Padding(
+      padding: const EdgeInsets.fromLTRB(
+        AppConstants.screenPadding, 12, AppConstants.screenPadding, 0,
+      ),
+      child: Container(
+        decoration: BoxDecoration(
+          gradient: LinearGradient(
+            colors: [
+              AppColors.teal.withValues(alpha: 0.15),
+              AppColors.glassOverlay,
+            ],
+          ),
+          borderRadius: BorderRadius.circular(AppConstants.cardBorderRadius),
           border: Border.all(
-            color: AppColors.limeGreen.withValues(alpha: 0.3),
+            color: AppColors.cardBorder,
             width: 1,
           ),
         ),
+        padding: const EdgeInsets.all(16),
         child: Row(
           children: [
-            Text(
-              '\u{1F381}', // gift emoji
-              style: const TextStyle(fontSize: 18),
+            // Play icon
+            Container(
+              width: 44,
+              height: 44,
+              decoration: BoxDecoration(
+                color: AppColors.teal.withValues(alpha: 0.20),
+                borderRadius: BorderRadius.circular(12),
+              ),
+              child: const Icon(
+                Icons.play_arrow_rounded,
+                color: AppColors.teal,
+                size: 24,
+              ),
             ),
-            const SizedBox(width: 10),
+            const SizedBox(width: 14),
             Expanded(
-              child: Text(
-                s.freeTrialDaysRemaining(daysLeft),
-                style: AppTypography.labelMedium.copyWith(
-                  color: AppColors.limeGreen,
-                  fontWeight: FontWeight.w600,
-                ),
+              child: Column(
+                crossAxisAlignment: CrossAxisAlignment.start,
+                children: [
+                  Text(
+                    s.continueLearning,
+                    style: AppTypography.labelMedium,
+                  ),
+                  Text(
+                    'Coming soon...',
+                    style: AppTypography.bodySmall.copyWith(
+                      color: AppColors.textMuted,
+                    ),
+                  ),
+                ],
+              ),
+            ),
+            Icon(
+              Icons.chevron_right_rounded,
+              color: AppColors.textMuted,
+            ),
+          ],
+        ),
+      ),
+    );
+  }
+
+  // ---------------------------------------------------------------------------
+  // Leaderboard Teaser Card
+  // ---------------------------------------------------------------------------
+
+  Widget _buildLeaderboardTeaser(AppStrings s) {
+    return Padding(
+      padding: const EdgeInsets.symmetric(
+        horizontal: AppConstants.screenPadding,
+      ),
+      child: Container(
+        decoration: BoxDecoration(
+          color: AppColors.glassOverlay,
+          borderRadius: BorderRadius.circular(AppConstants.cardBorderRadius),
+          border: Border.all(
+            color: AppColors.glassBorder,
+            width: 1,
+          ),
+        ),
+        padding: const EdgeInsets.all(16),
+        child: Row(
+          children: [
+            const Text(
+              '\u{1F3C6}',
+              style: TextStyle(fontSize: 24),
+            ),
+            const SizedBox(width: 12),
+            Expanded(
+              child: Column(
+                crossAxisAlignment: CrossAxisAlignment.start,
+                children: [
+                  Text(
+                    s.leaderboard,
+                    style: AppTypography.titleSmall,
+                  ),
+                  Text(
+                    'Coming soon...',
+                    style: AppTypography.bodySmall.copyWith(
+                      color: AppColors.textMuted,
+                    ),
+                  ),
+                ],
               ),
             ),
           ],
@@ -426,51 +577,147 @@ class SubjectHomeScreen extends ConsumerWidget {
           icon: subject['icon'] as IconData,
           chapters: chapterCount,
           chaptersLabel: s.nChapters(chapterCount),
-          progressLabel: s.progress,
           progress: 0.0, // Placeholder -- no progress yet
           onTap: () {
             final name = subject['name'] as String;
             context.go('${AppConstants.chapterListRoute}/$name');
           },
-        );
+        )
+          .animate()
+          .fadeIn(
+            delay: Duration(milliseconds: 80 * index),
+            duration: const Duration(milliseconds: 400),
+          )
+          .slideY(
+            begin: 0.05,
+            end: 0,
+            delay: Duration(milliseconds: 80 * index),
+            duration: const Duration(milliseconds: 400),
+            curve: Curves.easeOutCubic,
+          );
       },
     );
   }
 
   // ---------------------------------------------------------------------------
-  // AI Chat Tutor FAB
+  // AI Chat Tutor FAB (pulsing glow + tooltip)
   // ---------------------------------------------------------------------------
 
   Widget _buildAiChatFab(BuildContext context, AppStrings s) {
-    return FloatingActionButton.extended(
-      onPressed: () {
-        ScaffoldMessenger.of(context).showSnackBar(
-          SnackBar(
-            content: Text(
-              s.aiChatTutorComingSoon,
-              style: AppTypography.bodyMedium.copyWith(
-                color: AppColors.white,
+    return Tooltip(
+      message: 'Ask your AI tutor',
+      preferBelow: false,
+      child: FloatingActionButton.extended(
+        onPressed: () {
+          ScaffoldMessenger.of(context).showSnackBar(
+            SnackBar(
+              content: Text(
+                s.aiChatTutorComingSoon,
+                style: AppTypography.bodyMedium.copyWith(
+                  color: AppColors.white,
+                ),
               ),
+              backgroundColor: AppColors.darkNavyLight,
+              behavior: SnackBarBehavior.floating,
+              shape: RoundedRectangleBorder(
+                borderRadius: BorderRadius.circular(12),
+              ),
+              duration: const Duration(seconds: 2),
             ),
-            backgroundColor: AppColors.darkNavyLight,
-            behavior: SnackBarBehavior.floating,
-            shape: RoundedRectangleBorder(
-              borderRadius: BorderRadius.circular(12),
-            ),
-            duration: const Duration(seconds: 2),
+          );
+        },
+        backgroundColor: AppColors.teal,
+        foregroundColor: AppColors.white,
+        elevation: 6,
+        icon: const Icon(Icons.smart_toy_rounded),
+        label: Text(
+          s.aiChatTutor,
+          style: AppTypography.labelMedium.copyWith(
+            color: AppColors.white,
+            fontWeight: FontWeight.w600,
           ),
-        );
-      },
-      backgroundColor: AppColors.teal,
-      foregroundColor: AppColors.white,
-      elevation: 6,
-      icon: const Icon(Icons.smart_toy_rounded),
-      label: Text(
-        s.aiChatTutor,
-        style: AppTypography.labelMedium.copyWith(
-          color: AppColors.white,
-          fontWeight: FontWeight.w600,
         ),
+      ),
+    ).animate(onPlay: (c) => c.repeat(reverse: true))
+      .custom(
+        duration: const Duration(milliseconds: 2000),
+        curve: Curves.easeInOut,
+        builder: (context, value, child) => Container(
+          decoration: BoxDecoration(
+            borderRadius: BorderRadius.circular(16),
+            boxShadow: [
+              BoxShadow(
+                color: AppColors.teal.withValues(alpha: 0.35 * value),
+                blurRadius: 20 * value,
+                spreadRadius: 2 * value,
+              ),
+            ],
+          ),
+          child: child,
+        ),
+      );
+  }
+
+  // ---------------------------------------------------------------------------
+  // Gamification Chips
+  // ---------------------------------------------------------------------------
+
+  Widget _buildXpChip(WidgetRef ref) {
+    final gamification = ref.watch(gamificationProvider);
+    return Container(
+      padding: const EdgeInsets.symmetric(horizontal: 8, vertical: 4),
+      decoration: BoxDecoration(
+        color: AppColors.teal.withValues(alpha: 0.15),
+        borderRadius: BorderRadius.circular(12),
+      ),
+      child: Row(
+        mainAxisSize: MainAxisSize.min,
+        children: [
+          const Text('\u{1F48E}', style: TextStyle(fontSize: 12)),
+          const SizedBox(width: 4),
+          Text(
+            '${gamification.totalXp}',
+            style: AppTypography.labelSmall.copyWith(
+              color: AppColors.tealLight,
+              fontWeight: FontWeight.w600,
+              fontSize: 11,
+            ),
+          ),
+        ],
+      ),
+    );
+  }
+
+  Widget _buildStreakChip(WidgetRef ref) {
+    final gamification = ref.watch(gamificationProvider);
+    if (gamification.currentStreak == 0) return const SizedBox.shrink();
+    return Container(
+      padding: const EdgeInsets.symmetric(horizontal: 8, vertical: 4),
+      decoration: BoxDecoration(
+        color: AppColors.warning.withValues(alpha: 0.15),
+        borderRadius: BorderRadius.circular(12),
+      ),
+      child: Row(
+        mainAxisSize: MainAxisSize.min,
+        children: [
+          const Text('\u{1F525}', style: TextStyle(fontSize: 12))
+              .animate(onPlay: (c) => c.repeat(reverse: true))
+              .scaleXY(
+                begin: 1.0,
+                end: 1.15,
+                duration: const Duration(milliseconds: 800),
+                curve: Curves.easeInOut,
+              ),
+          const SizedBox(width: 3),
+          Text(
+            '${gamification.currentStreak}',
+            style: AppTypography.labelSmall.copyWith(
+              color: AppColors.warning,
+              fontWeight: FontWeight.w600,
+              fontSize: 11,
+            ),
+          ),
+        ],
       ),
     );
   }
@@ -528,14 +775,13 @@ class _DotSeparator extends StatelessWidget {
 
 /// A single subject card in the 2-column grid.
 ///
-/// Shows the subject icon, name, chapter count, and a progress bar.
+/// Shows the subject icon, name, chapter count, and a circular progress ring.
 class _SubjectCard extends StatelessWidget {
   const _SubjectCard({
     required this.name,
     required this.icon,
     required this.chapters,
     required this.chaptersLabel,
-    required this.progressLabel,
     required this.progress,
     required this.onTap,
   });
@@ -544,7 +790,6 @@ class _SubjectCard extends StatelessWidget {
   final IconData icon;
   final int chapters;
   final String chaptersLabel;
-  final String progressLabel;
   final double progress;
   final VoidCallback onTap;
 
@@ -560,10 +805,10 @@ class _SubjectCard extends StatelessWidget {
         highlightColor: AppColors.teal.withValues(alpha: 0.08),
         child: Container(
           decoration: BoxDecoration(
-            color: AppColors.darkNavyLight.withValues(alpha: 0.55),
+            color: AppColors.glassOverlay,
             borderRadius: BorderRadius.circular(AppConstants.cardBorderRadius),
             border: Border.all(
-              color: AppColors.teal.withValues(alpha: 0.15),
+              color: AppColors.glassBorder,
               width: 1,
             ),
             boxShadow: [
@@ -574,84 +819,100 @@ class _SubjectCard extends StatelessWidget {
               ),
             ],
           ),
-          padding: const EdgeInsets.all(16),
-          child: Column(
-            crossAxisAlignment: CrossAxisAlignment.start,
+          child: Row(
             children: [
-              // Icon container with teal accent
+              // Teal-to-lime left gradient border
               Container(
-                width: 44,
-                height: 44,
+                width: 4,
                 decoration: BoxDecoration(
-                  color: AppColors.teal.withValues(alpha: 0.15),
-                  borderRadius: BorderRadius.circular(12),
-                ),
-                child: Icon(
-                  icon,
-                  size: 24,
-                  color: AppColors.teal,
-                ),
-              ),
-              const SizedBox(height: 14),
-
-              // Subject name
-              Text(
-                name,
-                style: AppTypography.titleMedium.copyWith(
-                  fontWeight: FontWeight.w600,
-                ),
-                maxLines: 1,
-                overflow: TextOverflow.ellipsis,
-              ),
-              const SizedBox(height: 4),
-
-              // Chapter count
-              Text(
-                chaptersLabel,
-                style: AppTypography.bodySmall.copyWith(
-                  color: AppColors.textMuted,
+                  gradient: const LinearGradient(
+                    begin: Alignment.topCenter,
+                    end: Alignment.bottomCenter,
+                    colors: [AppColors.teal, AppColors.limeGreen],
+                  ),
+                  borderRadius: BorderRadius.only(
+                    topLeft: Radius.circular(AppConstants.cardBorderRadius),
+                    bottomLeft: Radius.circular(AppConstants.cardBorderRadius),
+                  ),
                 ),
               ),
-
-              const Spacer(),
-
-              // Progress bar
-              Column(
-                crossAxisAlignment: CrossAxisAlignment.start,
-                children: [
-                  Row(
-                    mainAxisAlignment: MainAxisAlignment.spaceBetween,
+              // Card content
+              Expanded(
+                child: Padding(
+                  padding: const EdgeInsets.fromLTRB(12, 16, 16, 12),
+                  child: Column(
+                    crossAxisAlignment: CrossAxisAlignment.start,
                     children: [
-                      Text(
-                        progressLabel,
-                        style: AppTypography.labelSmall.copyWith(
-                          color: AppColors.textMuted,
-                          fontSize: 10,
-                        ),
+                      // Icon + circular progress
+                      Row(
+                        children: [
+                          Container(
+                            width: 44,
+                            height: 44,
+                            decoration: BoxDecoration(
+                              color: AppColors.teal.withValues(alpha: 0.15),
+                              borderRadius: BorderRadius.circular(12),
+                            ),
+                            child: Icon(
+                              icon,
+                              size: 24,
+                              color: AppColors.teal,
+                            ),
+                          ),
+                          const Spacer(),
+                          // Circular progress ring
+                          SizedBox(
+                            width: 36,
+                            height: 36,
+                            child: Stack(
+                              alignment: Alignment.center,
+                              children: [
+                                CircularProgressIndicator(
+                                  value: progress,
+                                  strokeWidth: 3,
+                                  backgroundColor:
+                                      AppColors.darkNavy.withValues(alpha: 0.5),
+                                  valueColor:
+                                      const AlwaysStoppedAnimation<Color>(
+                                    AppColors.limeGreen,
+                                  ),
+                                ),
+                                Text(
+                                  '${(progress * 100).toInt()}%',
+                                  style: AppTypography.labelSmall.copyWith(
+                                    fontSize: 9,
+                                    fontWeight: FontWeight.w600,
+                                    color: AppColors.tealLight,
+                                  ),
+                                ),
+                              ],
+                            ),
+                          ),
+                        ],
                       ),
+                      const SizedBox(height: 12),
+
+                      // Subject name
                       Text(
-                        '${(progress * 100).toInt()}%',
-                        style: AppTypography.labelSmall.copyWith(
-                          color: AppColors.tealLight,
-                          fontSize: 10,
+                        name,
+                        style: AppTypography.titleMedium.copyWith(
                           fontWeight: FontWeight.w600,
+                        ),
+                        maxLines: 2,
+                        overflow: TextOverflow.ellipsis,
+                      ),
+                      const SizedBox(height: 4),
+
+                      // Chapter count
+                      Text(
+                        chaptersLabel,
+                        style: AppTypography.bodySmall.copyWith(
+                          color: AppColors.textMuted,
                         ),
                       ),
                     ],
                   ),
-                  const SizedBox(height: 4),
-                  ClipRRect(
-                    borderRadius: BorderRadius.circular(4),
-                    child: LinearProgressIndicator(
-                      value: progress,
-                      minHeight: 4,
-                      backgroundColor: AppColors.darkNavy.withValues(alpha: 0.5),
-                      valueColor: const AlwaysStoppedAnimation<Color>(
-                        AppColors.teal,
-                      ),
-                    ),
-                  ),
-                ],
+                ),
               ),
             ],
           ),

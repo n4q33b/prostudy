@@ -26,6 +26,15 @@ abstract final class AppConstants {
   static const double screenPadding = 24.0;
   static const double buttonHeight = 56.0;
   static const double buttonSpacing = 16.0;
+
+  // Spacing Grid (8pt base)
+  static const double s1 = 8.0;
+  static const double s2 = 16.0;
+  static const double s3 = 24.0;
+  static const double s4 = 32.0;
+  static const double s5 = 40.0;
+  static const double s6 = 48.0;
+
   static const double logoSizeSplash = 180.0;
   static const double logoSizeLogin = 100.0;
 
