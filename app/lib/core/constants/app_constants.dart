@@ -21,11 +21,13 @@ abstract final class AppConstants {
   static const String splashCurve = 'elasticOut';
 
   // Layout Constants
-  static const double buttonBorderRadius = 12.0;
+  static const double buttonBorderRadius = 14.0;
   static const double cardBorderRadius = 16.0;
   static const double screenPadding = 24.0;
   static const double buttonHeight = 56.0;
   static const double buttonSpacing = 16.0;
+  static const double chunkyBorderWidth = 4.0;
+  static const double chunkyBorderWidthSmall = 3.0;
 
   // Spacing Grid (8pt base)
   static const double s1 = 8.0;
@@ -99,10 +101,7 @@ abstract final class AppConstants {
       'Urdu',
       'Gujarati',
       'Kannada',
-      'Sindhi',
       'Telugu',
-      'Tamil',
-      'Bengali',
     ],
     boardCbse: ['English', 'Hindi'],
     boardNcert: ['English', 'Hindi'],

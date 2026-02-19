@@ -5,6 +5,8 @@
 ///
 /// Textbook data (subject names, chapter names) is shown verbatim from the
 /// textbook and is NOT localized through this class.
+///
+/// Supported languages: English, Marathi, Hindi, Urdu, Gujarati, Kannada, Telugu.
 class AppStrings {
   const AppStrings._({
     required this.langCode,
@@ -62,6 +64,16 @@ class AppStrings {
     switch (medium?.toLowerCase()) {
       case 'marathi':
         return _marathi;
+      case 'hindi':
+        return _hindi;
+      case 'urdu':
+        return _urdu;
+      case 'gujarati':
+        return _gujarati;
+      case 'kannada':
+        return _kannada;
+      case 'telugu':
+        return _telugu;
       default:
         return _english;
     }
@@ -131,55 +143,195 @@ class AppStrings {
   String classDisplay(int n) => '$classLabel $n';
 
   String freeTrialDaysRemaining(int n) {
-    if (langCode == 'mr') return 'मोफत चाचणी: $n दिवस शिल्लक';
-    return 'Free Trial: $n ${n == 1 ? 'day' : 'days'} remaining';
+    switch (langCode) {
+      case 'mr':
+        return 'मोफत चाचणी: $n दिवस शिल्लक';
+      case 'hi':
+        return 'मुफ्त परीक्षण: $n दिन शेष';
+      case 'ur':
+        return 'مفت آزمائش: $n دن باقی';
+      case 'gu':
+        return 'મફત ટ્રાયલ: $n દિવસ બાકી';
+      case 'kn':
+        return 'ಉಚಿತ ಪ್ರಯೋಗ: $n ದಿನ ಬಾಕಿ';
+      case 'te':
+        return 'ఉచిత ట్రయల్: $n రోజులు మిగిలి ఉన్నాయి';
+      default:
+        return 'Free Trial: $n ${n == 1 ? 'day' : 'days'} remaining';
+    }
   }
 
   String daysRemainingText(int n) {
-    if (langCode == 'mr') return '$n दिवस शिल्लक';
-    return '$n ${n == 1 ? 'day' : 'days'} remaining';
+    switch (langCode) {
+      case 'mr':
+        return '$n दिवस शिल्लक';
+      case 'hi':
+        return '$n दिन शेष';
+      case 'ur':
+        return '$n دن باقی';
+      case 'gu':
+        return '$n દિવસ બાકી';
+      case 'kn':
+        return '$n ದಿನ ಬಾಕಿ';
+      case 'te':
+        return '$n రోజులు మిగిలి ఉన్నాయి';
+      default:
+        return '$n ${n == 1 ? 'day' : 'days'} remaining';
+    }
   }
 
   String daysUsedText(int n) {
-    if (langCode == 'mr') return '$n दिवस वापरले';
-    return '$n ${n == 1 ? 'day' : 'days'} used';
+    switch (langCode) {
+      case 'mr':
+        return '$n दिवस वापरले';
+      case 'hi':
+        return '$n दिन उपयोग किए';
+      case 'ur':
+        return '$n دن استعمال ہوئے';
+      case 'gu':
+        return '$n દિવસ વપરાયા';
+      case 'kn':
+        return '$n ದಿನ ಬಳಸಲಾಗಿದೆ';
+      case 'te':
+        return '$n రోజులు వాడారు';
+      default:
+        return '$n ${n == 1 ? 'day' : 'days'} used';
+    }
   }
 
   String daysTotalText(int n) {
-    if (langCode == 'mr') return 'एकूण $n दिवस';
-    return '$n days total';
+    switch (langCode) {
+      case 'mr':
+        return 'एकूण $n दिवस';
+      case 'hi':
+        return 'कुल $n दिन';
+      case 'ur':
+        return 'کل $n دن';
+      case 'gu':
+        return 'કુલ $n દિવસ';
+      case 'kn':
+        return 'ಒಟ್ಟು $n ದಿನ';
+      case 'te':
+        return 'మొత్తం $n రోజులు';
+      default:
+        return '$n days total';
+    }
   }
 
   String mediumUpdatedTo(String m) {
-    if (langCode == 'mr') return 'माध्यम $m मध्ये बदलले';
-    return 'Medium updated to $m';
+    switch (langCode) {
+      case 'mr':
+        return 'माध्यम $m मध्ये बदलले';
+      case 'hi':
+        return 'माध्यम $m में बदला गया';
+      case 'ur':
+        return 'ذریعہ $m میں تبدیل ہو گیا';
+      case 'gu':
+        return 'માધ્યમ $m માં બદલાયું';
+      case 'kn':
+        return 'ಮಾಧ್ಯಮವನ್ನು $m ಗೆ ಬದಲಾಯಿಸಲಾಗಿದೆ';
+      case 'te':
+        return 'మాధ్యమం $m కి మార్చబడింది';
+      default:
+        return 'Medium updated to $m';
+    }
   }
 
   String classUpdatedTo(int n) {
-    if (langCode == 'mr') return 'इयत्ता $n मध्ये बदलली';
-    return 'Class updated to Class $n';
+    switch (langCode) {
+      case 'mr':
+        return 'इयत्ता $n मध्ये बदलली';
+      case 'hi':
+        return 'कक्षा $n में बदला गया';
+      case 'ur':
+        return 'جماعت $n میں تبدیل ہو گئی';
+      case 'gu':
+        return 'ધોરણ $n માં બદલાયું';
+      case 'kn':
+        return 'ತರಗತಿ $n ಗೆ ಬದಲಾಯಿಸಲಾಗಿದೆ';
+      case 'te':
+        return 'తరగతి $n కి మార్చబడింది';
+      default:
+        return 'Class updated to Class $n';
+    }
   }
 
   String changeToClass(int n) {
-    if (langCode == 'mr') return 'इयत्ता $n मध्ये बदला';
-    return 'Change to Class $n';
+    switch (langCode) {
+      case 'mr':
+        return 'इयत्ता $n मध्ये बदला';
+      case 'hi':
+        return 'कक्षा $n में बदलें';
+      case 'ur':
+        return 'جماعت $n میں تبدیل کریں';
+      case 'gu':
+        return 'ધોરણ $n માં બદલો';
+      case 'kn':
+        return 'ತರಗತಿ $n ಗೆ ಬದಲಾಯಿಸಿ';
+      case 'te':
+        return 'తరగతి $n కి మార్చండి';
+      default:
+        return 'Change to Class $n';
+    }
   }
 
   String monthlyPrice(String price) {
-    if (langCode == 'mr') return 'मासिक शुल्क: $price';
-    return 'Monthly price: $price';
+    switch (langCode) {
+      case 'mr':
+        return 'मासिक शुल्क: $price';
+      case 'hi':
+        return 'मासिक शुल्क: $price';
+      case 'ur':
+        return 'ماہانہ قیمت: $price';
+      case 'gu':
+        return 'માસિક કિંમત: $price';
+      case 'kn':
+        return 'ಮಾಸಿಕ ಬೆಲೆ: $price';
+      case 'te':
+        return 'నెలవారీ ధర: $price';
+      default:
+        return 'Monthly price: $price';
+    }
   }
 
   String freeDuringTrial(int n) {
-    if (langCode == 'mr') return 'चाचणी दरम्यान मोफत ($n दिवस शिल्लक)';
-    return 'Free during trial ($n ${n == 1 ? 'day' : 'days'} remaining)';
+    switch (langCode) {
+      case 'mr':
+        return 'चाचणी दरम्यान मोफत ($n दिवस शिल्लक)';
+      case 'hi':
+        return 'परीक्षण के दौरान मुफ्त ($n दिन शेष)';
+      case 'ur':
+        return 'آزمائش کے دوران مفت ($n دن باقی)';
+      case 'gu':
+        return 'ટ્રાયલ દરમિયાન મફત ($n દિવસ બાકી)';
+      case 'kn':
+        return 'ಪ್ರಯೋಗದ ಸಮಯದಲ್ಲಿ ಉಚಿತ ($n ದಿನ ಬಾಕಿ)';
+      case 'te':
+        return 'ట్రయల్ సమయంలో ఉచితం ($n రోజులు మిగిలి ఉన్నాయి)';
+      default:
+        return 'Free during trial ($n ${n == 1 ? 'day' : 'days'} remaining)';
+    }
   }
 
   String xpDisplay(int xp) => '$xp XP';
 
   String streakDisplay(int days) {
-    if (langCode == 'mr') return '$days दिवस';
-    return '$days ${days == 1 ? 'day' : 'days'}';
+    switch (langCode) {
+      case 'mr':
+        return '$days दिवस';
+      case 'hi':
+        return '$days दिन';
+      case 'ur':
+        return '$days دن';
+      case 'gu':
+        return '$days દિવસ';
+      case 'kn':
+        return '$days ದಿನ';
+      case 'te':
+        return '$days రోజులు';
+      default:
+        return '$days ${days == 1 ? 'day' : 'days'}';
+    }
   }
 
   // ---------------------------------------------------------------------------
@@ -239,7 +391,7 @@ class AppStrings {
   );
 
   // ---------------------------------------------------------------------------
-  // Marathi
+  // Marathi (मराठी)
   // ---------------------------------------------------------------------------
 
   static const _marathi = AppStrings._(
@@ -292,5 +444,285 @@ class AppStrings {
     leaderboard: 'लीडरबोर्ड',
     minutesShort: 'मिनि',
     level: 'स्तर',
+  );
+
+  // ---------------------------------------------------------------------------
+  // Hindi (हिन्दी)
+  // ---------------------------------------------------------------------------
+
+  static const _hindi = AppStrings._(
+    langCode: 'hi',
+    // Home
+    yourSubjects: 'आपके विषय',
+    progress: 'प्रगति',
+    chapters: 'अध्याय',
+    aiChatTutor: 'AI चैट ट्यूटर',
+    aiChatTutorComingSoon: 'AI चैट ट्यूटर -- जल्द आ रहा है',
+    // Settings
+    settings: 'सेटिंग्स',
+    yourProfile: 'आपकी प्रोफ़ाइल',
+    board: 'बोर्ड',
+    classLabel: 'कक्षा',
+    mediumLabel: 'माध्यम',
+    changeMedium: 'माध्यम बदलें',
+    changeMediumFreeSubtitle: 'आप कभी भी माध्यम मुफ्त में बदल सकते हैं',
+    changeClass: 'कक्षा बदलें',
+    classChangePricingApplies: 'कक्षा बदलने पर शुल्क लागू',
+    confirm: 'पुष्टि करें',
+    cancel: 'रद्द करें',
+    freeTrial: 'मुफ्त परीक्षण',
+    trialEnded: 'परीक्षण समाप्त',
+    active: 'सक्रिय',
+    subscribe: 'सदस्यता लें',
+    account: 'खाता',
+    signOut: 'साइन आउट',
+    signOutConfirmBody:
+        'क्या आप साइन आउट करना चाहते हैं? आपकी प्रगति सुरक्षित रहेगी।',
+    unableToLoadProfile: 'प्रोफ़ाइल लोड नहीं हो सकी।',
+    noProfileFound: 'कोई प्रोफ़ाइल नहीं मिली।',
+    // Onboarding
+    chooseYourBoard: 'अपना बोर्ड चुनें',
+    selectBoardSubtitle: 'शुरू करने के लिए अपना शिक्षा बोर्ड चुनें',
+    selectMedium: 'माध्यम चुनें',
+    continueLabel: 'आगे बढ़ें',
+    selectYourClass: 'अपनी कक्षा चुनें',
+    changeFromSettings: 'आप इसे बाद में सेटिंग्स से बदल सकते हैं',
+    getStarted: 'शुरू करें',
+    comingSoon: 'जल्द आ रहा है',
+    selected: 'चयनित',
+    // Chapter List
+    chaptersComingSoon: 'अध्याय जल्द आ रहे हैं',
+    // Simulation
+    couldNotLoadSimulation: 'सिमुलेशन लोड नहीं हो सका',
+    // Gamification & Enhanced UI
+    continueLearning: 'पढ़ाई जारी रखें',
+    markDone: 'पूर्ण करें',
+    leaderboard: 'लीडरबोर्ड',
+    minutesShort: 'मिनट',
+    level: 'स्तर',
+  );
+
+  // ---------------------------------------------------------------------------
+  // Urdu (اردو)
+  // ---------------------------------------------------------------------------
+
+  static const _urdu = AppStrings._(
+    langCode: 'ur',
+    // Home
+    yourSubjects: 'آپ کے مضامین',
+    progress: 'پیش رفت',
+    chapters: 'ابواب',
+    aiChatTutor: 'AI چیٹ ٹیوٹر',
+    aiChatTutorComingSoon: 'AI چیٹ ٹیوٹر -- جلد آ رہا ہے',
+    // Settings
+    settings: 'ترتیبات',
+    yourProfile: 'آپ کی پروفائل',
+    board: 'بورڈ',
+    classLabel: 'جماعت',
+    mediumLabel: 'ذریعہ',
+    changeMedium: 'ذریعہ تبدیل کریں',
+    changeMediumFreeSubtitle: 'آپ کسی بھی وقت ذریعہ مفت میں تبدیل کر سکتے ہیں',
+    changeClass: 'جماعت تبدیل کریں',
+    classChangePricingApplies: 'جماعت تبدیل کرنے پر فیس لاگو ہوگی',
+    confirm: 'تصدیق کریں',
+    cancel: 'منسوخ کریں',
+    freeTrial: 'مفت آزمائش',
+    trialEnded: 'آزمائش ختم ہوئی',
+    active: 'فعال',
+    subscribe: 'سبسکرائب کریں',
+    account: 'اکاؤنٹ',
+    signOut: 'سائن آؤٹ',
+    signOutConfirmBody:
+        'کیا آپ سائن آؤٹ کرنا چاہتے ہیں؟ آپ کی پیش رفت محفوظ رہے گی۔',
+    unableToLoadProfile: 'پروفائل لوڈ نہیں ہو سکی۔',
+    noProfileFound: 'کوئی پروفائل نہیں ملی۔',
+    // Onboarding
+    chooseYourBoard: 'اپنا بورڈ چنیں',
+    selectBoardSubtitle: 'شروع کرنے کے لیے اپنا تعلیمی بورڈ چنیں',
+    selectMedium: 'ذریعہ چنیں',
+    continueLabel: 'آگے بڑھیں',
+    selectYourClass: 'اپنی جماعت چنیں',
+    changeFromSettings: 'آپ بعد میں ترتیبات سے تبدیل کر سکتے ہیں',
+    getStarted: 'شروع کریں',
+    comingSoon: 'جلد آ رہا ہے',
+    selected: 'منتخب',
+    // Chapter List
+    chaptersComingSoon: 'ابواب جلد آ رہے ہیں',
+    // Simulation
+    couldNotLoadSimulation: 'سمیولیشن لوڈ نہیں ہو سکا',
+    // Gamification & Enhanced UI
+    continueLearning: 'پڑھائی جاری رکھیں',
+    markDone: 'مکمل کریں',
+    leaderboard: 'لیڈر بورڈ',
+    minutesShort: 'منٹ',
+    level: 'درجہ',
+  );
+
+  // ---------------------------------------------------------------------------
+  // Gujarati (ગુજરાતી)
+  // ---------------------------------------------------------------------------
+
+  static const _gujarati = AppStrings._(
+    langCode: 'gu',
+    // Home
+    yourSubjects: 'તમારા વિષયો',
+    progress: 'પ્રગતિ',
+    chapters: 'પ્રકરણો',
+    aiChatTutor: 'AI ચેટ ટ્યૂટર',
+    aiChatTutorComingSoon: 'AI ચેટ ટ્યૂટર -- ટૂંક સમયમાં આવી રહ્યું છે',
+    // Settings
+    settings: 'સેટિંગ્સ',
+    yourProfile: 'તમારી પ્રોફાઇલ',
+    board: 'બોર્ડ',
+    classLabel: 'ધોરણ',
+    mediumLabel: 'માધ્યમ',
+    changeMedium: 'માધ્યમ બદલો',
+    changeMediumFreeSubtitle: 'તમે ગમે ત્યારે માધ્યમ મફતમાં બદલી શકો છો',
+    changeClass: 'ધોરણ બદલો',
+    classChangePricingApplies: 'ધોરણ બદલવા પર શુલ્ક લાગુ',
+    confirm: 'ખાતરી કરો',
+    cancel: 'રદ કરો',
+    freeTrial: 'મફત ટ્રાયલ',
+    trialEnded: 'ટ્રાયલ સમાપ્ત',
+    active: 'સક્રિય',
+    subscribe: 'સબ્સ્ક્રાઇબ કરો',
+    account: 'ખાતું',
+    signOut: 'સાઇન આઉટ',
+    signOutConfirmBody:
+        'શું તમે સાઇન આઉટ કરવા માગો છો? તમારી પ્રગતિ સાચવવામાં આવશે.',
+    unableToLoadProfile: 'પ્રોફાઇલ લોડ થઈ શકી નથી.',
+    noProfileFound: 'કોઈ પ્રોફાઇલ મળી નથી.',
+    // Onboarding
+    chooseYourBoard: 'તમારું બોર્ડ પસંદ કરો',
+    selectBoardSubtitle: 'શરૂ કરવા માટે તમારું શિક્ષણ બોર્ડ પસંદ કરો',
+    selectMedium: 'માધ્યમ પસંદ કરો',
+    continueLabel: 'આગળ વધો',
+    selectYourClass: 'તમારું ધોરણ પસંદ કરો',
+    changeFromSettings: 'તમે આ પછીથી સેટિંગ્સમાંથી બદલી શકો છો',
+    getStarted: 'શરૂ કરો',
+    comingSoon: 'ટૂંક સમયમાં',
+    selected: 'પસંદ કરેલ',
+    // Chapter List
+    chaptersComingSoon: 'પ્રકરણો ટૂંક સમયમાં આવી રહ્યા છે',
+    // Simulation
+    couldNotLoadSimulation: 'સિમ્યુલેશન લોડ થઈ શક્યું નથી',
+    // Gamification & Enhanced UI
+    continueLearning: 'ભણવાનું ચાલુ રાખો',
+    markDone: 'પૂર્ણ કરો',
+    leaderboard: 'લીડરબોર્ડ',
+    minutesShort: 'મિનિટ',
+    level: 'સ્તર',
+  );
+
+  // ---------------------------------------------------------------------------
+  // Kannada (ಕನ್ನಡ)
+  // ---------------------------------------------------------------------------
+
+  static const _kannada = AppStrings._(
+    langCode: 'kn',
+    // Home
+    yourSubjects: 'ನಿಮ್ಮ ವಿಷಯಗಳು',
+    progress: 'ಪ್ರಗತಿ',
+    chapters: 'ಅಧ್ಯಾಯಗಳು',
+    aiChatTutor: 'AI ಚಾಟ್ ಟ್ಯೂಟರ್',
+    aiChatTutorComingSoon: 'AI ಚಾಟ್ ಟ್ಯೂಟರ್ -- ಶೀಘ್ರದಲ್ಲಿ ಬರಲಿದೆ',
+    // Settings
+    settings: 'ಸೆಟ್ಟಿಂಗ್ಸ್',
+    yourProfile: 'ನಿಮ್ಮ ಪ್ರೊಫೈಲ್',
+    board: 'ಬೋರ್ಡ್',
+    classLabel: 'ತರಗತಿ',
+    mediumLabel: 'ಮಾಧ್ಯಮ',
+    changeMedium: 'ಮಾಧ್ಯಮ ಬದಲಾಯಿಸಿ',
+    changeMediumFreeSubtitle: 'ನೀವು ಯಾವಾಗ ಬೇಕಾದರೂ ಮಾಧ್ಯಮವನ್ನು ಉಚಿತವಾಗಿ ಬದಲಾಯಿಸಬಹುದು',
+    changeClass: 'ತರಗತಿ ಬದಲಾಯಿಸಿ',
+    classChangePricingApplies: 'ತರಗತಿ ಬದಲಾವಣೆಗೆ ಶುಲ್ಕ ಅನ್ವಯವಾಗುತ್ತದೆ',
+    confirm: 'ದೃಢೀಕರಿಸಿ',
+    cancel: 'ರದ್ದುಮಾಡಿ',
+    freeTrial: 'ಉಚಿತ ಪ್ರಯೋಗ',
+    trialEnded: 'ಪ್ರಯೋಗ ಮುಗಿದಿದೆ',
+    active: 'ಸಕ್ರಿಯ',
+    subscribe: 'ಚಂದಾದಾರರಾಗಿ',
+    account: 'ಖಾತೆ',
+    signOut: 'ಸೈನ್ ಔಟ್',
+    signOutConfirmBody:
+        'ನೀವು ಸೈನ್ ಔಟ್ ಮಾಡಲು ಖಚಿತವಾಗಿದ್ದೀರಾ? ನಿಮ್ಮ ಪ್ರಗತಿ ಉಳಿಸಲಾಗುವುದು.',
+    unableToLoadProfile: 'ಪ್ರೊಫೈಲ್ ಲೋಡ್ ಮಾಡಲು ಸಾಧ್ಯವಾಗಲಿಲ್ಲ.',
+    noProfileFound: 'ಯಾವುದೇ ಪ್ರೊಫೈಲ್ ಕಂಡುಬಂದಿಲ್ಲ.',
+    // Onboarding
+    chooseYourBoard: 'ನಿಮ್ಮ ಬೋರ್ಡ್ ಆಯ್ಕೆಮಾಡಿ',
+    selectBoardSubtitle: 'ಪ್ರಾರಂಭಿಸಲು ನಿಮ್ಮ ಶಿಕ್ಷಣ ಬೋರ್ಡ್ ಆಯ್ಕೆಮಾಡಿ',
+    selectMedium: 'ಮಾಧ್ಯಮ ಆಯ್ಕೆಮಾಡಿ',
+    continueLabel: 'ಮುಂದುವರಿಸಿ',
+    selectYourClass: 'ನಿಮ್ಮ ತರಗತಿ ಆಯ್ಕೆಮಾಡಿ',
+    changeFromSettings: 'ನೀವು ಇದನ್ನು ನಂತರ ಸೆಟ್ಟಿಂಗ್ಸ್‌ನಿಂದ ಬದಲಾಯಿಸಬಹುದು',
+    getStarted: 'ಪ್ರಾರಂಭಿಸಿ',
+    comingSoon: 'ಶೀಘ್ರದಲ್ಲಿ',
+    selected: 'ಆಯ್ಕೆಮಾಡಲಾಗಿದೆ',
+    // Chapter List
+    chaptersComingSoon: 'ಅಧ್ಯಾಯಗಳು ಶೀಘ್ರದಲ್ಲಿ ಬರಲಿವೆ',
+    // Simulation
+    couldNotLoadSimulation: 'ಸಿಮ್ಯುಲೇಶನ್ ಲೋಡ್ ಮಾಡಲು ಸಾಧ್ಯವಾಗಲಿಲ್ಲ',
+    // Gamification & Enhanced UI
+    continueLearning: 'ಕಲಿಕೆ ಮುಂದುವರಿಸಿ',
+    markDone: 'ಪೂರ್ಣಗೊಳಿಸಿ',
+    leaderboard: 'ಲೀಡರ್‌ಬೋರ್ಡ್',
+    minutesShort: 'ನಿಮಿ',
+    level: 'ಮಟ್ಟ',
+  );
+
+  // ---------------------------------------------------------------------------
+  // Telugu (తెలుగు)
+  // ---------------------------------------------------------------------------
+
+  static const _telugu = AppStrings._(
+    langCode: 'te',
+    // Home
+    yourSubjects: 'మీ విషయాలు',
+    progress: 'పురోగతి',
+    chapters: 'అధ్యాయాలు',
+    aiChatTutor: 'AI చాట్ ట్యూటర్',
+    aiChatTutorComingSoon: 'AI చాట్ ట్యూటర్ -- త్వరలో వస్తుంది',
+    // Settings
+    settings: 'సెట్టింగ్స్',
+    yourProfile: 'మీ ప్రొఫైల్',
+    board: 'బోర్డు',
+    classLabel: 'తరగతి',
+    mediumLabel: 'మాధ్యమం',
+    changeMedium: 'మాధ్యమం మార్చండి',
+    changeMediumFreeSubtitle: 'మీరు ఎప్పుడైనా మాధ్యమాన్ని ఉచితంగా మార్చుకోవచ్చు',
+    changeClass: 'తరగతి మార్చండి',
+    classChangePricingApplies: 'తరగతి మార్పుకు రుసుము వర్తిస్తుంది',
+    confirm: 'నిర్ధారించండి',
+    cancel: 'రద్దు చేయండి',
+    freeTrial: 'ఉచిత ట్రయల్',
+    trialEnded: 'ట్రయల్ ముగిసింది',
+    active: 'యాక్టివ్',
+    subscribe: 'సబ్‌స్క్రైబ్ చేయండి',
+    account: 'ఖాతా',
+    signOut: 'సైన్ అవుట్',
+    signOutConfirmBody:
+        'మీరు సైన్ అవుట్ చేయాలనుకుంటున్నారా? మీ పురోగతి సేవ్ చేయబడుతుంది.',
+    unableToLoadProfile: 'ప్రొఫైల్ లోడ్ చేయడం సాధ్యం కాలేదు.',
+    noProfileFound: 'ప్రొఫైల్ కనుగొనబడలేదు.',
+    // Onboarding
+    chooseYourBoard: 'మీ బోర్డును ఎంచుకోండి',
+    selectBoardSubtitle: 'ప్రారంభించడానికి మీ విద్యా బోర్డును ఎంచుకోండి',
+    selectMedium: 'మాధ్యమం ఎంచుకోండి',
+    continueLabel: 'కొనసాగించండి',
+    selectYourClass: 'మీ తరగతిని ఎంచుకోండి',
+    changeFromSettings: 'మీరు దీన్ని తర్వాత సెట్టింగ్స్ నుండి మార్చవచ్చు',
+    getStarted: 'ప్రారంభించండి',
+    comingSoon: 'త్వరలో',
+    selected: 'ఎంపిక చేయబడింది',
+    // Chapter List
+    chaptersComingSoon: 'అధ్యాయాలు త్వరలో వస్తున్నాయి',
+    // Simulation
+    couldNotLoadSimulation: 'సిమ్యులేషన్ లోడ్ చేయడం సాధ్యం కాలేదు',
+    // Gamification & Enhanced UI
+    continueLearning: 'నేర్చుకోవడం కొనసాగించండి',
+    markDone: 'పూర్తి చేయండి',
+    leaderboard: 'లీడర్‌బోర్డ్',
+    minutesShort: 'నిమి',
+    level: 'స్థాయి',
   );
 }
